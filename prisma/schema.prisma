@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model School {
+  id               String   @id @default(cuid())
+  name             String   @default("")
+  academicYear     Int      @default(2025)
+  // 学年別学級数 (JSON: {"1": 4, "2": 4, "3": 4})
+  classCountsJson  String   @default("{}")
+  // 命名規則: "number" (1組,2組...) or "alphabet" (A組,B組...)
+  namingConvention String   @default("number")
+  // 週制: 5 or 6
+  daysPerWeek      Int      @default(5)
+  // 1日の最大コマ数
+  maxPeriodsPerDay Int      @default(6)
+  // 0時限目の有無
+  hasZeroPeriod    Boolean  @default(false)
+  // 時間帯名称 (JSON array)
+  periodNamesJson  String   @default("[]")
+  // 帯長(分) (JSON array)
+  periodLengthsJson String  @default("[]")
+  // 昼休み位置（何時限目の後）
+  lunchAfterPeriod Int      @default(4)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  gradeNum  Int      @unique
+  name      String   // "1年", "2年", "3年"
+  classes   Class[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  gradeId   String
+  grade     Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  name      String   // "1組", "2組" or "A組", "B組"
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([gradeId, name])
+  @@index([gradeId])
+}
+
+model Teacher {
+  id             String               @id @default(cuid())
+  name           String
+  nameKana       String               @default("")
+  // 担当教科ID (メイン)
+  mainSubjectId  String?
+  // 週当たり最大コマ数
+  maxPeriodsPerWeek Int               @default(25)
+  // 備考
+  notes          String               @default("")
+  availabilities TeacherAvailability[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model TeacherAvailability {
+  id         String  @id @default(cuid())
+  teacherId  String
+  teacher    Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  dayOfWeek  Int     // 0=月, 1=火, 2=水, 3=木, 4=金, (5=土)
+  period     Int     // 1〜6 (0=0時限目)
+  // "available" | "unavailable" | "preferred"
+  status     String  @default("available")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([teacherId, dayOfWeek, period])
+  @@index([teacherId])
+}
+
+model Subject {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  shortName    String   @default("")
+  color        String   @default("#6B7280")
+  // "general" | "reserve" | "school_affair"
+  category     String   @default("general")
+  sortOrder    Int      @default(0)
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
