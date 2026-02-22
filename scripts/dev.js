@@ -18,7 +18,7 @@ async function startDev() {
 
   console.log("Starting Next.js...")
 
-  const nextProcess = spawn("npx", ["next", "dev"], {
+  const nextProcess = spawn("npx", ["next", "dev", "-p", "3939"], {
     stdio: "inherit",
     shell: true,
   })

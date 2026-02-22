@@ -42,7 +42,7 @@ export async function startEmbeddedNextServer(): Promise<void> {
   try {
     const { createServer } = require("http")
     const hostname = "localhost"
-    const port = 3000
+    const port = 3939
 
     let appDir
     if (process.resourcesPath) {
