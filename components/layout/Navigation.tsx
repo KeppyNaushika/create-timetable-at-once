@@ -5,12 +5,17 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  CheckSquare,
   GraduationCap,
   LayoutDashboard,
+  LayoutGrid,
+  Play,
   Puzzle,
   School,
   Settings,
+  SlidersHorizontal,
   Users,
+  GitCompare,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -40,6 +45,34 @@ const setupItems: NavItem[] = [
     label: "基本時間割枠",
     href: "/setup/timetable-frame",
     icon: <Calendar className="h-4 w-4" />,
+  },
+]
+
+const schedulerItems: NavItem[] = [
+  {
+    label: "処理条件",
+    href: "/scheduler/conditions",
+    icon: <SlidersHorizontal className="h-4 w-4" />,
+  },
+  {
+    label: "駒チェック",
+    href: "/scheduler/check",
+    icon: <CheckSquare className="h-4 w-4" />,
+  },
+  {
+    label: "手動配置",
+    href: "/scheduler/manual",
+    icon: <LayoutGrid className="h-4 w-4" />,
+  },
+  {
+    label: "自動作成",
+    href: "/scheduler/auto",
+    icon: <Play className="h-4 w-4" />,
+  },
+  {
+    label: "パターン比較",
+    href: "/scheduler/patterns",
+    icon: <GitCompare className="h-4 w-4" />,
   },
 ]
 
@@ -132,6 +165,17 @@ export function Navigation() {
             データ入力
           </p>
           {dataItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            時間割作成
+          </p>
+          {schedulerItems.map((item) => (
             <NavLink key={item.href} item={item} />
           ))}
         </div>

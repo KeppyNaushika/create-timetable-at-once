@@ -34,9 +34,7 @@ export function useKomas(gradeId?: string) {
         await fetchKomas()
         return created
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "駒の追加に失敗しました"
-        )
+        setError(err instanceof Error ? err.message : "駒の追加に失敗しました")
         throw err
       }
     },
@@ -51,9 +49,7 @@ export function useKomas(gradeId?: string) {
         await fetchKomas()
         return updated
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "駒の更新に失敗しました"
-        )
+        setError(err instanceof Error ? err.message : "駒の更新に失敗しました")
         throw err
       }
     },
@@ -67,9 +63,7 @@ export function useKomas(gradeId?: string) {
         await window.electronAPI.komaDelete(id)
         await fetchKomas()
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "駒の削除に失敗しました"
-        )
+        setError(err instanceof Error ? err.message : "駒の削除に失敗しました")
         throw err
       }
     },
@@ -94,19 +88,14 @@ export function useKomas(gradeId?: string) {
   )
 
   const setKomaTeachers = useCallback(
-    async (
-      komaId: string,
-      teachers: { teacherId: string; role: string }[]
-    ) => {
+    async (komaId: string, teachers: { teacherId: string; role: string }[]) => {
       try {
         setError(null)
         await window.electronAPI.komaSetTeachers(komaId, teachers)
         await fetchKomas()
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "先生の設定に失敗しました"
+          err instanceof Error ? err.message : "先生の設定に失敗しました"
         )
         throw err
       }
@@ -122,9 +111,7 @@ export function useKomas(gradeId?: string) {
         await fetchKomas()
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "クラスの設定に失敗しました"
+          err instanceof Error ? err.message : "クラスの設定に失敗しました"
         )
         throw err
       }
@@ -140,9 +127,7 @@ export function useKomas(gradeId?: string) {
         await fetchKomas()
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "教室の設定に失敗しました"
+          err instanceof Error ? err.message : "教室の設定に失敗しました"
         )
         throw err
       }
@@ -159,9 +144,7 @@ export function useKomas(gradeId?: string) {
         return created
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "駒の一括作成に失敗しました"
+          err instanceof Error ? err.message : "駒の一括作成に失敗しました"
         )
         throw err
       }
@@ -177,9 +160,7 @@ export function useKomas(gradeId?: string) {
         await fetchKomas()
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "駒の一括削除に失敗しました"
+          err instanceof Error ? err.message : "駒の一括削除に失敗しました"
         )
         throw err
       }

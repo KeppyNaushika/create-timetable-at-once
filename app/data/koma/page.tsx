@@ -33,7 +33,10 @@ import { useRooms } from "@/hooks/useRooms"
 import { useSubjects } from "@/hooks/useSubjects"
 import { useTeachers } from "@/hooks/useTeachers"
 import { KOMA_TEACHER_ROLES, KOMA_TYPES } from "@/lib/constants"
-import { CURRICULUM_PRESETS, generateKomasFromPreset } from "@/lib/komaGenerator"
+import {
+  CURRICULUM_PRESETS,
+  generateKomasFromPreset,
+} from "@/lib/komaGenerator"
 import type { Grade, Koma } from "@/types/common.types"
 
 export default function KomaPage() {
@@ -84,12 +87,19 @@ export default function KomaPage() {
 
   // 教科別にグループ化
   const komasBySubject = useMemo(() => {
-    const groups: Record<string, { subject: { id: string; name: string; color: string }; komas: Koma[] }> = {}
+    const groups: Record<
+      string,
+      { subject: { id: string; name: string; color: string }; komas: Koma[] }
+    > = {}
     for (const koma of komas) {
       const subjectId = koma.subjectId
       if (!groups[subjectId]) {
         groups[subjectId] = {
-          subject: koma.subject ?? { id: subjectId, name: "不明", color: "#999" },
+          subject: koma.subject ?? {
+            id: subjectId,
+            name: "不明",
+            color: "#999",
+          },
           komas: [],
         }
       }
@@ -164,7 +174,13 @@ export default function KomaPage() {
       if (!selectedKoma) return
       const current = selectedKoma.komaTeachers ?? []
       const newTeachers = checked
-        ? [...current.map((kt) => ({ teacherId: kt.teacherId, role: kt.role })), { teacherId, role: "main" }]
+        ? [
+            ...current.map((kt) => ({
+              teacherId: kt.teacherId,
+              role: kt.role,
+            })),
+            { teacherId, role: "main" },
+          ]
         : current
             .filter((kt) => kt.teacherId !== teacherId)
             .map((kt) => ({ teacherId: kt.teacherId, role: kt.role }))
@@ -228,13 +244,18 @@ export default function KomaPage() {
 
   // 一括生成
   const [batchGradeId, setBatchGradeId] = useState<string>("")
-  const [batchPreset, setBatchPreset] = useState<Record<string, { count: number; type: string; enabled: boolean }>>({})
+  const [batchPreset, setBatchPreset] = useState<
+    Record<string, { count: number; type: string; enabled: boolean }>
+  >({})
 
   const handleLoadPreset = useCallback(
     (gradeNum: number) => {
       const preset = CURRICULUM_PRESETS[gradeNum]
       if (!preset) return
-      const map: Record<string, { count: number; type: string; enabled: boolean }> = {}
+      const map: Record<
+        string,
+        { count: number; type: string; enabled: boolean }
+      > = {}
       for (const item of preset) {
         const subject = subjects.find((s) => s.name === item.subjectName)
         if (subject) {
@@ -285,10 +306,7 @@ export default function KomaPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <PageHeader
-        title="駒設定"
-        description="各学年の教科駒を設定します"
-      >
+      <PageHeader title="駒設定" description="各学年の教科駒を設定します">
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setBatchDialogOpen(true)}>
             一括生成
@@ -310,7 +328,7 @@ export default function KomaPage() {
               className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
                 selectedGradeId === grade.id
                   ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground border-transparent"
               }`}
               onClick={() => setSelectedGradeId(grade.id)}
             >
@@ -434,20 +452,25 @@ export default function KomaPage() {
                           <Label>種類</Label>
                           <RadioGroup
                             value={selectedKoma.type}
-                            onValueChange={(v) =>
-                              handleUpdateField("type", v)
-                            }
+                            onValueChange={(v) => handleUpdateField("type", v)}
                             className="flex gap-4"
                           >
-                            {Object.entries(KOMA_TYPES).map(([value, label]) => (
-                              <div
-                                key={value}
-                                className="flex items-center gap-1.5"
-                              >
-                                <RadioGroupItem value={value} id={`type-${value}`} />
-                                <Label htmlFor={`type-${value}`}>{label}</Label>
-                              </div>
-                            ))}
+                            {Object.entries(KOMA_TYPES).map(
+                              ([value, label]) => (
+                                <div
+                                  key={value}
+                                  className="flex items-center gap-1.5"
+                                >
+                                  <RadioGroupItem
+                                    value={value}
+                                    id={`type-${value}`}
+                                  />
+                                  <Label htmlFor={`type-${value}`}>
+                                    {label}
+                                  </Label>
+                                </div>
+                              )
+                            )}
                           </RadioGroup>
                         </div>
                       </div>

@@ -57,10 +57,7 @@ export const CURRICULUM_PRESETS: Record<number, CurriculumItem[]> = {
  * プリセット設定から駒生成用のデータ配列を生成する純粋関数
  */
 export function generateKomasFromPreset(
-  preset: Record<
-    string,
-    { count: number; type: string; enabled: boolean }
-  >,
+  preset: Record<string, { count: number; type: string; enabled: boolean }>,
   gradeId: string,
   subjects: { id: string; name: string }[]
 ): { subjectId: string; gradeId: string; type: string; count: number }[] {

@@ -26,8 +26,12 @@ test.afterAll(async () => {
 
 test("学校基本設定ページが表示される", async () => {
   await expect(page.getByText("学校基本設定").first()).toBeVisible()
-  await expect(page.getByText("基本情報", { exact: true }).first()).toBeVisible()
-  await expect(page.getByText("学級構成", { exact: true }).first()).toBeVisible()
+  await expect(
+    page.getByText("基本情報", { exact: true }).first()
+  ).toBeVisible()
+  await expect(
+    page.getByText("学級構成", { exact: true }).first()
+  ).toBeVisible()
 })
 
 test("学校名を入力・保存できる", async () => {

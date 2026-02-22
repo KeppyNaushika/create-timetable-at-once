@@ -38,10 +38,7 @@ test("先生を追加できる", async () => {
   await page.getByPlaceholder("例: 山田太郎").fill("山田太郎")
   await page.getByPlaceholder("例: やまだたろう").fill("やまだたろう")
 
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("先生を追加しました")).toBeVisible()
   await expect(page.getByText("山田太郎")).toBeVisible()
 })
@@ -87,10 +84,7 @@ test("持ち駒タブが表示される", async () => {
 test("2人目の先生を追加できる", async () => {
   await page.getByRole("button", { name: "先生を追加" }).click()
   await page.getByPlaceholder("例: 山田太郎").fill("鈴木一郎")
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("先生を追加しました")).toBeVisible()
   await expect(page.getByText("鈴木一郎")).toBeVisible()
 })

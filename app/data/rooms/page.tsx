@@ -149,7 +149,8 @@ export default function RoomsPage() {
                   }`}
                   onClick={() => setSelectedRoomId(room.id)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") setSelectedRoomId(room.id)
+                    if (e.key === "Enter" || e.key === " ")
+                      setSelectedRoomId(room.id)
                   }}
                 >
                   <span>{room.name}</span>

@@ -40,10 +40,7 @@ test("特別教室を追加できる", async () => {
   await page.getByPlaceholder("例: 音楽室", { exact: true }).fill("音楽室")
   await page.getByPlaceholder("例: 音", { exact: true }).fill("音")
 
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("特別教室を追加しました")).toBeVisible()
   await expect(page.getByText("音楽室")).toBeVisible()
 })
@@ -76,9 +73,7 @@ test("教室の基本情報を編集できる", async () => {
 
 test("使用可能時間タブが表示される", async () => {
   await page.getByRole("tab", { name: "都合" }).click()
-  await expect(
-    page.getByText("使用可能時間", { exact: true })
-  ).toBeVisible()
+  await expect(page.getByText("使用可能時間", { exact: true })).toBeVisible()
 })
 
 test("2つ目の教室を追加できる", async () => {
@@ -86,10 +81,7 @@ test("2つ目の教室を追加できる", async () => {
   await page.getByRole("button", { name: "教室を追加" }).click()
   await page.getByPlaceholder("例: 音楽室", { exact: true }).fill("理科室")
   await page.getByPlaceholder("例: 音", { exact: true }).fill("理")
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("特別教室を追加しました")).toBeVisible()
   await expect(page.getByText("理科室")).toBeVisible()
 })

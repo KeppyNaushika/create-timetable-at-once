@@ -60,17 +60,11 @@ export function registerKomaHandlers() {
     return await komaDAL.batchCreateKomas(komas)
   })
 
-  ipcMain.handle(
-    "koma:getByTeacherId",
-    async (_event, teacherId: string) => {
-      return await komaDAL.getKomasByTeacherId(teacherId)
-    }
-  )
+  ipcMain.handle("koma:getByTeacherId", async (_event, teacherId: string) => {
+    return await komaDAL.getKomasByTeacherId(teacherId)
+  })
 
-  ipcMain.handle(
-    "koma:deleteByGradeId",
-    async (_event, gradeId: string) => {
-      return await komaDAL.deleteKomasByGradeId(gradeId)
-    }
-  )
+  ipcMain.handle("koma:deleteByGradeId", async (_event, gradeId: string) => {
+    return await komaDAL.deleteKomasByGradeId(gradeId)
+  })
 }

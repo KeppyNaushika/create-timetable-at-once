@@ -89,7 +89,8 @@ export function TeacherKomaList({ teacherId }: TeacherKomaListProps) {
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-xs">
-                    {KOMA_TYPES[koma.type as keyof typeof KOMA_TYPES] ?? koma.type}
+                    {KOMA_TYPES[koma.type as keyof typeof KOMA_TYPES] ??
+                      koma.type}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">{koma.count}</TableCell>

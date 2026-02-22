@@ -5,9 +5,14 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  CheckSquare,
+  GitCompare,
   GraduationCap,
+  LayoutGrid,
+  Play,
   Puzzle,
   School,
+  SlidersHorizontal,
   Users,
 } from "lucide-react"
 import Link from "next/link"
@@ -26,7 +31,7 @@ interface NavCard {
   description: string
   href: string
   icon: React.ReactNode
-  section: "setup" | "data"
+  section: "setup" | "data" | "scheduler"
   step: number
 }
 
@@ -95,6 +100,46 @@ const navCards: NavCard[] = [
     section: "data",
     step: 8,
   },
+  {
+    title: "処理条件",
+    description: "時間割作成の制約条件と重みを設定します",
+    href: "/scheduler/conditions",
+    icon: <SlidersHorizontal className="h-6 w-6" />,
+    section: "scheduler",
+    step: 9,
+  },
+  {
+    title: "駒チェック",
+    description: "先生容量と時限サマリをチェックします",
+    href: "/scheduler/check",
+    icon: <CheckSquare className="h-6 w-6" />,
+    section: "scheduler",
+    step: 10,
+  },
+  {
+    title: "手動配置",
+    description: "ドラッグ＆ドロップで時間割を手動作成します",
+    href: "/scheduler/manual",
+    icon: <LayoutGrid className="h-6 w-6" />,
+    section: "scheduler",
+    step: 11,
+  },
+  {
+    title: "自動作成",
+    description: "CSPソルバーで時間割を自動生成します",
+    href: "/scheduler/auto",
+    icon: <Play className="h-6 w-6" />,
+    section: "scheduler",
+    step: 12,
+  },
+  {
+    title: "パターン比較",
+    description: "複数パターンを比較し最適なものを採用します",
+    href: "/scheduler/patterns",
+    icon: <GitCompare className="h-6 w-6" />,
+    section: "scheduler",
+    step: 13,
+  },
 ]
 
 export default function DashboardPage() {
@@ -142,6 +187,36 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {navCards
             .filter((c) => c.section === "data")
+            .map((card) => (
+              <Link key={card.href} href={card.href}>
+                <Card className="hover:bg-accent/50 h-full transition-colors">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+                      {card.icon}
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        {card.title}
+                        <Badge variant="outline" className="text-xs">
+                          Step {card.step}
+                        </Badge>
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>{card.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">時間割作成</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {navCards
+            .filter((c) => c.section === "scheduler")
             .map((card) => (
               <Link key={card.href} href={card.href}>
                 <Card className="hover:bg-accent/50 h-full transition-colors">

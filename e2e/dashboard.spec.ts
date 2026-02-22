@@ -1,7 +1,12 @@
 import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 
-import { type AppContext, closeApp, expect, launchApp } from "./helpers/fixtures"
+import {
+  type AppContext,
+  closeApp,
+  expect,
+  launchApp,
+} from "./helpers/fixtures"
 
 let ctx: AppContext
 let page: Page
@@ -19,9 +24,10 @@ test("ダッシュボードが表示される", async () => {
   await expect(page.locator("h1")).toHaveText("一括時間割作成")
   await expect(page.locator("h2").first()).toHaveText("初期設定")
   await expect(page.locator("h2").nth(1)).toHaveText("データ入力")
+  await expect(page.locator("h2").nth(2)).toHaveText("時間割作成")
 })
 
-test("全ナビカード（8枚）が存在する", async () => {
+test("全ナビカード（13枚）が存在する", async () => {
   const titles = [
     "学校基本設定",
     "科目設定",
@@ -31,6 +37,11 @@ test("全ナビカード（8枚）が存在する", async () => {
     "特別教室",
     "校務",
     "駒設定",
+    "処理条件",
+    "駒チェック",
+    "手動配置",
+    "自動作成",
+    "パターン比較",
   ]
   for (const title of titles) {
     await expect(page.getByText(title, { exact: false }).first()).toBeVisible()
