@@ -84,6 +84,7 @@ export function useTeachers() {
       try {
         setError(null)
         await window.electronAPI.teacherAvailabilityUpsert(data)
+        await fetchTeachers()
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "都合の更新に失敗しました"
@@ -91,7 +92,7 @@ export function useTeachers() {
         throw err
       }
     },
-    []
+    [fetchTeachers]
   )
 
   const batchUpsertAvailabilities = useCallback(

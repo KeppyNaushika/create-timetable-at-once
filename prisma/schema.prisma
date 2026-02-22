@@ -36,18 +36,20 @@ model Grade {
   gradeNum  Int      @unique
   name      String   // "1年", "2年", "3年"
   classes   Class[]
+  komas     Koma[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Class {
-  id        String   @id @default(cuid())
-  gradeId   String
-  grade     Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
-  name      String   // "1組", "2組" or "A組", "B組"
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(cuid())
+  gradeId     String
+  grade       Grade        @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  name        String       // "1組", "2組" or "A組", "B組"
+  sortOrder   Int          @default(0)
+  komaClasses KomaClass[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@unique([gradeId, name])
   @@index([gradeId])
@@ -59,11 +61,17 @@ model Teacher {
   nameKana       String               @default("")
   // 担当教科ID (メイン)
   mainSubjectId  String?
+  // 連続授業の最大数
+  maxConsecutive Int                   @default(6)
+  // 1日の最大授業数
+  maxPerDay      Int                   @default(6)
   // 週当たり最大コマ数
   maxPeriodsPerWeek Int               @default(25)
   // 備考
   notes          String               @default("")
   availabilities TeacherAvailability[]
+  teacherDuties  TeacherDuty[]
+  komaTeachers   KomaTeacher[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 }
@@ -92,6 +100,129 @@ model Subject {
   category     String   @default("general")
   sortOrder    Int      @default(0)
   isDefault    Boolean  @default(false)
+  komas        Koma[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model SpecialRoom {
+  id             String             @id @default(cuid())
+  name           String
+  shortName      String             @default("")
+  // 収容可能人数
+  capacity       Int                @default(40)
+  notes          String             @default("")
+  sortOrder      Int                @default(0)
+  availabilities RoomAvailability[]
+  komaRooms      KomaRoom[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model RoomAvailability {
+  id        String      @id @default(cuid())
+  roomId    String
+  room      SpecialRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  dayOfWeek Int         // 0=月, 1=火, 2=水, 3=木, 4=金, (5=土)
+  period    Int         // 1〜6 (0=0時限目)
+  // "available" | "unavailable"
+  status    String      @default("available")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([roomId, dayOfWeek, period])
+  @@index([roomId])
+}
+
+model Duty {
+  id           String        @id @default(cuid())
+  name         String
+  shortName    String        @default("")
+  dayOfWeek    Int           // 0=月, 1=火, 2=水, 3=木, 4=金, (5=土)
+  period       Int           // 時限
+  sortOrder    Int           @default(0)
+  teacherDuties TeacherDuty[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model TeacherDuty {
+  id        String   @id @default(cuid())
+  dutyId    String
+  duty      Duty     @relation(fields: [dutyId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([dutyId, teacherId])
+  @@index([dutyId])
+  @@index([teacherId])
+}
+
+model Koma {
+  id           String        @id @default(cuid())
+  subjectId    String
+  subject      Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  gradeId      String
+  grade        Grade         @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  // "normal" | "consecutive"
+  type         String        @default("normal")
+  // 週あたり駒数
+  count        Int           @default(1)
+  // 優先順位 (0-9, 高いほど優先)
+  priority     Int           @default(5)
+  label        String        @default("")
+  komaTeachers KomaTeacher[]
+  komaClasses  KomaClass[]
+  komaRooms    KomaRoom[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([subjectId])
+  @@index([gradeId])
+}
+
+model KomaTeacher {
+  id        String   @id @default(cuid())
+  komaId    String
+  koma      Koma     @relation(fields: [komaId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  // "main" | "sub"
+  role      String   @default("main")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([komaId, teacherId])
+  @@index([komaId])
+  @@index([teacherId])
+}
+
+model KomaClass {
+  id        String   @id @default(cuid())
+  komaId    String
+  koma      Koma     @relation(fields: [komaId], references: [id], onDelete: Cascade)
+  classId   String
+  class_    Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([komaId, classId])
+  @@index([komaId])
+  @@index([classId])
+}
+
+model KomaRoom {
+  id        String      @id @default(cuid())
+  komaId    String
+  koma      Koma        @relation(fields: [komaId], references: [id], onDelete: Cascade)
+  roomId    String
+  room      SpecialRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([komaId, roomId])
+  @@index([komaId])
+  @@index([roomId])
 }

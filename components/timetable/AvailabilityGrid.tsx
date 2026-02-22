@@ -2,20 +2,24 @@
 
 import { useCallback } from "react"
 
-import { AVAILABILITY_STATUS, DAY_NAMES } from "@/lib/constants"
+import { AVAILABILITY_STATUS, DAY_NAMES, ROOM_AVAILABILITY_STATUS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import type { TeacherAvailability } from "@/types/common.types"
+import type { RoomAvailability, TeacherAvailability } from "@/types/common.types"
 
 interface AvailabilityGridProps {
-  teacherId: string
+  teacherId?: string
+  roomId?: string
   daysPerWeek: number
   maxPeriodsPerDay: number
   hasZeroPeriod: boolean
-  availabilities: TeacherAvailability[]
+  availabilities: (TeacherAvailability | RoomAvailability)[]
   onToggle: (dayOfWeek: number, period: number, newStatus: string) => void
+  statusCycle?: readonly string[]
+  statusLabels?: Record<string, string>
 }
 
-const STATUS_CYCLE = ["available", "unavailable", "preferred"] as const
+const DEFAULT_STATUS_CYCLE = ["available", "unavailable", "preferred"] as const
+const ROOM_STATUS_CYCLE = ["available", "unavailable"] as const
 
 const STATUS_COLORS: Record<string, string> = {
   available: "bg-green-100 text-green-800 border-green-300",
@@ -29,7 +33,13 @@ export function AvailabilityGrid({
   hasZeroPeriod,
   availabilities,
   onToggle,
+  statusCycle,
+  statusLabels,
+  roomId,
 }: AvailabilityGridProps) {
+  const cycle = statusCycle ?? (roomId ? ROOM_STATUS_CYCLE : DEFAULT_STATUS_CYCLE)
+  const labels = statusLabels ?? (roomId ? ROOM_AVAILABILITY_STATUS : AVAILABILITY_STATUS)
+
   const getStatus = useCallback(
     (dayOfWeek: number, period: number): string => {
       const found = availabilities.find(
@@ -43,13 +53,11 @@ export function AvailabilityGrid({
   const handleClick = useCallback(
     (dayOfWeek: number, period: number) => {
       const currentStatus = getStatus(dayOfWeek, period)
-      const currentIndex = STATUS_CYCLE.indexOf(
-        currentStatus as (typeof STATUS_CYCLE)[number]
-      )
-      const nextStatus = STATUS_CYCLE[(currentIndex + 1) % STATUS_CYCLE.length]
+      const currentIndex = cycle.indexOf(currentStatus)
+      const nextStatus = cycle[(currentIndex + 1) % cycle.length]
       onToggle(dayOfWeek, period, nextStatus)
     },
-    [getStatus, onToggle]
+    [getStatus, onToggle, cycle]
   )
 
   const displayDays = DAY_NAMES.slice(0, daysPerWeek)
@@ -63,12 +71,12 @@ export function AvailabilityGrid({
   return (
     <div className="space-y-2">
       <div className="text-muted-foreground flex gap-3 text-xs">
-        {STATUS_CYCLE.map((status) => (
+        {cycle.map((status) => (
           <div key={status} className="flex items-center gap-1">
             <div
               className={cn("h-3 w-3 rounded border", STATUS_COLORS[status])}
             />
-            {AVAILABILITY_STATUS[status]}
+            {labels[status as keyof typeof labels]}
           </div>
         ))}
       </div>
@@ -107,9 +115,7 @@ export function AvailabilityGrid({
                         )}
                         onClick={() => handleClick(dayIndex, period)}
                       >
-                        {AVAILABILITY_STATUS[
-                          status as keyof typeof AVAILABILITY_STATUS
-                        ] ?? ""}
+                        {labels[status as keyof typeof labels] ?? ""}
                       </button>
                     </td>
                   )
