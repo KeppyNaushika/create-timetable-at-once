@@ -19,6 +19,7 @@
 | PDF出力          | @react-pdf/renderer または pdf-lib         |
 | Excel出力        | exceljs                                    |
 | プロセス間通信   | Electron IPC (メインプロセス ↔ レンダラー) |
+| E2Eテスト        | Playwright (Electron サポート)             |
 
 > **注**: 既存プロジェクト `score-at-once-electron` と同一の技術選定・アーキテクチャパターンに従うこと。Electron Forge によるビルド、Prisma の IPC 経由アクセス、shadcn/ui コンポーネント体系を踏襲する。
 
@@ -89,10 +90,14 @@ timetable-creator/
 │   ├── menu.ts
 │   ├── ipc-handlers/             # IPC ハンドラ群
 │   └── lib/
+├── e2e/                          # E2Eテスト（Playwright）
+│   ├── helpers/                  # テストヘルパー（Electron起動・終了）
+│   └── *.spec.ts                 # テストスペック
 ├── prisma/
 │   └── schema.prisma
 ├── public/
 │   └── holidays.json             # 祝日マスターデータ
+├── playwright.config.ts          # Playwright設定
 ├── forge.config.js
 ├── package.json
 └── tsconfig.json
@@ -1423,3 +1428,35 @@ electron-src/ipc-handlers/
 - **対応OS**: Windows 10/11, macOS 12+, Ubuntu 22.04+
 - **日本語対応**: UIテキストはすべて日本語、帳票出力も日本語フォント対応
 - **アクセシビリティ**: キーボード操作のみで全操作が可能、色覚多様性への配慮（色だけでなくアイコン・パターンでも情報を伝達）
+
+---
+
+## E2Eテスト
+
+Playwright の Electron サポートを使い、全スタック（UI → IPC → Prisma → SQLite）を検証する E2E テストを実装済み。
+
+### テスト構成（38テスト）
+
+| ファイル | テスト内容 | テスト数 |
+| --- | --- | --- |
+| `e2e/dashboard.spec.ts` | ダッシュボード表示・ナビカード遷移 | 5 |
+| `e2e/setup-school.spec.ts` | 学校基本設定CRUD・永続化 | 5 |
+| `e2e/setup-subjects.spec.ts` | 科目設定・デフォルト科目・CRUD・タブ切替 | 6 |
+| `e2e/teachers.spec.ts` | 先生設定CRUD・都合・持ち駒タブ | 7 |
+| `e2e/rooms.spec.ts` | 特別教室CRUD・使用可能時間 | 5 |
+| `e2e/duties.spec.ts` | 校務CRUD・担当先生割当 | 5 |
+| `e2e/koma.spec.ts` | 駒設定・一括生成・学年タブ | 5 |
+
+### テスト用DB分離
+
+- 環境変数 `TIMETABLE_DATA_DIR` でテスト専用の一時ディレクトリを指定
+- 環境変数 `NEXT_SERVER_PORT` でポート衝突を回避（テスト時: 3100）
+- 各テストスイートで独立した DB を使用し、終了時にクリーンアップ
+
+### 実行コマンド
+
+```bash
+npm run test:e2e          # ビルド + 全テスト実行
+npm run test:e2e:headed   # ビルド + ブラウザ表示付き実行
+npx playwright test       # ビルド済みの場合のテスト実行のみ
+```
