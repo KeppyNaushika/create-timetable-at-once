@@ -148,10 +148,7 @@ export interface ElectronAPI {
     data: Record<string, unknown>
   ) => Promise<import("./common.types").Duty>
   dutyDelete: (id: string) => Promise<import("./common.types").Duty>
-  dutySetTeachers: (
-    dutyId: string,
-    teacherIds: string[]
-  ) => Promise<void>
+  dutySetTeachers: (dutyId: string, teacherIds: string[]) => Promise<void>
 
   // Koma
   komaGetAll: () => Promise<import("./common.types").Koma[]>
@@ -181,6 +178,90 @@ export interface ElectronAPI {
     teacherId: string
   ) => Promise<import("./common.types").Koma[]>
   komaDeleteByGradeId: (gradeId: string) => Promise<void>
+
+  // Check
+  checkTeacherCapacity: () => Promise<
+    {
+      id: string
+      name: string
+      maxPerDay: number
+      maxPeriodsPerWeek: number
+      maxConsecutive: number
+      totalKomaCount: number
+      unavailableCount: number
+      dutyCount: number
+      komaCount: number
+    }[]
+  >
+  checkPeriodSummary: (
+    daysPerWeek: number,
+    maxPeriods: number
+  ) => Promise<
+    {
+      dayOfWeek: number
+      period: number
+      availableTeachers: number
+      requiredSlots: number
+    }[]
+  >
+
+  // ScheduleCondition
+  conditionGet: () => Promise<import("./common.types").ScheduleCondition | null>
+  conditionUpsert: (
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").ScheduleCondition>
+  conditionUpsertPerSubject: (data: {
+    conditionId: string
+    subjectId: string
+    placementRestriction?: string
+    maxPerDay?: number
+  }) => Promise<import("./common.types").PerSubjectCondition>
+  conditionDeletePerSubject: (
+    conditionId: string,
+    subjectId: string
+  ) => Promise<void>
+
+  // Timetable
+  timetablePlace: (data: {
+    patternId: string
+    komaId: string
+    dayOfWeek: number
+    period: number
+    placedBy?: string
+  }) => Promise<import("./common.types").TimetableSlot>
+  timetableRemove: (patternId: string, slotId: string) => Promise<void>
+  timetableFix: (
+    slotId: string,
+    isFixed: boolean
+  ) => Promise<import("./common.types").TimetableSlot>
+  timetableBatchPlace: (
+    patternId: string,
+    slots: {
+      komaId: string
+      dayOfWeek: number
+      period: number
+      placedBy?: string
+    }[]
+  ) => Promise<import("./common.types").TimetableSlot[]>
+  timetableClear: (patternId: string, keepFixed: boolean) => Promise<void>
+
+  // TimetablePattern
+  patternGetAll: () => Promise<import("./common.types").TimetablePattern[]>
+  patternCreate: (data: {
+    name?: string
+    status?: string
+  }) => Promise<import("./common.types").TimetablePattern>
+  patternDelete: (id: string) => Promise<void>
+  patternAdopt: (
+    id: string
+  ) => Promise<import("./common.types").TimetablePattern>
+  patternGetWithSlots: (
+    id: string
+  ) => Promise<import("./common.types").TimetablePattern | null>
+  patternUpdateScore: (
+    id: string,
+    data: { violationCount: number; score: number }
+  ) => Promise<import("./common.types").TimetablePattern>
 
   // Misc
   getAppVersion: () => Promise<string>

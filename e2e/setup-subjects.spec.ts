@@ -47,10 +47,7 @@ test("科目を追加できる", async () => {
   await page.getByPlaceholder("例: 国語").fill("プログラミング")
   await page.getByPlaceholder("例: 国", { exact: true }).fill("プ")
 
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "保存" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "保存" }).click()
   await expect(page.getByText("科目を追加しました")).toBeVisible()
   await expect(page.getByText("プログラミング")).toBeVisible()
 })
@@ -64,10 +61,7 @@ test("科目を編集できる", async () => {
   const nameInput = page.getByPlaceholder("例: 国語")
   await nameInput.fill("情報")
 
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "保存" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "保存" }).click()
   await expect(page.getByText("科目を更新しました")).toBeVisible()
   await expect(page.getByText("情報")).toBeVisible()
 })
@@ -80,9 +74,7 @@ test("追加した科目を削除できる", async () => {
 })
 
 test("タブを切り替えられる", async () => {
-  await page
-    .getByRole("tab", { name: "予備（学活・道徳・総合等）" })
-    .click()
+  await page.getByRole("tab", { name: "予備（学活・道徳・総合等）" }).click()
   await expect(page.getByText("道徳").first()).toBeVisible()
 
   await page.getByRole("tab", { name: "校務" }).click()

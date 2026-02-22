@@ -163,5 +163,70 @@ export interface SchoolWithGrades extends School {
   grades: Grade[]
 }
 
+// ========== Phase 3: 時間割作成 ==========
+
+export interface ScheduleCondition {
+  id: string
+  teacherAvailability: string
+  teacherAvailabilityWeight: number
+  teacherMaxPerDay: string
+  teacherMaxPerDayWeight: number
+  teacherMaxConsecutive: string
+  teacherMaxConsecutiveWeight: number
+  teacherMaxPerWeek: string
+  teacherMaxPerWeekWeight: number
+  classSameSubjectPerDay: string
+  classSameSubjectPerDayWeight: number
+  classConsecutiveSame: string
+  classConsecutiveSameWeight: number
+  roomConflict: string
+  roomConflictWeight: number
+  roomAvailability: string
+  roomAvailabilityWeight: number
+  dutyConflict: string
+  dutyConflictWeight: number
+  consecutiveKoma: string
+  consecutiveKomaWeight: number
+  dailyBalance: string
+  dailyBalanceWeight: number
+  perSubjectConditions?: PerSubjectCondition[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PerSubjectCondition {
+  id: string
+  conditionId: string
+  subjectId: string
+  placementRestriction: string
+  maxPerDay: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TimetablePattern {
+  id: string
+  name: string
+  status: string // "draft" | "candidate" | "adopted"
+  violationCount: number
+  score: number
+  metadataJson: string
+  slots?: TimetableSlot[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TimetableSlot {
+  id: string
+  patternId: string
+  komaId: string
+  dayOfWeek: number
+  period: number
+  placedBy: string // "auto" | "manual" | "fixed"
+  isFixed: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 // ClassCounts: gradeNum -> classCount
 export type ClassCounts = Record<string, number>

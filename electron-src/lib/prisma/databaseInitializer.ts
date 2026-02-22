@@ -230,7 +230,82 @@ CREATE INDEX "KomaRoom_komaId_idx" ON "KomaRoom"("komaId");
 CREATE INDEX "KomaRoom_roomId_idx" ON "KomaRoom"("roomId");
         `
 
-        const allSQL = migrationSQL + phase2SQL + indexSQL
+        const phase3SQL = `
+CREATE TABLE "ScheduleCondition" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "teacherAvailability" TEXT NOT NULL DEFAULT 'forbidden',
+    "teacherAvailabilityWeight" INTEGER NOT NULL DEFAULT 100,
+    "teacherMaxPerDay" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxPerDayWeight" INTEGER NOT NULL DEFAULT 80,
+    "teacherMaxConsecutive" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxConsecutiveWeight" INTEGER NOT NULL DEFAULT 80,
+    "teacherMaxPerWeek" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxPerWeekWeight" INTEGER NOT NULL DEFAULT 60,
+    "classSameSubjectPerDay" TEXT NOT NULL DEFAULT 'consider',
+    "classSameSubjectPerDayWeight" INTEGER NOT NULL DEFAULT 70,
+    "classConsecutiveSame" TEXT NOT NULL DEFAULT 'ignore',
+    "classConsecutiveSameWeight" INTEGER NOT NULL DEFAULT 50,
+    "roomConflict" TEXT NOT NULL DEFAULT 'forbidden',
+    "roomConflictWeight" INTEGER NOT NULL DEFAULT 100,
+    "roomAvailability" TEXT NOT NULL DEFAULT 'forbidden',
+    "roomAvailabilityWeight" INTEGER NOT NULL DEFAULT 100,
+    "dutyConflict" TEXT NOT NULL DEFAULT 'forbidden',
+    "dutyConflictWeight" INTEGER NOT NULL DEFAULT 100,
+    "consecutiveKoma" TEXT NOT NULL DEFAULT 'consider',
+    "consecutiveKomaWeight" INTEGER NOT NULL DEFAULT 90,
+    "dailyBalance" TEXT NOT NULL DEFAULT 'consider',
+    "dailyBalanceWeight" INTEGER NOT NULL DEFAULT 40,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "PerSubjectCondition" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "conditionId" TEXT NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "placementRestriction" TEXT NOT NULL DEFAULT 'any',
+    "maxPerDay" INTEGER NOT NULL DEFAULT 2,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "PerSubjectCondition_conditionId_fkey" FOREIGN KEY ("conditionId") REFERENCES "ScheduleCondition" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "TimetablePattern" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL DEFAULT '',
+    "status" TEXT NOT NULL DEFAULT 'draft',
+    "violationCount" INTEGER NOT NULL DEFAULT 0,
+    "score" REAL NOT NULL DEFAULT 0,
+    "metadataJson" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "TimetableSlot" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "patternId" TEXT NOT NULL,
+    "komaId" TEXT NOT NULL,
+    "dayOfWeek" INTEGER NOT NULL,
+    "period" INTEGER NOT NULL,
+    "placedBy" TEXT NOT NULL DEFAULT 'auto',
+    "isFixed" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "TimetableSlot_patternId_fkey" FOREIGN KEY ("patternId") REFERENCES "TimetablePattern" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+        `
+
+        const phase3IndexSQL = `
+CREATE UNIQUE INDEX "PerSubjectCondition_conditionId_subjectId_key" ON "PerSubjectCondition"("conditionId", "subjectId");
+CREATE INDEX "PerSubjectCondition_conditionId_idx" ON "PerSubjectCondition"("conditionId");
+CREATE INDEX "TimetableSlot_patternId_idx" ON "TimetableSlot"("patternId");
+CREATE INDEX "TimetableSlot_komaId_idx" ON "TimetableSlot"("komaId");
+CREATE INDEX "TimetableSlot_patternId_dayOfWeek_period_idx" ON "TimetableSlot"("patternId", "dayOfWeek", "period");
+CREATE UNIQUE INDEX "TimetableSlot_patternId_komaId_dayOfWeek_period_key" ON "TimetableSlot"("patternId", "komaId", "dayOfWeek", "period");
+        `
+
+        const allSQL =
+          migrationSQL + phase2SQL + indexSQL + phase3SQL + phase3IndexSQL
         const statements = allSQL.split(";").filter((stmt) => stmt.trim())
 
         for (const statement of statements) {
@@ -286,6 +361,8 @@ export const upgradeDatabase = async (): Promise<void> => {
         )
         console.log("Added maxConsecutive and maxPerDay columns to Teacher")
       }
+      // Phase 3 アップグレードもチェック
+      await upgradeToPhase3(prisma)
       return
     }
 
@@ -408,12 +485,108 @@ CREATE INDEX "KomaRoom_roomId_idx" ON "KomaRoom"("roomId");
     }
 
     console.log("Database upgraded to Phase 2 successfully")
+
+    // Phase 3 アップグレードもチェック
+    await upgradeToPhase3(prisma)
   } catch (error) {
     console.error("Failed to upgrade database:", error)
     throw error
   } finally {
     await prisma.$disconnect()
   }
+}
+
+async function upgradeToPhase3(prisma: PrismaClient): Promise<void> {
+  const tables = await prisma.$queryRawUnsafe<{ name: string }[]>(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='ScheduleCondition'`
+  )
+
+  if (tables.length > 0) return
+
+  const phase3SQL = `
+CREATE TABLE "ScheduleCondition" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "teacherAvailability" TEXT NOT NULL DEFAULT 'forbidden',
+    "teacherAvailabilityWeight" INTEGER NOT NULL DEFAULT 100,
+    "teacherMaxPerDay" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxPerDayWeight" INTEGER NOT NULL DEFAULT 80,
+    "teacherMaxConsecutive" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxConsecutiveWeight" INTEGER NOT NULL DEFAULT 80,
+    "teacherMaxPerWeek" TEXT NOT NULL DEFAULT 'consider',
+    "teacherMaxPerWeekWeight" INTEGER NOT NULL DEFAULT 60,
+    "classSameSubjectPerDay" TEXT NOT NULL DEFAULT 'consider',
+    "classSameSubjectPerDayWeight" INTEGER NOT NULL DEFAULT 70,
+    "classConsecutiveSame" TEXT NOT NULL DEFAULT 'ignore',
+    "classConsecutiveSameWeight" INTEGER NOT NULL DEFAULT 50,
+    "roomConflict" TEXT NOT NULL DEFAULT 'forbidden',
+    "roomConflictWeight" INTEGER NOT NULL DEFAULT 100,
+    "roomAvailability" TEXT NOT NULL DEFAULT 'forbidden',
+    "roomAvailabilityWeight" INTEGER NOT NULL DEFAULT 100,
+    "dutyConflict" TEXT NOT NULL DEFAULT 'forbidden',
+    "dutyConflictWeight" INTEGER NOT NULL DEFAULT 100,
+    "consecutiveKoma" TEXT NOT NULL DEFAULT 'consider',
+    "consecutiveKomaWeight" INTEGER NOT NULL DEFAULT 90,
+    "dailyBalance" TEXT NOT NULL DEFAULT 'consider',
+    "dailyBalanceWeight" INTEGER NOT NULL DEFAULT 40,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "PerSubjectCondition" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "conditionId" TEXT NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "placementRestriction" TEXT NOT NULL DEFAULT 'any',
+    "maxPerDay" INTEGER NOT NULL DEFAULT 2,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "PerSubjectCondition_conditionId_fkey" FOREIGN KEY ("conditionId") REFERENCES "ScheduleCondition" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "TimetablePattern" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL DEFAULT '',
+    "status" TEXT NOT NULL DEFAULT 'draft',
+    "violationCount" INTEGER NOT NULL DEFAULT 0,
+    "score" REAL NOT NULL DEFAULT 0,
+    "metadataJson" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "TimetableSlot" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "patternId" TEXT NOT NULL,
+    "komaId" TEXT NOT NULL,
+    "dayOfWeek" INTEGER NOT NULL,
+    "period" INTEGER NOT NULL,
+    "placedBy" TEXT NOT NULL DEFAULT 'auto',
+    "isFixed" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "TimetableSlot_patternId_fkey" FOREIGN KEY ("patternId") REFERENCES "TimetablePattern" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+  `
+
+  const phase3IndexSQL = `
+CREATE UNIQUE INDEX "PerSubjectCondition_conditionId_subjectId_key" ON "PerSubjectCondition"("conditionId", "subjectId");
+CREATE INDEX "PerSubjectCondition_conditionId_idx" ON "PerSubjectCondition"("conditionId");
+CREATE INDEX "TimetableSlot_patternId_idx" ON "TimetableSlot"("patternId");
+CREATE INDEX "TimetableSlot_komaId_idx" ON "TimetableSlot"("komaId");
+CREATE INDEX "TimetableSlot_patternId_dayOfWeek_period_idx" ON "TimetableSlot"("patternId", "dayOfWeek", "period");
+CREATE UNIQUE INDEX "TimetableSlot_patternId_komaId_dayOfWeek_period_key" ON "TimetableSlot"("patternId", "komaId", "dayOfWeek", "period");
+  `
+
+  const allSQL = phase3SQL + phase3IndexSQL
+  const statements = allSQL.split(";").filter((stmt) => stmt.trim())
+
+  for (const statement of statements) {
+    if (statement.trim()) {
+      await prisma.$executeRawUnsafe(statement.trim())
+    }
+  }
+
+  console.log("Database upgraded to Phase 3 successfully")
 }
 
 export const checkDatabaseExists = async (): Promise<boolean> => {

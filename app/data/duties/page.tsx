@@ -166,13 +166,15 @@ export default function DutiesPage() {
                   }`}
                   onClick={() => setSelectedDutyId(duty.id)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") setSelectedDutyId(duty.id)
+                    if (e.key === "Enter" || e.key === " ")
+                      setSelectedDutyId(duty.id)
                   }}
                 >
                   <div>
                     <span>{duty.name}</span>
                     <span className="text-muted-foreground ml-1 text-xs">
-                      ({DAY_NAMES[duty.dayOfWeek]}{duty.period})
+                      ({DAY_NAMES[duty.dayOfWeek]}
+                      {duty.period})
                     </span>
                   </div>
                   <Button
@@ -245,13 +247,11 @@ export default function DutiesPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {DAY_NAMES.slice(0, daysPerWeek).map(
-                                (day, i) => (
-                                  <SelectItem key={i} value={String(i)}>
-                                    {day}
-                                  </SelectItem>
-                                )
-                              )}
+                              {DAY_NAMES.slice(0, daysPerWeek).map((day, i) => (
+                                <SelectItem key={i} value={String(i)}>
+                                  {day}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>

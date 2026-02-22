@@ -149,6 +149,61 @@ contextBridge.exposeInMainWorld("electronAPI", {
   komaDeleteByGradeId: (gradeId: string) =>
     ipcRenderer.invoke("koma:deleteByGradeId", gradeId),
 
+  // Check
+  checkTeacherCapacity: () => ipcRenderer.invoke("check:teacherCapacity"),
+  checkPeriodSummary: (daysPerWeek: number, maxPeriods: number) =>
+    ipcRenderer.invoke("check:periodSummary", daysPerWeek, maxPeriods),
+
+  // ScheduleCondition
+  conditionGet: () => ipcRenderer.invoke("condition:get"),
+  conditionUpsert: (data: Record<string, unknown>) =>
+    ipcRenderer.invoke("condition:upsert", data),
+  conditionUpsertPerSubject: (data: {
+    conditionId: string
+    subjectId: string
+    placementRestriction?: string
+    maxPerDay?: number
+  }) => ipcRenderer.invoke("condition:upsertPerSubject", data),
+  conditionDeletePerSubject: (conditionId: string, subjectId: string) =>
+    ipcRenderer.invoke("condition:deletePerSubject", conditionId, subjectId),
+
+  // Timetable
+  timetablePlace: (data: {
+    patternId: string
+    komaId: string
+    dayOfWeek: number
+    period: number
+    placedBy?: string
+  }) => ipcRenderer.invoke("timetable:place", data),
+  timetableRemove: (patternId: string, slotId: string) =>
+    ipcRenderer.invoke("timetable:remove", patternId, slotId),
+  timetableFix: (slotId: string, isFixed: boolean) =>
+    ipcRenderer.invoke("timetable:fix", slotId, isFixed),
+  timetableBatchPlace: (
+    patternId: string,
+    slots: {
+      komaId: string
+      dayOfWeek: number
+      period: number
+      placedBy?: string
+    }[]
+  ) => ipcRenderer.invoke("timetable:batchPlace", patternId, slots),
+  timetableClear: (patternId: string, keepFixed: boolean) =>
+    ipcRenderer.invoke("timetable:clear", patternId, keepFixed),
+
+  // TimetablePattern
+  patternGetAll: () => ipcRenderer.invoke("pattern:getAll"),
+  patternCreate: (data: { name?: string; status?: string }) =>
+    ipcRenderer.invoke("pattern:create", data),
+  patternDelete: (id: string) => ipcRenderer.invoke("pattern:delete", id),
+  patternAdopt: (id: string) => ipcRenderer.invoke("pattern:adopt", id),
+  patternGetWithSlots: (id: string) =>
+    ipcRenderer.invoke("pattern:getWithSlots", id),
+  patternUpdateScore: (
+    id: string,
+    data: { violationCount: number; score: number }
+  ) => ipcRenderer.invoke("pattern:updateScore", id, data),
+
   // Misc
   getAppVersion: () => ipcRenderer.invoke("misc:getAppVersion"),
   getDataDirectoryInfo: () => ipcRenderer.invoke("misc:getDataDirectoryInfo"),

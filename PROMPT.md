@@ -1437,15 +1437,15 @@ Playwright の Electron サポートを使い、全スタック（UI → IPC →
 
 ### テスト構成（38テスト）
 
-| ファイル | テスト内容 | テスト数 |
-| --- | --- | --- |
-| `e2e/dashboard.spec.ts` | ダッシュボード表示・ナビカード遷移 | 5 |
-| `e2e/setup-school.spec.ts` | 学校基本設定CRUD・永続化 | 5 |
-| `e2e/setup-subjects.spec.ts` | 科目設定・デフォルト科目・CRUD・タブ切替 | 6 |
-| `e2e/teachers.spec.ts` | 先生設定CRUD・都合・持ち駒タブ | 7 |
-| `e2e/rooms.spec.ts` | 特別教室CRUD・使用可能時間 | 5 |
-| `e2e/duties.spec.ts` | 校務CRUD・担当先生割当 | 5 |
-| `e2e/koma.spec.ts` | 駒設定・一括生成・学年タブ | 5 |
+| ファイル                     | テスト内容                               | テスト数 |
+| ---------------------------- | ---------------------------------------- | -------- |
+| `e2e/dashboard.spec.ts`      | ダッシュボード表示・ナビカード遷移       | 5        |
+| `e2e/setup-school.spec.ts`   | 学校基本設定CRUD・永続化                 | 5        |
+| `e2e/setup-subjects.spec.ts` | 科目設定・デフォルト科目・CRUD・タブ切替 | 6        |
+| `e2e/teachers.spec.ts`       | 先生設定CRUD・都合・持ち駒タブ           | 7        |
+| `e2e/rooms.spec.ts`          | 特別教室CRUD・使用可能時間               | 5        |
+| `e2e/duties.spec.ts`         | 校務CRUD・担当先生割当                   | 5        |
+| `e2e/koma.spec.ts`           | 駒設定・一括生成・学年タブ               | 5        |
 
 ### テスト用DB分離
 

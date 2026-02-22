@@ -24,12 +24,9 @@ export function registerRoomHandlers() {
     return await roomDAL.deleteRoom(id)
   })
 
-  ipcMain.handle(
-    "room:getWithAvailabilities",
-    async (_event, id: string) => {
-      return await roomDAL.getRoomWithAvailabilities(id)
-    }
-  )
+  ipcMain.handle("room:getWithAvailabilities", async (_event, id: string) => {
+    return await roomDAL.getRoomWithAvailabilities(id)
+  })
 
   // RoomAvailability
   ipcMain.handle("roomAvailability:upsert", async (_event, data) => {

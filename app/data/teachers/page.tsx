@@ -163,7 +163,8 @@ export default function TeachersPage() {
                   }`}
                   onClick={() => setSelectedTeacherId(teacher.id)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") setSelectedTeacherId(teacher.id)
+                    if (e.key === "Enter" || e.key === " ")
+                      setSelectedTeacherId(teacher.id)
                   }}
                 >
                   <span>{teacher.name}</span>

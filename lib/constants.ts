@@ -53,6 +53,113 @@ export const KOMA_TEACHER_ROLES = {
   sub: "副",
 } as const
 
+// ========== Phase 3: 制約条件 ==========
+
+export const CONSTRAINT_LEVELS = {
+  forbidden: "禁止",
+  consider: "考慮",
+  ignore: "無視",
+  manual_only: "手動のみ",
+} as const
+
+export type ConstraintLevel = keyof typeof CONSTRAINT_LEVELS
+
+export interface ConstraintFieldDef {
+  key: string
+  label: string
+  category: "teacher" | "class" | "room" | "duty" | "koma" | "balance"
+  description: string
+  allowedLevels: ConstraintLevel[]
+}
+
+export const CONSTRAINT_FIELDS: ConstraintFieldDef[] = [
+  {
+    key: "teacherAvailability",
+    label: "先生の都合",
+    category: "teacher",
+    description: "先生が不可・希望と設定した時間帯を守る",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "teacherMaxPerDay",
+    label: "先生1日の最大コマ数",
+    category: "teacher",
+    description: "先生の1日あたり授業数上限を守る",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "teacherMaxConsecutive",
+    label: "先生の連続授業制限",
+    category: "teacher",
+    description: "先生の連続授業数上限を守る",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "teacherMaxPerWeek",
+    label: "先生週あたり最大コマ数",
+    category: "teacher",
+    description: "先生の週あたり授業数上限を守る",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "classSameSubjectPerDay",
+    label: "クラス同一教科1日制限",
+    category: "class",
+    description: "同じクラスに同一教科が1日に複数回入らないようにする",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "classConsecutiveSame",
+    label: "クラス同一教科連続不可",
+    category: "class",
+    description: "同じクラスに同一教科が連続して入らないようにする",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "roomConflict",
+    label: "教室重複禁止",
+    category: "room",
+    description: "同一教室に複数の授業を同時配置しない",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "roomAvailability",
+    label: "教室利用可能時間",
+    category: "room",
+    description: "教室が利用不可の時間帯に配置しない",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "dutyConflict",
+    label: "校務時間帯不可",
+    category: "duty",
+    description: "先生の校務担当時間帯に授業を配置しない",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "consecutiveKoma",
+    label: "連続駒の隣接配置",
+    category: "koma",
+    description: "連続タイプの駒を隣接する時限に配置する",
+    allowedLevels: ["forbidden", "consider", "ignore"],
+  },
+  {
+    key: "dailyBalance",
+    label: "曜日間コマ数均等化",
+    category: "balance",
+    description: "各先生のコマ数を曜日間で均等にする",
+    allowedLevels: ["consider", "ignore"],
+  },
+]
+
+export const PLACEMENT_RESTRICTIONS = {
+  any: "制限なし",
+  morning_only: "午前のみ",
+  afternoon_only: "午後のみ",
+  not_first: "1時限目不可",
+  not_last: "最終時限不可",
+} as const
+
 export const COLOR_PALETTE = [
   "#EF4444",
   "#F59E0B",

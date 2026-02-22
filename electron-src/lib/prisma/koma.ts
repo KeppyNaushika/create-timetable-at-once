@@ -226,9 +226,7 @@ export async function batchCreateKomas(
   const prisma = getPrismaClient()
   try {
     return await prisma.$transaction(
-      komas.map((k) =>
-        prisma.koma.create({ data: k, include: komaIncludes })
-      )
+      komas.map((k) => prisma.koma.create({ data: k, include: komaIncludes }))
     )
   } finally {
     await prisma.$disconnect()
@@ -245,7 +243,10 @@ export async function getKomasByTeacherId(teacherId: string) {
         },
       },
       include: komaIncludes,
-      orderBy: [{ grade: { gradeNum: "asc" } }, { subject: { sortOrder: "asc" } }],
+      orderBy: [
+        { grade: { gradeNum: "asc" } },
+        { subject: { sortOrder: "asc" } },
+      ],
     })
   } finally {
     await prisma.$disconnect()

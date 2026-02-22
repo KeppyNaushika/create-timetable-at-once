@@ -23,10 +23,7 @@ test.beforeAll(async () => {
   await page.waitForTimeout(1000)
   await page.getByRole("button", { name: "先生を追加" }).click()
   await page.getByPlaceholder("例: 山田太郎").fill("田中太郎")
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("先生を追加しました")).toBeVisible()
 
   await page.goto(`${TEST_BASE_URL}/data/duties`, {
@@ -49,15 +46,10 @@ test("校務を追加できる", async () => {
 
   await expect(page.getByRole("heading", { name: "校務を追加" })).toBeVisible()
 
-  await page
-    .getByPlaceholder("例: 給食指導", { exact: true })
-    .fill("給食指導")
+  await page.getByPlaceholder("例: 給食指導", { exact: true }).fill("給食指導")
   await page.getByPlaceholder("例: 給", { exact: true }).fill("給")
 
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "追加" })
-    .click()
+  await page.getByRole("dialog").getByRole("button", { name: "追加" }).click()
   await expect(page.getByText("校務を追加しました")).toBeVisible()
   await expect(page.getByText("給食指導")).toBeVisible()
 })

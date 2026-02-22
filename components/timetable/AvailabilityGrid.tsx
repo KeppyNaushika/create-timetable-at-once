@@ -2,9 +2,16 @@
 
 import { useCallback } from "react"
 
-import { AVAILABILITY_STATUS, DAY_NAMES, ROOM_AVAILABILITY_STATUS } from "@/lib/constants"
+import {
+  AVAILABILITY_STATUS,
+  DAY_NAMES,
+  ROOM_AVAILABILITY_STATUS,
+} from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import type { RoomAvailability, TeacherAvailability } from "@/types/common.types"
+import type {
+  RoomAvailability,
+  TeacherAvailability,
+} from "@/types/common.types"
 
 interface AvailabilityGridProps {
   teacherId?: string
@@ -37,8 +44,10 @@ export function AvailabilityGrid({
   statusLabels,
   roomId,
 }: AvailabilityGridProps) {
-  const cycle = statusCycle ?? (roomId ? ROOM_STATUS_CYCLE : DEFAULT_STATUS_CYCLE)
-  const labels = statusLabels ?? (roomId ? ROOM_AVAILABILITY_STATUS : AVAILABILITY_STATUS)
+  const cycle =
+    statusCycle ?? (roomId ? ROOM_STATUS_CYCLE : DEFAULT_STATUS_CYCLE)
+  const labels =
+    statusLabels ?? (roomId ? ROOM_AVAILABILITY_STATUS : AVAILABILITY_STATUS)
 
   const getStatus = useCallback(
     (dayOfWeek: number, period: number): string => {

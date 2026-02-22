@@ -82,9 +82,7 @@ export function useDuties() {
         await fetchDuties()
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "担当先生の設定に失敗しました"
+          err instanceof Error ? err.message : "担当先生の設定に失敗しました"
         )
         throw err
       }

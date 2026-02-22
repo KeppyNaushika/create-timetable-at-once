@@ -226,3 +226,93 @@ model KomaRoom {
   @@index([komaId])
   @@index([roomId])
 }
+
+// ========== Phase 3: 時間割作成 ==========
+
+model ScheduleCondition {
+  id                        String               @id @default(cuid())
+  // 制約レベル: "forbidden" | "consider" | "ignore" | "manual_only"
+  // --- 先生制約 ---
+  teacherAvailability       String               @default("forbidden")  // 先生の都合
+  teacherAvailabilityWeight Int                  @default(100)
+  teacherMaxPerDay          String               @default("consider")   // 先生1日の最大コマ数
+  teacherMaxPerDayWeight    Int                  @default(80)
+  teacherMaxConsecutive     String               @default("consider")   // 先生の連続授業
+  teacherMaxConsecutiveWeight Int                @default(80)
+  teacherMaxPerWeek         String               @default("consider")   // 先生週あたり最大
+  teacherMaxPerWeekWeight   Int                  @default(60)
+  // --- クラス制約 ---
+  classSameSubjectPerDay    String               @default("consider")   // クラス同一教科1日制限
+  classSameSubjectPerDayWeight Int               @default(70)
+  classConsecutiveSame      String               @default("ignore")     // クラス同一教科連続不可
+  classConsecutiveSameWeight Int                 @default(50)
+  // --- 教室制約 ---
+  roomConflict              String               @default("forbidden")  // 教室重複禁止
+  roomConflictWeight        Int                  @default(100)
+  roomAvailability          String               @default("forbidden")  // 教室利用可能時間
+  roomAvailabilityWeight    Int                  @default(100)
+  // --- 校務制約 ---
+  dutyConflict              String               @default("forbidden")  // 校務時間帯不可
+  dutyConflictWeight        Int                  @default(100)
+  // --- 連続駒制約 ---
+  consecutiveKoma           String               @default("consider")   // 連続駒は隣接配置
+  consecutiveKomaWeight     Int                  @default(90)
+  // --- バランス制約 ---
+  dailyBalance              String               @default("consider")   // 曜日間コマ数均等化
+  dailyBalanceWeight        Int                  @default(40)
+  // --- 教科別制約 ---
+  perSubjectConditions      PerSubjectCondition[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+}
+
+model PerSubjectCondition {
+  id                   String            @id @default(cuid())
+  conditionId          String
+  condition            ScheduleCondition @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+  subjectId            String
+  // 教科別の配置制限: "any" | "morning_only" | "afternoon_only" | "not_first" | "not_last"
+  placementRestriction String            @default("any")
+  // 最大連続禁止
+  maxPerDay            Int               @default(2)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@unique([conditionId, subjectId])
+  @@index([conditionId])
+}
+
+model TimetablePattern {
+  id             String          @id @default(cuid())
+  name           String          @default("")
+  // "draft" | "candidate" | "adopted"
+  status         String          @default("draft")
+  // 違反数 (キャッシュ)
+  violationCount Int             @default(0)
+  // スコア (低いほど良い)
+  score          Float           @default(0)
+  // メタデータ (JSON: ソルバー設定等)
+  metadataJson   String          @default("{}")
+  slots          TimetableSlot[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model TimetableSlot {
+  id          String           @id @default(cuid())
+  patternId   String
+  pattern     TimetablePattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  komaId      String
+  dayOfWeek   Int              // 0=月, 1=火, 2=水, 3=木, 4=金, (5=土)
+  period      Int              // 時限
+  // "auto" | "manual" | "fixed"
+  placedBy    String           @default("auto")
+  isFixed     Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([patternId, komaId, dayOfWeek, period])
+  @@index([patternId])
+  @@index([komaId])
+  @@index([patternId, dayOfWeek, period])
+}
