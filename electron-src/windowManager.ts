@@ -20,7 +20,8 @@ export function createMainWindow(): BrowserWindow {
     },
   })
 
-  const url = "http://localhost:3000"
+  const port = process.env.NEXT_SERVER_PORT || "3000"
+  const url = `http://localhost:${port}`
 
   Menu.setApplicationMenu(menu(app, mainWindow))
 
