@@ -39,8 +39,8 @@ next-env.d.ts
 # Electron
 main/
 
-# データフォルダ
-data/
+# データフォルダ (Electronランタイム用、app/data/は除外しない)
+/data/
 **/*.db
 **/*.db-shm
 **/*.db-wal

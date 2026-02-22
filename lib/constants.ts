@@ -38,6 +38,21 @@ export const AVAILABILITY_STATUS = {
   preferred: "希望",
 } as const
 
+export const ROOM_AVAILABILITY_STATUS = {
+  available: "可",
+  unavailable: "不可",
+} as const
+
+export const KOMA_TYPES = {
+  normal: "普通",
+  consecutive: "連続",
+} as const
+
+export const KOMA_TEACHER_ROLES = {
+  main: "主",
+  sub: "副",
+} as const
+
 export const COLOR_PALETTE = [
   "#EF4444",
   "#F59E0B",

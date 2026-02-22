@@ -195,6 +195,11 @@ export class DatabaseSetup {
           setupPerformed = true
         }
       } else {
+        // 既存DBのアップグレード (Phase 2 テーブル追加)
+        const { upgradeDatabase } =
+          await import("./prisma/databaseInitializer")
+        await upgradeDatabase()
+
         const isEmpty = await this.isDatabaseEmpty()
         if (isEmpty) {
           await this.runSeed()

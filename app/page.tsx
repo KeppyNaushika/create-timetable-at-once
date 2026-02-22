@@ -1,6 +1,15 @@
 "use client"
 
-import { BookOpen, Calendar, GraduationCap, School, Users } from "lucide-react"
+import {
+  BookOpen,
+  Briefcase,
+  Building2,
+  Calendar,
+  GraduationCap,
+  Puzzle,
+  School,
+  Users,
+} from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +70,30 @@ const navCards: NavCard[] = [
     icon: <GraduationCap className="h-6 w-6" />,
     section: "data",
     step: 5,
+  },
+  {
+    title: "特別教室",
+    description: "特別教室の情報と使用可能時間を設定します",
+    href: "/data/rooms",
+    icon: <Building2 className="h-6 w-6" />,
+    section: "data",
+    step: 6,
+  },
+  {
+    title: "校務",
+    description: "校務の情報と担当先生を設定します",
+    href: "/data/duties",
+    icon: <Briefcase className="h-6 w-6" />,
+    section: "data",
+    step: 7,
+  },
+  {
+    title: "駒設定",
+    description: "各学年の教科駒を設定・一括生成します",
+    href: "/data/koma",
+    icon: <Puzzle className="h-6 w-6" />,
+    section: "data",
+    step: 8,
   },
 ]
 

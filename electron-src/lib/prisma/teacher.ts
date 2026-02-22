@@ -4,7 +4,10 @@ export async function getTeachers() {
   const prisma = getPrismaClient()
   try {
     return await prisma.teacher.findMany({
-      include: { availabilities: true },
+      include: {
+        availabilities: true,
+        teacherDuties: { include: { duty: true } },
+      },
       orderBy: { name: "asc" },
     })
   } finally {
@@ -28,6 +31,8 @@ export async function createTeacher(data: {
   name: string
   nameKana?: string
   mainSubjectId?: string
+  maxConsecutive?: number
+  maxPerDay?: number
   maxPeriodsPerWeek?: number
   notes?: string
 }) {
@@ -45,6 +50,8 @@ export async function updateTeacher(
     name?: string
     nameKana?: string
     mainSubjectId?: string | null
+    maxConsecutive?: number
+    maxPerDay?: number
     maxPeriodsPerWeek?: number
     notes?: string
   }

@@ -101,6 +101,87 @@ export interface ElectronAPI {
   ) => Promise<import("./common.types").Subject[]>
   subjectSeedDefaults: () => Promise<void>
 
+  // SpecialRoom
+  roomGetAll: () => Promise<import("./common.types").SpecialRoom[]>
+  roomGetById: (
+    id: string
+  ) => Promise<import("./common.types").SpecialRoom | null>
+  roomCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").SpecialRoom>
+  roomUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").SpecialRoom>
+  roomDelete: (id: string) => Promise<import("./common.types").SpecialRoom>
+  roomGetWithAvailabilities: (
+    id: string
+  ) => Promise<import("./common.types").SpecialRoom | null>
+
+  // RoomAvailability
+  roomAvailabilityUpsert: (data: {
+    roomId: string
+    dayOfWeek: number
+    period: number
+    status: string
+  }) => Promise<import("./common.types").RoomAvailability>
+  roomAvailabilityBatchUpsert: (
+    items: {
+      roomId: string
+      dayOfWeek: number
+      period: number
+      status: string
+    }[]
+  ) => Promise<import("./common.types").RoomAvailability[]>
+  roomAvailabilityGetByRoomId: (
+    roomId: string
+  ) => Promise<import("./common.types").RoomAvailability[]>
+
+  // Duty
+  dutyGetAll: () => Promise<import("./common.types").Duty[]>
+  dutyGetById: (id: string) => Promise<import("./common.types").Duty | null>
+  dutyCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").Duty>
+  dutyUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").Duty>
+  dutyDelete: (id: string) => Promise<import("./common.types").Duty>
+  dutySetTeachers: (
+    dutyId: string,
+    teacherIds: string[]
+  ) => Promise<void>
+
+  // Koma
+  komaGetAll: () => Promise<import("./common.types").Koma[]>
+  komaGetById: (id: string) => Promise<import("./common.types").Koma | null>
+  komaGetByGradeId: (
+    gradeId: string
+  ) => Promise<import("./common.types").Koma[]>
+  komaCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").Koma>
+  komaUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./common.types").Koma>
+  komaDelete: (id: string) => Promise<import("./common.types").Koma>
+  komaDuplicate: (id: string) => Promise<import("./common.types").Koma>
+  komaSetTeachers: (
+    komaId: string,
+    teachers: { teacherId: string; role: string }[]
+  ) => Promise<void>
+  komaSetClasses: (komaId: string, classIds: string[]) => Promise<void>
+  komaSetRooms: (komaId: string, roomIds: string[]) => Promise<void>
+  komaBatchCreate: (
+    komas: Record<string, unknown>[]
+  ) => Promise<import("./common.types").Koma[]>
+  komaGetByTeacherId: (
+    teacherId: string
+  ) => Promise<import("./common.types").Koma[]>
+  komaDeleteByGradeId: (gradeId: string) => Promise<void>
+
   // Misc
   getAppVersion: () => Promise<string>
   getDataDirectoryInfo: () => Promise<{ path: string }>

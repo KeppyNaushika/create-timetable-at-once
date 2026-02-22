@@ -2,9 +2,12 @@
 
 import {
   BookOpen,
+  Briefcase,
+  Building2,
   Calendar,
   GraduationCap,
   LayoutDashboard,
+  Puzzle,
   School,
   Settings,
   Users,
@@ -50,6 +53,21 @@ const dataItems: NavItem[] = [
     label: "クラス設定",
     href: "/data/classes",
     icon: <GraduationCap className="h-4 w-4" />,
+  },
+  {
+    label: "特別教室",
+    href: "/data/rooms",
+    icon: <Building2 className="h-4 w-4" />,
+  },
+  {
+    label: "校務",
+    href: "/data/duties",
+    icon: <Briefcase className="h-4 w-4" />,
+  },
+  {
+    label: "駒設定",
+    href: "/data/koma",
+    icon: <Puzzle className="h-4 w-4" />,
   },
 ]
 
