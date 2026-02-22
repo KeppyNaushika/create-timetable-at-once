@@ -16,6 +16,9 @@ export const getAppRootPath = (): string => {
 }
 
 export const getDataDirectory = (): string => {
+  if (process.env.TIMETABLE_DATA_DIR) {
+    return process.env.TIMETABLE_DATA_DIR
+  }
   return path.join(getAppRootPath(), "data")
 }
 
