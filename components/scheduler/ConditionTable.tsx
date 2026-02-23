@@ -77,7 +77,7 @@ export function ConditionTable({ condition, onUpdate }: ConditionTableProps) {
           >
           const level = conditionRecord[field.key] as string
           const weight = conditionRecord[`${field.key}Weight`] as number
-          const isDisabled = level === "ignore"
+          const isConsider = level === "consider"
 
           return (
             <TableRow key={field.key}>
@@ -108,18 +108,27 @@ export function ConditionTable({ condition, onUpdate }: ConditionTableProps) {
               <TableCell>
                 {weight !== undefined && (
                   <div className="flex items-center gap-2">
-                    <Slider
-                      value={[weight]}
-                      min={0}
-                      max={100}
-                      step={5}
-                      disabled={isDisabled}
-                      onValueChange={(v) => handleWeightChange(field.key, v)}
-                      className="w-24"
-                    />
-                    <span className="text-muted-foreground w-8 text-xs">
-                      {weight}
-                    </span>
+                    {isConsider ? (
+                      <>
+                        <Slider
+                          value={[weight]}
+                          min={1}
+                          max={100}
+                          step={5}
+                          onValueChange={(v) =>
+                            handleWeightChange(field.key, v)
+                          }
+                          className="w-24"
+                        />
+                        <span className="text-muted-foreground w-8 text-xs">
+                          {weight}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">
+                        {level === "forbidden" ? "100000" : "0"}
+                      </span>
+                    )}
                   </div>
                 )}
               </TableCell>

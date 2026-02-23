@@ -16,6 +16,8 @@ import type {
 } from "./types"
 import { countTeacherWeekSlots, getTeacherDaySlots, buildScheduleMaps } from "./utils"
 
+const HARD_COST = 100000
+
 // 制約チェックコンテキスト
 export interface ConstraintContext {
   condition: ScheduleCondition
@@ -37,6 +39,10 @@ function isActive(level: string): boolean {
 
 function isForbidden(level: string): boolean {
   return level === "forbidden"
+}
+
+function resolveWeight(level: string, configWeight: number): number {
+  return isForbidden(level) ? HARD_COST : configWeight
 }
 
 // --- 個別制約チェック ---
@@ -63,7 +69,7 @@ function checkTeacherAvailability(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.teacherAvailabilityWeight,
+        weight: resolveWeight(ctx.condition.teacherAvailability, ctx.condition.teacherAvailabilityWeight),
       }
     }
   }
@@ -94,7 +100,7 @@ function checkTeacherMaxPerDay(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.teacherMaxPerDayWeight,
+        weight: resolveWeight(ctx.condition.teacherMaxPerDay, ctx.condition.teacherMaxPerDayWeight),
       }
     }
   }
@@ -137,7 +143,7 @@ function checkTeacherMaxConsecutive(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.teacherMaxConsecutiveWeight,
+        weight: resolveWeight(ctx.condition.teacherMaxConsecutive, ctx.condition.teacherMaxConsecutiveWeight),
       }
     }
   }
@@ -167,7 +173,7 @@ function checkTeacherMaxPerWeek(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.teacherMaxPerWeekWeight,
+        weight: resolveWeight(ctx.condition.teacherMaxPerWeek, ctx.condition.teacherMaxPerWeekWeight),
       }
     }
   }
@@ -193,7 +199,7 @@ function checkTeacherConflict(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: 100,
+        weight: HARD_COST,
       }
     }
   }
@@ -219,7 +225,7 @@ function checkClassConflict(
         classId: cid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: 100,
+        weight: HARD_COST,
       }
     }
   }
@@ -234,6 +240,9 @@ function checkClassSameSubjectPerDay(
   if (!isActive(ctx.condition.classSameSubjectPerDay)) return null
   const koma = ctx.komaLookup[komaId]
   if (!koma) return null
+
+  // 教科別条件が設定済みの教科はスキップ（perSubjectMaxPerDay に任せる）
+  if (ctx.perSubjectConditions.some((c) => c.subjectId === koma.subjectId)) return null
 
   for (const cid of koma.classIds) {
     const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
@@ -252,7 +261,7 @@ function checkClassSameSubjectPerDay(
           classId: cid,
           dayOfWeek: pos.dayOfWeek,
           period: pos.period,
-          weight: ctx.condition.classSameSubjectPerDayWeight,
+          weight: resolveWeight(ctx.condition.classSameSubjectPerDay, ctx.condition.classSameSubjectPerDayWeight),
         }
       }
     }
@@ -291,7 +300,7 @@ function checkClassConsecutiveSame(
             classId: cid,
             dayOfWeek: pos.dayOfWeek,
             period: pos.period,
-            weight: ctx.condition.classConsecutiveSameWeight,
+            weight: resolveWeight(ctx.condition.classConsecutiveSame, ctx.condition.classConsecutiveSameWeight),
           }
         }
       }
@@ -320,7 +329,7 @@ function checkRoomConflict(
         roomId: rid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.roomConflictWeight,
+        weight: resolveWeight(ctx.condition.roomConflict, ctx.condition.roomConflictWeight),
       }
     }
   }
@@ -349,7 +358,7 @@ function checkRoomAvailability(
         roomId: rid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.roomAvailabilityWeight,
+        weight: resolveWeight(ctx.condition.roomAvailability, ctx.condition.roomAvailabilityWeight),
       }
     }
   }
@@ -375,7 +384,7 @@ function checkDutyConflict(
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.dutyConflictWeight,
+        weight: resolveWeight(ctx.condition.dutyConflict, ctx.condition.dutyConflictWeight),
       }
     }
   }
@@ -414,7 +423,7 @@ function checkConsecutiveKoma(
         komaId,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.consecutiveKomaWeight,
+        weight: resolveWeight(ctx.condition.consecutiveKoma, ctx.condition.consecutiveKomaWeight),
       }
     }
   }
@@ -458,13 +467,13 @@ function checkDailyBalance(
     if (max - min >= 2) {
       return {
         type: "dailyBalance",
-        severity: "warning",
+        severity: isForbidden(ctx.condition.dailyBalance) ? "error" : "warning",
         message: `先生の曜日間コマ数差(${max - min})が大きい`,
         komaId,
         teacherId: tid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: ctx.condition.dailyBalanceWeight,
+        weight: resolveWeight(ctx.condition.dailyBalance, ctx.condition.dailyBalanceWeight),
       }
     }
   }
@@ -484,6 +493,7 @@ function checkPerSubjectPlacement(
     (c) => c.subjectId === koma.subjectId
   )
   if (!psc || psc.placementRestriction === "any") return null
+  if (psc.level === "ignore") return null
 
   const period = pos.period
   const isMorning = period <= ctx.lunchAfterPeriod
@@ -523,12 +533,12 @@ function checkPerSubjectPlacement(
   if (violated) {
     return {
       type: "perSubjectPlacement",
-      severity: "warning",
+      severity: psc.level === "forbidden" ? "error" : "warning",
       message,
       komaId,
       dayOfWeek: pos.dayOfWeek,
       period: pos.period,
-      weight: 60,
+      weight: psc.level === "forbidden" ? HARD_COST : 60,
     }
   }
   return null
@@ -547,6 +557,7 @@ function checkPerSubjectMaxPerDay(
     (c) => c.subjectId === koma.subjectId
   )
   if (!psc) return null
+  if (psc.level === "ignore") return null
 
   // 同一クラス×同一教科×同一曜日の配置数をカウント
   for (const cid of koma.classIds) {
@@ -563,13 +574,13 @@ function checkPerSubjectMaxPerDay(
     if (count > psc.maxPerDay) {
       return {
         type: "perSubjectMaxPerDay",
-        severity: "warning",
+        severity: psc.level === "forbidden" ? "error" : "warning",
         message: `教科の1日最大コマ数(${psc.maxPerDay})を超過`,
         komaId,
         classId: cid,
         dayOfWeek: pos.dayOfWeek,
         period: pos.period,
-        weight: 60,
+        weight: psc.level === "forbidden" ? HARD_COST : 60,
       }
     }
   }
@@ -711,6 +722,54 @@ export function isPlacementValid(
     }
   }
 
+  // Class same subject per day (if forbidden, 教科別条件が設定済みの教科はスキップ)
+  if (isForbidden(ctx.condition.classSameSubjectPerDay) &&
+      !ctx.perSubjectConditions.some((c) => c.subjectId === koma.subjectId)) {
+    for (const cid of koma.classIds) {
+      const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
+      if (!dayMap) continue
+      for (const existingKomaId of Object.values(dayMap)) {
+        if (!existingKomaId || existingKomaId === komaId) continue
+        const existingKoma = ctx.komaLookup[existingKomaId]
+        if (existingKoma && existingKoma.subjectId === koma.subjectId) return false
+      }
+    }
+  }
+
+  // Per-subject constraints (if forbidden)
+  if (ctx.perSubjectConditions.length > 0) {
+    const psc = ctx.perSubjectConditions.find(
+      (c) => c.subjectId === koma.subjectId
+    )
+    if (psc && psc.level === "forbidden") {
+      // Placement restriction
+      if (psc.placementRestriction !== "any") {
+        const period = pos.period
+        const isMorning = period <= ctx.lunchAfterPeriod
+        let violated = false
+        switch (psc.placementRestriction) {
+          case "morning_only": violated = !isMorning; break
+          case "afternoon_only": violated = isMorning; break
+          case "not_first": violated = period === 1; break
+          case "not_last": violated = period === ctx.maxPeriodsPerDay; break
+        }
+        if (violated) return false
+      }
+      // Max per day
+      for (const cid of koma.classIds) {
+        const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
+        if (!dayMap) continue
+        let count = 1
+        for (const existingKomaId of Object.values(dayMap)) {
+          if (!existingKomaId || existingKomaId === komaId) continue
+          const existingKoma = ctx.komaLookup[existingKomaId]
+          if (existingKoma && existingKoma.subjectId === koma.subjectId) count++
+        }
+        if (count > psc.maxPerDay) return false
+      }
+    }
+  }
+
   return true
 }
 
@@ -723,6 +782,26 @@ export function evaluateAllConstraints(
   const evalCtx: ConstraintContext = { ...ctx, teacherMap, classMap, roomMap }
 
   const violations: Violation[] = []
+
+  // ── 未配置チェック: コマごとの必要数と実配置数を比較 ──
+  const placedCount = new Map<string, number>()
+  for (const a of assignments) {
+    placedCount.set(a.komaId, (placedCount.get(a.komaId) ?? 0) + 1)
+  }
+  for (const [komaId, koma] of Object.entries(evalCtx.komaLookup)) {
+    const placed = placedCount.get(komaId) ?? 0
+    const missing = koma.count - placed
+    if (missing > 0) {
+      violations.push({
+        type: "unplaced",
+        severity: "error",
+        message: `未配置: ${koma.label ?? komaId} が${missing}コマ不足`,
+        komaId,
+        weight: HARD_COST,
+      })
+    }
+  }
+
   for (const a of assignments) {
     // 配置済みマップから一時除去 → checkPlacement の +1 ロジックが正しく機能
     removeFromScheduleMaps(evalCtx, a.komaId, a)
@@ -807,7 +886,6 @@ export function computeKomaPlacementCost(
   const koma = ctx.komaLookup[komaId]
   if (!koma) return 0
 
-  const HARD_COST = 100000
   let cost = 0
 
   // Self-occupation: 同一コマの別インスタンスが同一スロットにある場合
@@ -898,8 +976,9 @@ export function computeKomaPlacementCost(
     }
   }
 
-  // Class same subject per day
-  if (isActive(ctx.condition.classSameSubjectPerDay)) {
+  // Class same subject per day（教科別条件が設定済みの教科はスキップ）
+  if (isActive(ctx.condition.classSameSubjectPerDay) &&
+      !ctx.perSubjectConditions.some((c) => c.subjectId === koma.subjectId)) {
     for (const cid of koma.classIds) {
       const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
       if (!dayMap) continue
@@ -986,29 +1065,29 @@ export function computeKomaPlacementCost(
     const psc = ctx.perSubjectConditions.find(
       (c) => c.subjectId === koma.subjectId
     )
-    if (psc && psc.placementRestriction !== "any") {
-      const period = pos.period
-      const isMorning = period <= ctx.lunchAfterPeriod
-      let violated = false
-      switch (psc.placementRestriction) {
-        case "morning_only":
-          violated = !isMorning
-          break
-        case "afternoon_only":
-          violated = isMorning
-          break
-        case "not_first":
-          violated = period === 1
-          break
-        case "not_last":
-          violated = period === ctx.maxPeriodsPerDay
-          break
+    if (psc && psc.level !== "ignore") {
+      if (psc.placementRestriction !== "any") {
+        const period = pos.period
+        const isMorning = period <= ctx.lunchAfterPeriod
+        let violated = false
+        switch (psc.placementRestriction) {
+          case "morning_only":
+            violated = !isMorning
+            break
+          case "afternoon_only":
+            violated = isMorning
+            break
+          case "not_first":
+            violated = period === 1
+            break
+          case "not_last":
+            violated = period === ctx.maxPeriodsPerDay
+            break
+        }
+        if (violated) cost += psc.level === "forbidden" ? HARD_COST : 60
       }
-      if (violated) cost += 60
-    }
 
-    // Per-subject max per day
-    if (psc) {
+      // Per-subject max per day
       for (const cid of koma.classIds) {
         const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
         if (!dayMap) continue
@@ -1021,7 +1100,7 @@ export function computeKomaPlacementCost(
           }
         }
         if (count > psc.maxPerDay) {
-          cost += 60
+          cost += psc.level === "forbidden" ? HARD_COST : 60
           break
         }
       }
@@ -1045,10 +1124,35 @@ export function computeKomaPlacementCost(
         const max = Math.max(...activeDays)
         const min = Math.min(...activeDays)
         if (max - min >= 2) {
-          cost += ctx.condition.dailyBalanceWeight
+          cost += isForbidden(ctx.condition.dailyBalance)
+            ? HARD_COST
+            : ctx.condition.dailyBalanceWeight
           break
         }
       }
+    }
+  }
+
+  // Consecutive koma（連続駒の隣接チェック）
+  if (isActive(ctx.condition.consecutiveKoma) && koma.type === "consecutive") {
+    for (const cid of koma.classIds) {
+      const dayMap = ctx.classMap[cid]?.[pos.dayOfWeek]
+      if (!dayMap) continue
+      const sameKomaPeriods: number[] = []
+      for (const [p, kid] of Object.entries(dayMap)) {
+        if (kid === komaId) sameKomaPeriods.push(Number(p))
+      }
+      if (sameKomaPeriods.length > 0) {
+        const isAdjacent = sameKomaPeriods.some(
+          (p) => Math.abs(p - pos.period) === 1
+        )
+        if (!isAdjacent) {
+          cost += isForbidden(ctx.condition.consecutiveKoma)
+            ? HARD_COST
+            : ctx.condition.consecutiveKomaWeight
+        }
+      }
+      break
     }
   }
 

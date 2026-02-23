@@ -65,6 +65,28 @@ export function SolverResultSummary({ result }: SolverResultSummaryProps) {
           )}
         </div>
       )}
+
+      {result.allPatternScores && result.allPatternScores.length > 1 && (
+        <div className="border-t pt-3">
+          <p className="text-muted-foreground mb-1 text-xs font-medium">
+            全{result.allPatternScores.length}パターンの結果
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {result.allPatternScores.map((p, i) => (
+              <Badge
+                key={i}
+                variant={
+                  i === result.selectedPatternIndex ? "default" : "outline"
+                }
+                className="text-xs"
+              >
+                #{p.index}: スコア{p.score} / 違反{p.violations}
+                {i === result.selectedPatternIndex && " (採用)"}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

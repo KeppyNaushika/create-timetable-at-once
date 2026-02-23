@@ -199,6 +199,7 @@ export interface PerSubjectCondition {
   id: string
   conditionId: string
   subjectId: string
+  level: string // "forbidden" | "consider" | "ignore"
   placementRestriction: string
   maxPerDay: number
   createdAt: string
