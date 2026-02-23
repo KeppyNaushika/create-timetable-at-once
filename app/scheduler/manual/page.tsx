@@ -8,7 +8,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { DragOverlay } from "@/components/scheduler/DragOverlay"
@@ -17,24 +17,41 @@ import { RemainingKomaList } from "@/components/scheduler/RemainingKomaList"
 import { TimetableGrid } from "@/components/scheduler/TimetableGrid"
 import { ViolationsPane } from "@/components/scheduler/ViolationsPane"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { useClasses } from "@/hooks/useClasses"
+import { useConditions } from "@/hooks/useConditions"
+import { useDuties } from "@/hooks/useDuties"
 import { useKomas } from "@/hooks/useKomas"
 import { usePatterns } from "@/hooks/usePatterns"
+import { useRooms } from "@/hooks/useRooms"
 import { useSchool } from "@/hooks/useSchool"
 import { useTeachers } from "@/hooks/useTeachers"
-import { useClasses } from "@/hooks/useClasses"
-import { useRooms } from "@/hooks/useRooms"
 import { useTimetable } from "@/hooks/useTimetable"
 import { useTimetableEditor } from "@/hooks/useTimetableEditor"
+import {
+  evaluateAllConstraints,
+  setTeacherCache,
+  type ConstraintContext,
+} from "@/lib/solver/constraints"
+import type { Assignment, Violation } from "@/lib/solver/types"
+import {
+  buildDutyMap,
+  buildKomaLookup,
+  buildRoomAvailabilityMap,
+  buildScheduleMaps,
+  buildTeacherAvailabilityMap,
+  parseDisabledSlots,
+} from "@/lib/solver/utils"
 import type { Koma } from "@/types/common.types"
 import type { ViewMode } from "@/types/timetable.types"
-import type { Violation } from "@/lib/solver/types"
 
 export default function ManualPage() {
   const { school } = useSchool()
   const { komas, fetchKomas } = useKomas()
   const { teachers, fetchTeachers } = useTeachers()
-  const { classes, fetchClasses } = useClasses()
+  const { classes, grades, fetchClasses } = useClasses()
   const { rooms, fetchRooms } = useRooms()
+  const { condition } = useConditions()
+  const { duties } = useDuties()
   const { patterns, createPattern } = usePatterns()
   const [activePatternId, setActivePatternId] = useState<string | null>(null)
   const {
@@ -44,11 +61,10 @@ export default function ManualPage() {
     removeSlot,
     fixSlot,
     clearSlots,
-    batchPlace,
   } = useTimetable(activePatternId)
   const editor = useTimetableEditor()
 
-  const [viewMode, setViewMode] = useState<ViewMode>("teacher")
+  const [viewMode, setViewMode] = useState<ViewMode>("all")
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null)
   const [selectedCell, setSelectedCell] = useState<{
     dayOfWeek: number
@@ -84,8 +100,9 @@ export default function ManualPage() {
     editor.load(slots)
   }, [slots]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-select first entity
+  // Auto-select first entity when in entity mode
   useEffect(() => {
+    if (viewMode === "all") return
     if (!selectedEntity) {
       const entities = getEntities()
       if (entities.length > 0) {
@@ -94,7 +111,16 @@ export default function ManualPage() {
     }
   }, [viewMode, teachers, classes, rooms]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Koma lookup
+  // Disabled slots
+  const disabledSlots = useMemo(
+    () => parseDisabledSlots(school?.disabledSlotsJson ?? "[]"),
+    [school?.disabledSlotsJson]
+  )
+
+  // Koma lookup (solver-style with teacherIds/classIds/roomIds)
+  const komaLookupSolver = useMemo(() => buildKomaLookup(komas), [komas])
+
+  // Koma lookup (simple for grid display)
   const komaLookup = useMemo(() => {
     const map: Record<string, Koma> = {}
     for (const k of komas) {
@@ -102,6 +128,75 @@ export default function ManualPage() {
     }
     return map
   }, [komas])
+
+  // --- Violation detection ---
+  const violationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!condition || komas.length === 0) return
+
+    if (violationTimerRef.current) clearTimeout(violationTimerRef.current)
+
+    violationTimerRef.current = setTimeout(() => {
+      try {
+        // Set teacher cache for constraint checks
+        setTeacherCache(teachers)
+
+        // Build assignments from current editor slots
+        const assignments: Assignment[] = editor.state.slots.map((s) => ({
+          komaId: s.komaId,
+          dayOfWeek: s.dayOfWeek,
+          period: s.period,
+        }))
+
+        if (assignments.length === 0) {
+          setViolations([])
+          return
+        }
+
+        // Build context
+        const teacherAvailMap = buildTeacherAvailabilityMap(teachers)
+        const roomAvailMap = buildRoomAvailabilityMap(rooms)
+        const dutyMap = buildDutyMap(duties)
+        const { teacherMap, classMap, roomMap } = buildScheduleMaps(
+          assignments,
+          komaLookupSolver
+        )
+
+        const ctx: ConstraintContext = {
+          condition,
+          perSubjectConditions: condition.perSubjectConditions ?? [],
+          komaLookup: komaLookupSolver,
+          teacherAvailMap,
+          roomAvailMap,
+          dutyMap,
+          teacherMap,
+          classMap,
+          roomMap,
+          maxPeriodsPerDay: school?.maxPeriodsPerDay ?? 6,
+          lunchAfterPeriod: school?.lunchAfterPeriod ?? 4,
+        }
+
+        const result = evaluateAllConstraints(ctx, assignments)
+        setViolations(result)
+      } catch {
+        // Fail silently - violations are non-critical
+      }
+    }, 200)
+
+    return () => {
+      if (violationTimerRef.current) clearTimeout(violationTimerRef.current)
+    }
+  }, [
+    editor.state.slots,
+    condition,
+    komas,
+    teachers,
+    rooms,
+    duties,
+    school,
+    komaLookupSolver,
+  ])
 
   // Entity list based on view mode
   function getEntities(): { id: string; name: string }[] {
@@ -120,7 +215,7 @@ export default function ManualPage() {
     }
   }
 
-  // Violation map for grid
+  // Violation map for grid (keyed by day-period, and optionally per class)
   const violationMap = useMemo(() => {
     const map: Record<
       string,
@@ -166,14 +261,115 @@ export default function ManualPage() {
       const overData = over.data.current
       if (!activeData?.komaId || !overData) return
 
-      const { komaId, slotId } = activeData
-      const { dayOfWeek, period } = overData
+      const { komaId, slotId: activeSlotId } = activeData as {
+        komaId: string
+        slotId?: string
+      }
+      const { dayOfWeek, period } = overData as {
+        dayOfWeek: number
+        period: number
+      }
 
-      if (slotId) {
-        // Move existing slot
-        editor.move(slotId, komaId, 0, 0, dayOfWeek, period)
+      // Find existing slot(s) at drop target
+      const existingAtTarget = editor.state.slots.filter(
+        (s) => s.dayOfWeek === dayOfWeek && s.period === period
+      )
+
+      if (activeSlotId) {
+        // --- MOVE or SWAP ---
+        const activeSlot = editor.state.slots.find(
+          (s) => s.id === activeSlotId
+        )
+        if (!activeSlot) return
+        // If dropped on same cell, do nothing
+        if (
+          activeSlot.dayOfWeek === dayOfWeek &&
+          activeSlot.period === period
+        ) {
+          return
+        }
+
+        try {
+          // Filter out self from target (shouldn't happen but safety)
+          const targetSlots = existingAtTarget.filter(
+            (s) => s.id !== activeSlotId
+          )
+
+          if (targetSlots.length > 0) {
+            // SWAP: exchange positions of active and first target slot
+            const targetSlot = targetSlots[0]
+
+            const fromDay = activeSlot.dayOfWeek
+            const fromPeriod = activeSlot.period
+
+            // DB: remove both, then place both at swapped positions
+            await removeSlot(activeSlotId)
+            await removeSlot(targetSlot.id)
+
+            const [newActiveSlot, newTargetSlot] = await Promise.all([
+              placeSlot({
+                komaId,
+                dayOfWeek,
+                period,
+                placedBy: "manual",
+              }),
+              placeSlot({
+                komaId: targetSlot.komaId,
+                dayOfWeek: fromDay,
+                period: fromPeriod,
+                placedBy: "manual",
+              }),
+            ])
+
+            if (newActiveSlot && newTargetSlot) {
+              // Atomic editor swap (single undo entry)
+              editor.swap(
+                {
+                  id: activeSlotId,
+                  komaId,
+                  dayOfWeek: fromDay,
+                  period: fromPeriod,
+                },
+                {
+                  id: targetSlot.id,
+                  komaId: targetSlot.komaId,
+                  dayOfWeek,
+                  period,
+                },
+                newActiveSlot.id,
+                newTargetSlot.id
+              )
+            }
+          } else {
+            // MOVE: simple move via DB
+            await removeSlot(activeSlotId)
+            const newSlot = await placeSlot({
+              komaId,
+              dayOfWeek,
+              period,
+              placedBy: "manual",
+            })
+            if (newSlot) {
+              // Single undo entry for move
+              editor.move(
+                activeSlotId,
+                komaId,
+                activeSlot.dayOfWeek,
+                activeSlot.period,
+                dayOfWeek,
+                period
+              )
+              // Sync the new DB slot ID without creating undo entry
+              editor.updateSlotId(activeSlotId, newSlot.id)
+            }
+          }
+        } catch {
+          toast.error("移動に失敗しました")
+          // Reload slots from DB to recover
+          fetchSlots()
+        }
       } else {
-        // Place new koma
+        // --- PLACE NEW ---
         try {
           const newSlot = await placeSlot({
             komaId,
@@ -189,7 +385,7 @@ export default function ManualPage() {
         }
       }
     },
-    [placeSlot, editor]
+    [placeSlot, removeSlot, editor, fetchSlots]
   )
 
   const handleRemoveSlot = useCallback(
@@ -231,7 +427,6 @@ export default function ManualPage() {
 
   const handleSave = useCallback(async () => {
     if (!activePatternId) {
-      // Create new pattern
       try {
         const pattern = await createPattern({
           name: `手動パターン ${new Date().toLocaleString("ja-JP")}`,
@@ -251,11 +446,21 @@ export default function ManualPage() {
     setSelectedCell({ dayOfWeek, period })
   }, [])
 
-  const handleKomaClick = useCallback((komaId: string) => {
+  const handleKomaClick = useCallback((_komaId: string) => {
     // Select koma for placement
   }, [])
 
   const errorCount = violations.filter((v) => v.severity === "error").length
+
+  // Sort classes for "all" mode (by grade then sortOrder)
+  const sortedClasses = useMemo(() => {
+    return [...classes].sort((a, b) => {
+      const gradeA = a.grade?.gradeNum ?? 0
+      const gradeB = b.grade?.gradeNum ?? 0
+      if (gradeA !== gradeB) return gradeA - gradeB
+      return a.sortOrder - b.sortOrder
+    })
+  }, [classes])
 
   return (
     <TooltipProvider>
@@ -293,9 +498,11 @@ export default function ManualPage() {
                 selectedEntity={selectedEntity}
                 selectedCell={selectedCell}
                 violationMap={violationMap}
+                disabledSlots={disabledSlots}
                 onCellClick={handleCellClick}
                 onRemoveSlot={handleRemoveSlot}
                 onFixSlot={handleFixSlot}
+                classes={sortedClasses}
               />
             </div>
 

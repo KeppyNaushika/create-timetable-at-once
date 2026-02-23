@@ -51,9 +51,18 @@ export function KomaCard({
       )}
       style={{ backgroundColor: bgColor }}
     >
-      <div className="truncate font-medium">{shortName}</div>
-      {teacherName && !isCompact && (
-        <div className="truncate text-[10px] opacity-80">{teacherName}</div>
+      {isCompact && teacherName ? (
+        <div className="truncate font-medium">
+          {shortName}
+          <span className="ml-0.5 font-normal opacity-80">{teacherName}</span>
+        </div>
+      ) : (
+        <>
+          <div className="truncate font-medium">{shortName}</div>
+          {teacherName && (
+            <div className="truncate text-[10px] opacity-80">{teacherName}</div>
+          )}
+        </>
       )}
     </div>
   )

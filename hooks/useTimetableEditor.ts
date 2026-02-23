@@ -73,6 +73,44 @@ function reducer(
       }
     }
 
+    case "SWAP": {
+      // Atomic swap: A goes to B's position, B goes to A's position
+      return {
+        ...state,
+        slots: state.slots.map((s) => {
+          if (s.id === action.slotA.id) {
+            return {
+              ...s,
+              id: action.newSlotAId,
+              dayOfWeek: action.slotB.dayOfWeek,
+              period: action.slotB.period,
+            }
+          }
+          if (s.id === action.slotB.id) {
+            return {
+              ...s,
+              id: action.newSlotBId,
+              dayOfWeek: action.slotA.dayOfWeek,
+              period: action.slotA.period,
+            }
+          }
+          return s
+        }),
+        past: [...state.past.slice(-MAX_HISTORY), state.slots],
+        future: [],
+      }
+    }
+
+    case "UPDATE_SLOT_ID": {
+      // Update slot ID without creating undo entry (for DB sync)
+      return {
+        ...state,
+        slots: state.slots.map((s) =>
+          s.id === action.oldId ? { ...s, id: action.newId } : s
+        ),
+      }
+    }
+
     case "FIX": {
       return {
         ...state,
@@ -183,6 +221,22 @@ export function useTimetableEditor() {
     []
   )
 
+  const swap = useCallback(
+    (
+      slotA: { id: string; komaId: string; dayOfWeek: number; period: number },
+      slotB: { id: string; komaId: string; dayOfWeek: number; period: number },
+      newSlotAId: string,
+      newSlotBId: string
+    ) => {
+      dispatch({ type: "SWAP", slotA, slotB, newSlotAId, newSlotBId })
+    },
+    []
+  )
+
+  const updateSlotId = useCallback((oldId: string, newId: string) => {
+    dispatch({ type: "UPDATE_SLOT_ID", oldId, newId })
+  }, [])
+
   const fix = useCallback((slotId: string, isFixed: boolean) => {
     dispatch({ type: "FIX", slotId, isFixed })
   }, [])
@@ -207,6 +261,8 @@ export function useTimetableEditor() {
     place,
     remove,
     move,
+    swap,
+    updateSlotId,
     fix,
     undo,
     redo,

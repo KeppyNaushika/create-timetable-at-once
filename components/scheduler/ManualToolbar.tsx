@@ -40,12 +40,14 @@ interface ManualToolbarProps {
 }
 
 const viewModeIcons: Record<ViewMode, React.ReactNode> = {
+  all: <LayoutGrid className="h-4 w-4" />,
   teacher: <User className="h-4 w-4" />,
   class: <GraduationCap className="h-4 w-4" />,
   room: <Building2 className="h-4 w-4" />,
 }
 
 const viewModeLabels: Record<ViewMode, string> = {
+  all: "一覧表",
   teacher: "先生別",
   class: "クラス別",
   room: "教室別",
@@ -70,7 +72,7 @@ export function ManualToolbar({
     <div className="flex flex-wrap items-center gap-2 border-b px-4 py-2">
       {/* View mode toggle */}
       <div className="flex items-center gap-1 rounded-md border p-0.5">
-        {(["teacher", "class", "room"] as ViewMode[]).map((mode) => (
+        {(["all", "teacher", "class", "room"] as ViewMode[]).map((mode) => (
           <Button
             key={mode}
             variant={viewMode === mode ? "secondary" : "ghost"}
@@ -84,22 +86,24 @@ export function ManualToolbar({
         ))}
       </div>
 
-      {/* Entity selector */}
-      <Select
-        value={selectedEntity ?? ""}
-        onValueChange={(v) => onEntityChange(v || null)}
-      >
-        <SelectTrigger className="h-8 w-40">
-          <SelectValue placeholder="選択..." />
-        </SelectTrigger>
-        <SelectContent>
-          {entities.map((e) => (
-            <SelectItem key={e.id} value={e.id}>
-              {e.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Entity selector (hidden in "all" mode) */}
+      {viewMode !== "all" && (
+        <Select
+          value={selectedEntity ?? ""}
+          onValueChange={(v) => onEntityChange(v || null)}
+        >
+          <SelectTrigger className="h-8 w-40">
+            <SelectValue placeholder="選択..." />
+          </SelectTrigger>
+          <SelectContent>
+            {entities.map((e) => (
+              <SelectItem key={e.id} value={e.id}>
+                {e.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       <div className="flex-1" />
 
