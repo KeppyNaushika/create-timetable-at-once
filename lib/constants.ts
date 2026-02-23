@@ -160,6 +160,47 @@ export const PLACEMENT_RESTRICTIONS = {
   not_last: "最終時限不可",
 } as const
 
+// ========== Phase 4: 確認・出力 ==========
+
+export const PAPER_SIZES = {
+  B4: { label: "B4横", width: 364, height: 257 },
+  A4: { label: "A4横(80%)", width: 297, height: 210 },
+  A3: { label: "A3横", width: 420, height: 297 },
+} as const
+
+export const LINE_STYLES = {
+  none: "なし",
+  thin: "細線",
+  thick: "太線",
+  double: "二重線",
+  dotted: "点線",
+} as const
+
+export const OUTPUT_ORDERS = {
+  grade: "学年順",
+  name: "名前順",
+  nameKana: "カナ順",
+} as const
+
+export const REPORT_TYPES = {
+  "teacher-all": "先生全体表",
+  "class-all": "クラス全体表",
+  "teacher-schedule": "先生用時間割",
+  "class-schedule": "クラス用時間割",
+  "room-schedule": "特別教室用時間割",
+  "duty-list": "校務一覧表",
+  "teacher-list": "先生一覧表",
+  "koma-list": "駒一覧",
+  "remaining-koma": "残り駒一覧",
+} as const
+
+export const HIGHLIGHT_COLORS = [
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#FFA07A",
+] as const
+
 export const COLOR_PALETTE = [
   "#EF4444",
   "#F59E0B",

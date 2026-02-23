@@ -1,4 +1,5 @@
 import { registerCheckHandlers } from "./checkHandlers"
+import { registerExportHandlers } from "./exportHandlers"
 import { registerClassHandlers } from "./classHandlers"
 import { registerConditionHandlers } from "./conditionHandlers"
 import { registerDutyHandlers } from "./dutyHandlers"
@@ -26,6 +27,7 @@ export function setupAllIPCHandlers() {
   registerTimetableHandlers()
   registerPatternHandlers()
   registerMiscHandlers()
+  registerExportHandlers()
 
   console.log("All IPC handlers registered successfully")
 }

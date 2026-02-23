@@ -25,9 +25,11 @@ test("ダッシュボードが表示される", async () => {
   await expect(page.locator("h2").first()).toHaveText("初期設定")
   await expect(page.locator("h2").nth(1)).toHaveText("データ入力")
   await expect(page.locator("h2").nth(2)).toHaveText("時間割作成")
+  await expect(page.locator("h2").nth(3)).toHaveText("確認")
+  await expect(page.locator("h2").nth(4)).toHaveText("印刷・出力")
 })
 
-test("全ナビカード（13枚）が存在する", async () => {
+test("全ナビカード（17枚）が存在する", async () => {
   const titles = [
     "学校基本設定",
     "科目設定",
@@ -42,6 +44,10 @@ test("全ナビカード（13枚）が存在する", async () => {
     "手動配置",
     "自動作成",
     "パターン比較",
+    "全体表",
+    "個別表",
+    "品質診断",
+    "印刷・出力",
   ]
   for (const title of titles) {
     await expect(page.getByText(title, { exact: false }).first()).toBeVisible()

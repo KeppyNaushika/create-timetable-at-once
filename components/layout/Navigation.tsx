@@ -6,16 +6,21 @@ import {
   Building2,
   Calendar,
   CheckSquare,
+  ClipboardCheck,
+  Eye,
+  FileSpreadsheet,
+  GitCompare,
   GraduationCap,
   LayoutDashboard,
   LayoutGrid,
   Play,
+  Printer,
   Puzzle,
   School,
   Settings,
   SlidersHorizontal,
+  Stethoscope,
   Users,
-  GitCompare,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -48,34 +53,6 @@ const setupItems: NavItem[] = [
   },
 ]
 
-const schedulerItems: NavItem[] = [
-  {
-    label: "処理条件",
-    href: "/scheduler/conditions",
-    icon: <SlidersHorizontal className="h-4 w-4" />,
-  },
-  {
-    label: "駒チェック",
-    href: "/scheduler/check",
-    icon: <CheckSquare className="h-4 w-4" />,
-  },
-  {
-    label: "手動配置",
-    href: "/scheduler/manual",
-    icon: <LayoutGrid className="h-4 w-4" />,
-  },
-  {
-    label: "自動作成",
-    href: "/scheduler/auto",
-    icon: <Play className="h-4 w-4" />,
-  },
-  {
-    label: "パターン比較",
-    href: "/scheduler/patterns",
-    icon: <GitCompare className="h-4 w-4" />,
-  },
-]
-
 const dataItems: NavItem[] = [
   {
     label: "先生設定",
@@ -104,6 +81,100 @@ const dataItems: NavItem[] = [
   },
 ]
 
+const schedulerItems: NavItem[] = [
+  {
+    label: "処理条件",
+    href: "/scheduler/conditions",
+    icon: <SlidersHorizontal className="h-4 w-4" />,
+  },
+  {
+    label: "駒チェック",
+    href: "/scheduler/check",
+    icon: <CheckSquare className="h-4 w-4" />,
+  },
+  {
+    label: "手動配置",
+    href: "/scheduler/manual",
+    icon: <LayoutGrid className="h-4 w-4" />,
+  },
+  {
+    label: "自動作成",
+    href: "/scheduler/auto",
+    icon: <Play className="h-4 w-4" />,
+  },
+  {
+    label: "パターン比較",
+    href: "/scheduler/patterns",
+    icon: <GitCompare className="h-4 w-4" />,
+  },
+]
+
+const reviewItems: NavItem[] = [
+  {
+    label: "全体表",
+    href: "/review/overview",
+    icon: <Eye className="h-4 w-4" />,
+  },
+  {
+    label: "個別表",
+    href: "/review/individual",
+    icon: <ClipboardCheck className="h-4 w-4" />,
+  },
+  {
+    label: "品質診断",
+    href: "/review/diagnosis",
+    icon: <Stethoscope className="h-4 w-4" />,
+  },
+]
+
+const printItems: NavItem[] = [
+  {
+    label: "先生全体表",
+    href: "/print/teacher-all",
+    icon: <Printer className="h-4 w-4" />,
+  },
+  {
+    label: "クラス全体表",
+    href: "/print/class-all",
+    icon: <Printer className="h-4 w-4" />,
+  },
+  {
+    label: "先生用時間割",
+    href: "/print/teacher-schedule",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "クラス用時間割",
+    href: "/print/class-schedule",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "教室用時間割",
+    href: "/print/room-schedule",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "校務一覧表",
+    href: "/print/duty-list",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "先生一覧表",
+    href: "/print/teacher-list",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "駒一覧",
+    href: "/print/koma-list",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+  {
+    label: "残り駒一覧",
+    href: "/print/remaining-koma",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
+]
+
 export function Navigation() {
   const pathname = usePathname()
 
@@ -126,7 +197,7 @@ export function Navigation() {
   }
 
   return (
-    <div className="bg-card flex h-full w-56 flex-col border-r">
+    <div className="bg-card flex h-full w-56 flex-col border-r no-print">
       <div className="flex h-14 items-center gap-2 border-b px-4">
         <Settings className="text-primary h-5 w-5" />
         <span className="text-sm font-bold">一括時間割作成</span>
@@ -176,6 +247,28 @@ export function Navigation() {
             時間割作成
           </p>
           {schedulerItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            確認
+          </p>
+          {reviewItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            印刷・出力
+          </p>
+          {printItems.map((item) => (
             <NavLink key={item.href} item={item} />
           ))}
         </div>

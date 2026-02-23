@@ -204,6 +204,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     data: { violationCount: number; score: number }
   ) => ipcRenderer.invoke("pattern:updateScore", id, data),
 
+  // Export
+  exportExcel: (reportType: string, data: unknown, defaultFileName: string) =>
+    ipcRenderer.invoke("export:excel", reportType, data, defaultFileName),
+  exportSavePdf: (pdfData: number[], defaultFileName: string) =>
+    ipcRenderer.invoke("export:savePdf", pdfData, defaultFileName),
+
   // Misc
   getAppVersion: () => ipcRenderer.invoke("misc:getAppVersion"),
   getDataDirectoryInfo: () => ipcRenderer.invoke("misc:getDataDirectoryInfo"),

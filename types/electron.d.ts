@@ -263,6 +263,17 @@ export interface ElectronAPI {
     data: { violationCount: number; score: number }
   ) => Promise<import("./common.types").TimetablePattern>
 
+  // Export
+  exportExcel: (
+    reportType: string,
+    data: unknown,
+    defaultFileName: string
+  ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
+  exportSavePdf: (
+    pdfData: number[],
+    defaultFileName: string
+  ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
+
   // Misc
   getAppVersion: () => Promise<string>
   getDataDirectoryInfo: () => Promise<{ path: string }>
