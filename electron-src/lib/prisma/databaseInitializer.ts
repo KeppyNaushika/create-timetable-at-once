@@ -304,8 +304,95 @@ CREATE INDEX "TimetableSlot_patternId_dayOfWeek_period_idx" ON "TimetableSlot"("
 CREATE UNIQUE INDEX "TimetableSlot_patternId_komaId_dayOfWeek_period_key" ON "TimetableSlot"("patternId", "komaId", "dayOfWeek", "period");
         `
 
+        const phase5SQL = `
+CREATE TABLE "DailySchedule" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "date" TEXT NOT NULL,
+    "scheduleType" TEXT NOT NULL DEFAULT 'normal',
+    "periodsCount" INTEGER,
+    "reason" TEXT NOT NULL DEFAULT '',
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "DailyChange" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "dailyScheduleId" TEXT NOT NULL,
+    "classId" TEXT NOT NULL,
+    "period" INTEGER NOT NULL,
+    "changeType" TEXT NOT NULL,
+    "originalKomaId" TEXT,
+    "substituteTeacherId" TEXT,
+    "rescheduleDate" TEXT,
+    "reschedulePeriod" INTEGER,
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "DailyChange_dailyScheduleId_fkey" FOREIGN KEY ("dailyScheduleId") REFERENCES "DailySchedule" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "SchoolEvent" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "date" TEXT NOT NULL,
+    "eventType" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "isAllDay" BOOLEAN NOT NULL DEFAULT true,
+    "affectedPeriods" INTEGER NOT NULL DEFAULT 0,
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "ExamSchedule" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "startDate" TEXT NOT NULL,
+    "endDate" TEXT NOT NULL,
+    "subjectsJson" TEXT NOT NULL DEFAULT '[]',
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "ExamAssignment" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "examScheduleId" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "period" INTEGER NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "classId" TEXT NOT NULL,
+    "supervisorId" TEXT NOT NULL,
+    "assignedBy" TEXT NOT NULL DEFAULT 'auto',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "ExamAssignment_examScheduleId_fkey" FOREIGN KEY ("examScheduleId") REFERENCES "ExamSchedule" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "AppSetting" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+        `
+
+        const phase5IndexSQL = `
+CREATE UNIQUE INDEX "DailySchedule_date_key" ON "DailySchedule"("date");
+CREATE UNIQUE INDEX "DailyChange_dailyScheduleId_classId_period_key" ON "DailyChange"("dailyScheduleId", "classId", "period");
+CREATE INDEX "DailyChange_dailyScheduleId_idx" ON "DailyChange"("dailyScheduleId");
+CREATE INDEX "DailyChange_classId_idx" ON "DailyChange"("classId");
+CREATE INDEX "SchoolEvent_date_idx" ON "SchoolEvent"("date");
+CREATE INDEX "SchoolEvent_eventType_idx" ON "SchoolEvent"("eventType");
+CREATE UNIQUE INDEX "ExamAssignment_examScheduleId_date_period_classId_key" ON "ExamAssignment"("examScheduleId", "date", "period", "classId");
+CREATE INDEX "ExamAssignment_examScheduleId_idx" ON "ExamAssignment"("examScheduleId");
+CREATE INDEX "ExamAssignment_supervisorId_idx" ON "ExamAssignment"("supervisorId");
+CREATE UNIQUE INDEX "AppSetting_key_key" ON "AppSetting"("key");
+        `
+
         const allSQL =
-          migrationSQL + phase2SQL + indexSQL + phase3SQL + phase3IndexSQL
+          migrationSQL + phase2SQL + indexSQL + phase3SQL + phase3IndexSQL + phase5SQL + phase5IndexSQL
         const statements = allSQL.split(";").filter((stmt) => stmt.trim())
 
         for (const statement of statements) {
@@ -587,6 +674,114 @@ CREATE UNIQUE INDEX "TimetableSlot_patternId_komaId_dayOfWeek_period_key" ON "Ti
   }
 
   console.log("Database upgraded to Phase 3 successfully")
+
+  await upgradeToPhase5(prisma)
+}
+
+async function upgradeToPhase5(prisma: PrismaClient): Promise<void> {
+  const tables = await prisma.$queryRawUnsafe<{ name: string }[]>(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='DailySchedule'`
+  )
+
+  if (tables.length > 0) return
+
+  const phase5SQL = `
+CREATE TABLE "DailySchedule" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "date" TEXT NOT NULL,
+    "scheduleType" TEXT NOT NULL DEFAULT 'normal',
+    "periodsCount" INTEGER,
+    "reason" TEXT NOT NULL DEFAULT '',
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "DailyChange" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "dailyScheduleId" TEXT NOT NULL,
+    "classId" TEXT NOT NULL,
+    "period" INTEGER NOT NULL,
+    "changeType" TEXT NOT NULL,
+    "originalKomaId" TEXT,
+    "substituteTeacherId" TEXT,
+    "rescheduleDate" TEXT,
+    "reschedulePeriod" INTEGER,
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "DailyChange_dailyScheduleId_fkey" FOREIGN KEY ("dailyScheduleId") REFERENCES "DailySchedule" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "SchoolEvent" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "date" TEXT NOT NULL,
+    "eventType" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "isAllDay" BOOLEAN NOT NULL DEFAULT true,
+    "affectedPeriods" INTEGER NOT NULL DEFAULT 0,
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "ExamSchedule" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "startDate" TEXT NOT NULL,
+    "endDate" TEXT NOT NULL,
+    "subjectsJson" TEXT NOT NULL DEFAULT '[]',
+    "notes" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "ExamAssignment" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "examScheduleId" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "period" INTEGER NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "classId" TEXT NOT NULL,
+    "supervisorId" TEXT NOT NULL,
+    "assignedBy" TEXT NOT NULL DEFAULT 'auto',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "ExamAssignment_examScheduleId_fkey" FOREIGN KEY ("examScheduleId") REFERENCES "ExamSchedule" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "AppSetting" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+  `
+
+  const phase5IndexSQL = `
+CREATE UNIQUE INDEX "DailySchedule_date_key" ON "DailySchedule"("date");
+CREATE UNIQUE INDEX "DailyChange_dailyScheduleId_classId_period_key" ON "DailyChange"("dailyScheduleId", "classId", "period");
+CREATE INDEX "DailyChange_dailyScheduleId_idx" ON "DailyChange"("dailyScheduleId");
+CREATE INDEX "DailyChange_classId_idx" ON "DailyChange"("classId");
+CREATE INDEX "SchoolEvent_date_idx" ON "SchoolEvent"("date");
+CREATE INDEX "SchoolEvent_eventType_idx" ON "SchoolEvent"("eventType");
+CREATE UNIQUE INDEX "ExamAssignment_examScheduleId_date_period_classId_key" ON "ExamAssignment"("examScheduleId", "date", "period", "classId");
+CREATE INDEX "ExamAssignment_examScheduleId_idx" ON "ExamAssignment"("examScheduleId");
+CREATE INDEX "ExamAssignment_supervisorId_idx" ON "ExamAssignment"("supervisorId");
+CREATE UNIQUE INDEX "AppSetting_key_key" ON "AppSetting"("key");
+  `
+
+  const allSQL = phase5SQL + phase5IndexSQL
+  const statements = allSQL.split(";").filter((stmt) => stmt.trim())
+
+  for (const statement of statements) {
+    if (statement.trim()) {
+      await prisma.$executeRawUnsafe(statement.trim())
+    }
+  }
+
+  console.log("Database upgraded to Phase 5/6 successfully")
 }
 
 export const checkDatabaseExists = async (): Promise<boolean> => {

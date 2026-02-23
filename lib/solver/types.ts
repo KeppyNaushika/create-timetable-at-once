@@ -78,7 +78,7 @@ export const DEFAULT_SOLVER_CONFIG: SolverConfig = {
 
 // ソルバー進捗
 export interface SolverProgress {
-  phase: "propagation" | "backtrack" | "annealing" | "chain" | "done" | "error"
+  phase: "propagation" | "backtrack" | "annealing" | "chain" | "construction" | "localSearch" | "done" | "error"
   phaseLabel: string
   patternIndex: number
   totalPatterns: number

@@ -4,9 +4,9 @@ import {
   calculateScore,
   setTeacherCache,
 } from "./constraints"
-import { computeInitialDomains, ac3 } from "./domain"
-import { backtrack } from "./backtrack"
-import { simulatedAnnealing } from "./simulatedAnnealing"
+import { greedyConstruct } from "./greedyConstruct"
+import { tabuSearch } from "./localSearch"
+import { SeededRandom } from "./random"
 import {
   buildKomaLookup,
   buildTeacherAvailabilityMap,
@@ -29,23 +29,31 @@ export class TimetableScheduler {
   private input: SolverInput
   private config: SolverConfig
   private startTime: number = 0
+  private progressCallback?: (p: SolverProgress) => void
 
   constructor(input: SolverInput, config: SolverConfig) {
     this.input = input
     this.config = config
   }
 
+  setProgressCallback(cb: (p: SolverProgress) => void) {
+    this.progressCallback = cb
+  }
+
   async *solve(): AsyncGenerator<SolverProgress, SolverResult> {
     this.startTime = Date.now()
     const results: SolverResult[] = []
+    const totalKomas = this.getTotalKomas()
 
     for (let pi = 0; pi < this.config.maxPatterns; pi++) {
-      yield this.progress("propagation", "制約伝播", pi)
+      if (Date.now() - this.startTime > this.config.maxTimeMs) break
 
-      const result = await this.solveOne(pi, (p) => {
-        // Can't yield from callback, store for next iteration
-      })
+      yield this.makeProgress("construction", "貪欲構築", pi, 0, totalKomas)
 
+      const remainingMs = this.config.maxTimeMs - (Date.now() - this.startTime)
+      if (remainingMs <= 0) break
+
+      const result = await this.solveOne(pi, remainingMs, totalKomas)
       results.push(result)
 
       yield {
@@ -54,21 +62,21 @@ export class TimetableScheduler {
         patternIndex: pi,
         totalPatterns: this.config.maxPatterns,
         placedCount: result.assignments.length,
-        totalKomas: this.getTotalKomas(),
+        totalKomas,
         violations: result.violations.length,
         score: result.score,
         elapsedMs: Date.now() - this.startTime,
       }
     }
 
-    // Return best result
     results.sort((a, b) => a.score - b.score)
     return results[0]
   }
 
   private async solveOne(
     patternIndex: number,
-    onProgress: (p: SolverProgress) => void
+    remainingMs: number,
+    totalKomas: number
   ): Promise<SolverResult> {
     const komaLookup = buildKomaLookup(this.input.komas)
     const teacherAvailMap = buildTeacherAvailabilityMap(this.input.teachers)
@@ -76,10 +84,8 @@ export class TimetableScheduler {
     const dutyMap = buildDutyMap(this.input.duties)
     const allPositions = getAllSlotPositions(this.input)
 
-    // Set teacher cache for constraint checks
     setTeacherCache(this.input.teachers)
 
-    // Build initial assignments from fixed slots
     const fixedAssignments: Assignment[] = this.input.fixedSlots.map((s) => ({
       komaId: s.komaId,
       dayOfWeek: s.dayOfWeek,
@@ -105,70 +111,77 @@ export class TimetableScheduler {
       lunchAfterPeriod: this.input.school.lunchAfterPeriod,
     }
 
-    // Phase 1: Compute domains + AC-3
-    const komaIds = Object.keys(komaLookup)
-    const initialDomains = computeInitialDomains(komaIds, allPositions, ctx)
-    const { consistent, domain } = ac3(initialDomains, komaLookup, ctx)
-
-    if (!consistent) {
-      return {
-        assignments: fixedAssignments,
-        violations: evaluateAllConstraints(ctx, fixedAssignments),
-        score: Infinity,
+    const sendProgress = (partial: Partial<SolverProgress>) => {
+      this.progressCallback?.({
+        phase: partial.phase ?? "construction",
+        phaseLabel: partial.phaseLabel ?? "貪欲構築",
+        patternIndex,
+        totalPatterns: this.config.maxPatterns,
+        placedCount: partial.placedCount ?? 0,
+        totalKomas,
+        violations: partial.violations ?? 0,
+        score: partial.score ?? 0,
         elapsedMs: Date.now() - this.startTime,
-        isComplete: false,
-      }
+        message: partial.message,
+      })
     }
 
-    // Phase 2: Backtracking
     const targets = expandKomasToAssignmentTargets(this.input.komas)
-    const btResult = backtrack(
+    const rng = new SeededRandom((this.config.seed ?? Date.now()) + patternIndex)
+
+    // ── Phase 1: 貪欲構築 ──
+    sendProgress({
+      phase: "construction",
+      phaseLabel: "貪欲構築",
+      placedCount: fixedAssignments.length,
+    })
+
+    const greedyAssignments = greedyConstruct(
       ctx,
-      domain,
       komaLookup,
+      allPositions,
       fixedAssignments,
       targets,
-      this.config.btMaxDepth
+      rng,
+      (p) => sendProgress(p)
     )
 
-    let assignments = btResult.assignments
+    // ── Phase 2: タブー探索 ──
+    // パターンごとの残り時間を正確に計算
+    const tabuDeadline = Math.max(
+      this.config.maxTimeMs - (Date.now() - this.startTime),
+      5000
+    )
 
-    // Phase 3: Simulated Annealing (if BT didn't find complete solution)
-    if (
-      !btResult.complete ||
-      calculateScore(evaluateAllConstraints(ctx, assignments)) > 0
-    ) {
-      // Rebuild schedule maps with BT result
-      const {
-        teacherMap: tm,
-        classMap: cm,
-        roomMap: rm,
-      } = buildScheduleMaps(assignments, komaLookup)
-      ctx.teacherMap = tm
-      ctx.classMap = cm
-      ctx.roomMap = rm
+    sendProgress({
+      phase: "localSearch",
+      phaseLabel: "局所探索",
+      placedCount: greedyAssignments.length,
+    })
 
-      assignments = simulatedAnnealing(
-        ctx,
-        assignments,
-        komaLookup,
-        allPositions,
-        {
-          ...this.config,
-          seed: (this.config.seed ?? Date.now()) + patternIndex,
-        }
-      )
-    }
+    const bestAssignments = tabuSearch(
+      ctx,
+      greedyAssignments,
+      komaLookup,
+      allPositions,
+      {
+        ...this.config,
+        seed: (this.config.seed ?? Date.now()) + patternIndex,
+      },
+      (p) => sendProgress(p),
+      tabuDeadline
+    )
 
-    const violations = evaluateAllConstraints(ctx, assignments)
+    // ── Phase 3: 最終評価 ──
+    const violations = evaluateAllConstraints(ctx, bestAssignments)
     const score = calculateScore(violations)
 
     return {
-      assignments,
+      assignments: bestAssignments,
       violations,
       score,
       elapsedMs: Date.now() - this.startTime,
-      isComplete: btResult.complete && score === 0,
+      isComplete: bestAssignments.length >= totalKomas && score === 0,
     }
   }
 
@@ -176,18 +189,20 @@ export class TimetableScheduler {
     return this.input.komas.reduce((sum, k) => sum + k.count, 0)
   }
 
-  private progress(
+  private makeProgress(
     phase: SolverProgress["phase"],
     phaseLabel: string,
-    patternIndex: number
+    patternIndex: number,
+    placedCount: number,
+    totalKomas: number
   ): SolverProgress {
     return {
       phase,
       phaseLabel,
       patternIndex,
       totalPatterns: this.config.maxPatterns,
-      placedCount: 0,
-      totalKomas: this.getTotalKomas(),
+      placedCount,
+      totalKomas,
       violations: 0,
       score: 0,
       elapsedMs: Date.now() - this.startTime,

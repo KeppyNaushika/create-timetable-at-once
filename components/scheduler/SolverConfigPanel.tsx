@@ -63,37 +63,20 @@ export function SolverConfigPanel({
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs">SA イテレーション</Label>
+        <Label className="text-xs">リスタート回数</Label>
         <div className="flex items-center gap-2">
           <Slider
-            value={[config.saIterations / 10000]}
+            value={[config.ilsRestarts]}
             min={1}
-            max={50}
+            max={20}
             step={1}
             onValueChange={([v]) =>
-              onChange({ ...config, saIterations: v * 10000 })
+              onChange({ ...config, ilsRestarts: v })
             }
             className="flex-1"
           />
-          <span className="text-muted-foreground w-12 text-xs">
-            {(config.saIterations / 1000).toFixed(0)}k
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs">BT 最大深度</Label>
-        <div className="flex items-center gap-2">
-          <Slider
-            value={[config.btMaxDepth]}
-            min={100}
-            max={2000}
-            step={100}
-            onValueChange={([v]) => onChange({ ...config, btMaxDepth: v })}
-            className="flex-1"
-          />
-          <span className="text-muted-foreground w-12 text-xs">
-            {config.btMaxDepth}
+          <span className="text-muted-foreground w-10 text-xs">
+            {config.ilsRestarts}回
           </span>
         </div>
       </div>

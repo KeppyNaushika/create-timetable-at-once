@@ -210,6 +210,74 @@ contextBridge.exposeInMainWorld("electronAPI", {
   exportSavePdf: (pdfData: number[], defaultFileName: string) =>
     ipcRenderer.invoke("export:savePdf", pdfData, defaultFileName),
 
+  // DailySchedule
+  dailyScheduleGetByMonth: (yearMonth: string) =>
+    ipcRenderer.invoke("dailySchedule:getByMonth", yearMonth),
+  dailyScheduleGetByDate: (date: string) =>
+    ipcRenderer.invoke("dailySchedule:getByDate", date),
+  dailyScheduleUpsert: (data: Record<string, unknown>) =>
+    ipcRenderer.invoke("dailySchedule:upsert", data),
+  dailyScheduleDelete: (id: string) =>
+    ipcRenderer.invoke("dailySchedule:delete", id),
+
+  // DailyChange
+  dailyChangeGetByScheduleId: (scheduleId: string) =>
+    ipcRenderer.invoke("dailyChange:getByScheduleId", scheduleId),
+  dailyChangeCreate: (data: Record<string, unknown>) =>
+    ipcRenderer.invoke("dailyChange:create", data),
+  dailyChangeUpdate: (id: string, data: Record<string, unknown>) =>
+    ipcRenderer.invoke("dailyChange:update", id, data),
+  dailyChangeDelete: (id: string) =>
+    ipcRenderer.invoke("dailyChange:delete", id),
+
+  // SchoolEvent
+  schoolEventGetAll: () => ipcRenderer.invoke("schoolEvent:getAll"),
+  schoolEventGetByDateRange: (startDate: string, endDate: string) =>
+    ipcRenderer.invoke("schoolEvent:getByDateRange", startDate, endDate),
+  schoolEventCreate: (data: Record<string, unknown>) =>
+    ipcRenderer.invoke("schoolEvent:create", data),
+  schoolEventUpdate: (id: string, data: Record<string, unknown>) =>
+    ipcRenderer.invoke("schoolEvent:update", id, data),
+  schoolEventDelete: (id: string) =>
+    ipcRenderer.invoke("schoolEvent:delete", id),
+  schoolEventImportHolidays: (holidays: { date: string; name: string }[]) =>
+    ipcRenderer.invoke("schoolEvent:importHolidays", holidays),
+
+  // ExamSchedule
+  examScheduleGetAll: () => ipcRenderer.invoke("examSchedule:getAll"),
+  examScheduleGetById: (id: string) =>
+    ipcRenderer.invoke("examSchedule:getById", id),
+  examScheduleCreate: (data: Record<string, unknown>) =>
+    ipcRenderer.invoke("examSchedule:create", data),
+  examScheduleUpdate: (id: string, data: Record<string, unknown>) =>
+    ipcRenderer.invoke("examSchedule:update", id, data),
+  examScheduleDelete: (id: string) =>
+    ipcRenderer.invoke("examSchedule:delete", id),
+
+  // ExamAssignment
+  examAssignmentGetByScheduleId: (scheduleId: string) =>
+    ipcRenderer.invoke("examAssignment:getByScheduleId", scheduleId),
+  examAssignmentBatchUpsert: (
+    scheduleId: string,
+    assignments: Record<string, unknown>[]
+  ) => ipcRenderer.invoke("examAssignment:batchUpsert", scheduleId, assignments),
+  examAssignmentDelete: (id: string) =>
+    ipcRenderer.invoke("examAssignment:delete", id),
+  examAssignmentClear: (scheduleId: string) =>
+    ipcRenderer.invoke("examAssignment:clear", scheduleId),
+
+  // AppSetting
+  settingGet: (key: string) => ipcRenderer.invoke("setting:get", key),
+  settingSet: (key: string, value: string) =>
+    ipcRenderer.invoke("setting:set", key, value),
+  settingGetAll: () => ipcRenderer.invoke("setting:getAll"),
+
+  // Backup
+  backupCreate: () => ipcRenderer.invoke("backup:create"),
+  backupRestore: (path: string) => ipcRenderer.invoke("backup:restore", path),
+  backupGetList: () => ipcRenderer.invoke("backup:getList"),
+  backupDelete: (path: string) => ipcRenderer.invoke("backup:delete", path),
+
   // Misc
   getAppVersion: () => ipcRenderer.invoke("misc:getAppVersion"),
   getDataDirectoryInfo: () => ipcRenderer.invoke("misc:getDataDirectoryInfo"),

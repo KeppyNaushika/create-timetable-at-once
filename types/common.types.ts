@@ -10,6 +10,7 @@ export interface School {
   periodNamesJson: string
   periodLengthsJson: string
   lunchAfterPeriod: number
+  disabledSlotsJson: string
   createdAt: string
   updatedAt: string
 }

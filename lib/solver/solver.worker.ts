@@ -12,6 +12,16 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   if (msg.type === "start") {
     try {
       const scheduler = new TimetableScheduler(msg.input, msg.config)
+
+      // BT/SA の同期処理中でも進捗を直接メインスレッドへ送る
+      scheduler.setProgressCallback((progress: SolverProgress) => {
+        const response: WorkerResponse = {
+          type: "progress",
+          data: progress,
+        }
+        self.postMessage(response)
+      })
+
       const generator = scheduler.solve()
 
       let result: IteratorResult<SolverProgress, SolverResult>
