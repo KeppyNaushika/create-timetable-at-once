@@ -143,11 +143,25 @@ export function countTeacherWeekSlots(
   return count
 }
 
+export function parseDisabledSlots(json: string): Set<string> {
+  try {
+    const arr = JSON.parse(json)
+    if (!Array.isArray(arr)) return new Set()
+    return new Set(
+      arr.map((s: { dayOfWeek: number; period: number }) => `${s.dayOfWeek}:${s.period}`)
+    )
+  } catch {
+    return new Set()
+  }
+}
+
 export function getAllSlotPositions(input: SolverInput): SlotPosition[] {
+  const disabled = parseDisabledSlots(input.school.disabledSlotsJson)
   const positions: SlotPosition[] = []
   for (let d = 0; d < input.school.daysPerWeek; d++) {
     const startPeriod = input.school.hasZeroPeriod ? 0 : 1
     for (let p = startPeriod; p <= input.school.maxPeriodsPerDay; p++) {
+      if (disabled.has(`${d}:${p}`)) continue
       positions.push({ dayOfWeek: d, period: p })
     }
   }

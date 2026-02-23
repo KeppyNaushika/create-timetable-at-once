@@ -42,8 +42,23 @@ export function backtrack(
     return count <= t.index
   })
 
-  // Deduplicate by komaId (one variable per unique koma needing placement)
-  const unassignedKomaIds = [...new Set(remaining.map((t) => t.komaId))]
+  // count > 1 の駒を展開: 各駒が残り配置回数分だけリストに登場する
+  const unassignedList: string[] = []
+  const remainingCountPerKoma: Record<string, number> = {}
+  for (const t of remaining) {
+    remainingCountPerKoma[t.komaId] =
+      (remainingCountPerKoma[t.komaId] ?? 0) + 1
+  }
+  for (const [komaId, count] of Object.entries(remainingCountPerKoma)) {
+    for (let i = 0; i < count; i++) {
+      unassignedList.push(komaId)
+    }
+  }
+
+  // maxDepth をターゲット数に合わせて引き上げ
+  const effectiveMaxDepth = Math.max(maxDepth, unassignedList.length + 200)
+  // ノード数上限（指数爆発防止、SA greedy fill で残りを埋める）
+  const maxNodes = Math.max(50000, unassignedList.length * 100)
 
   let currentDomain = deepCopyDomain(domain)
   let depth = 0
@@ -51,7 +66,8 @@ export function backtrack(
 
   function solve(unassigned: string[]): boolean {
     if (unassigned.length === 0) return true
-    if (depth >= maxDepth) return false
+    if (depth >= effectiveMaxDepth) return false
+    if (nodesExplored >= maxNodes) return false
 
     depth++
     nodesExplored++
@@ -63,9 +79,10 @@ export function backtrack(
       })
     }
 
-    // Select variable (MRV + degree)
+    // Select variable (MRV + degree) — 一意な駒IDから選択
+    const uniqueKomas = [...new Set(unassigned)]
     const komaId = selectVariableMRVDegree(
-      unassigned,
+      uniqueKomas,
       currentDomain,
       komaLookup
     )
@@ -95,8 +112,13 @@ export function backtrack(
       const savedDomain = deepCopyDomain(currentDomain)
       let consistent = true
 
-      const nextUnassigned = unassigned.filter((id) => id !== komaId)
-      for (const otherId of nextUnassigned) {
+      // komaId の1出現だけを除去（count>1 の残りは維持）
+      const removeIdx = unassigned.indexOf(komaId)
+      const nextUnassigned = [...unassigned]
+      nextUnassigned.splice(removeIdx, 1)
+
+      const nextUniqueKomas = [...new Set(nextUnassigned)]
+      for (const otherId of nextUniqueKomas) {
         currentDomain[otherId] = currentDomain[otherId].filter((p) =>
           isPlacementValid(ctx, otherId, p)
         )
@@ -121,7 +143,7 @@ export function backtrack(
     return false
   }
 
-  const complete = solve(unassignedKomaIds)
+  const complete = solve(unassignedList)
 
   return { assignments, complete }
 }

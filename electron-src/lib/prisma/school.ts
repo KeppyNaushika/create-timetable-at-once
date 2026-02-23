@@ -20,6 +20,7 @@ export async function createSchool(data: {
   periodNamesJson?: string
   periodLengthsJson?: string
   lunchAfterPeriod?: number
+  disabledSlotsJson?: string
 }) {
   const prisma = getPrismaClient()
   try {
@@ -42,6 +43,7 @@ export async function updateSchool(
     periodNamesJson?: string
     periodLengthsJson?: string
     lunchAfterPeriod?: number
+    disabledSlotsJson?: string
   }
 ) {
   const prisma = getPrismaClient()

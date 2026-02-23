@@ -201,6 +201,55 @@ export const HIGHLIGHT_COLORS = [
   "#FFA07A",
 ] as const
 
+// ========== Phase 5: 日課管理 ==========
+
+export const SCHEDULE_TYPES = {
+  normal: "通常",
+  shortened: "短縮",
+  exam: "試験",
+  event: "行事",
+  holiday: "休日",
+  custom: "カスタム",
+} as const
+
+export const CHANGE_TYPES = {
+  cancel: "休講",
+  substitute: "代替",
+  swap: "交換",
+  special: "特別授業",
+  self_study: "自習",
+} as const
+
+export const EVENT_TYPES = {
+  holiday: "休日",
+  national_holiday: "祝日",
+  school_event: "学校行事",
+  exam: "試験",
+  ceremony: "式典",
+  other: "その他",
+} as const
+
+// ========== Phase 6: 拡張機能 ==========
+
+export const EXAM_ASSIGN_METHODS = {
+  auto: "自動",
+  manual: "手動",
+} as const
+
+export const THEME_OPTIONS = {
+  light: "ライト",
+  dark: "ダーク",
+  system: "システム",
+} as const
+
+export const KEYBOARD_SHORTCUTS = {
+  undo: { key: "z", modifiers: ["ctrl"], label: "元に戻す" },
+  redo: { key: "z", modifiers: ["ctrl", "shift"], label: "やり直す" },
+  save: { key: "s", modifiers: ["ctrl"], label: "保存" },
+  help: { key: "/", modifiers: ["ctrl"], label: "ショートカットヘルプ" },
+  toggleDark: { key: "d", modifiers: ["ctrl", "shift"], label: "ダークモード切替" },
+} as const
+
 export const COLOR_PALETTE = [
   "#EF4444",
   "#F59E0B",

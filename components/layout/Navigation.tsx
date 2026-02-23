@@ -4,20 +4,25 @@ import {
   BookOpen,
   Briefcase,
   Building2,
+  Calculator,
   Calendar,
+  CalendarDays,
   CheckSquare,
   ClipboardCheck,
+  ClipboardList,
   Eye,
   FileSpreadsheet,
   GitCompare,
   GraduationCap,
   LayoutDashboard,
   LayoutGrid,
+  ListChecks,
   Play,
   Printer,
   Puzzle,
   School,
   Settings,
+  Shuffle,
   SlidersHorizontal,
   Stethoscope,
   Users,
@@ -175,6 +180,55 @@ const printItems: NavItem[] = [
   },
 ]
 
+const dailyItems: NavItem[] = [
+  {
+    label: "日課カレンダー",
+    href: "/daily/calendar",
+    icon: <CalendarDays className="h-4 w-4" />,
+  },
+  {
+    label: "日課編集",
+    href: "/daily/edit",
+    icon: <Shuffle className="h-4 w-4" />,
+  },
+  {
+    label: "授業時数",
+    href: "/daily/hours",
+    icon: <Calculator className="h-4 w-4" />,
+  },
+  {
+    label: "年間カレンダー",
+    href: "/daily/annual",
+    icon: <Calendar className="h-4 w-4" />,
+  },
+]
+
+const examItems: NavItem[] = [
+  {
+    label: "試験日程",
+    href: "/exam/schedule",
+    icon: <ClipboardList className="h-4 w-4" />,
+  },
+  {
+    label: "監督割当",
+    href: "/exam/assign",
+    icon: <ListChecks className="h-4 w-4" />,
+  },
+  {
+    label: "選択科目",
+    href: "/elective",
+    icon: <Shuffle className="h-4 w-4" />,
+  },
+]
+
+const settingsItems: NavItem[] = [
+  {
+    label: "アプリ設定",
+    href: "/settings",
+    icon: <Settings className="h-4 w-4" />,
+  },
+]
+
 export function Navigation() {
   const pathname = usePathname()
 
@@ -269,6 +323,39 @@ export function Navigation() {
             印刷・出力
           </p>
           {printItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            日課管理
+          </p>
+          {dailyItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            試験・選択
+          </p>
+          {examItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-1">
+          <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+            設定
+          </p>
+          {settingsItems.map((item) => (
             <NavLink key={item.href} item={item} />
           ))}
         </div>

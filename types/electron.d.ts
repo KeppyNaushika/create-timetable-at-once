@@ -274,6 +274,87 @@ export interface ElectronAPI {
     defaultFileName: string
   ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
 
+  // DailySchedule
+  dailyScheduleGetByMonth: (
+    yearMonth: string
+  ) => Promise<import("./daily.types").DailySchedule[]>
+  dailyScheduleGetByDate: (
+    date: string
+  ) => Promise<import("./daily.types").DailySchedule | null>
+  dailyScheduleUpsert: (
+    data: Record<string, unknown>
+  ) => Promise<import("./daily.types").DailySchedule>
+  dailyScheduleDelete: (
+    id: string
+  ) => Promise<void>
+
+  // DailyChange
+  dailyChangeGetByScheduleId: (
+    scheduleId: string
+  ) => Promise<import("./daily.types").DailyChange[]>
+  dailyChangeCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./daily.types").DailyChange>
+  dailyChangeUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./daily.types").DailyChange>
+  dailyChangeDelete: (id: string) => Promise<void>
+
+  // SchoolEvent
+  schoolEventGetAll: () => Promise<import("./daily.types").SchoolEvent[]>
+  schoolEventGetByDateRange: (
+    startDate: string,
+    endDate: string
+  ) => Promise<import("./daily.types").SchoolEvent[]>
+  schoolEventCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./daily.types").SchoolEvent>
+  schoolEventUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./daily.types").SchoolEvent>
+  schoolEventDelete: (id: string) => Promise<void>
+  schoolEventImportHolidays: (
+    holidays: { date: string; name: string }[]
+  ) => Promise<number>
+
+  // ExamSchedule
+  examScheduleGetAll: () => Promise<import("./exam.types").ExamSchedule[]>
+  examScheduleGetById: (
+    id: string
+  ) => Promise<import("./exam.types").ExamSchedule | null>
+  examScheduleCreate: (
+    data: Record<string, unknown>
+  ) => Promise<import("./exam.types").ExamSchedule>
+  examScheduleUpdate: (
+    id: string,
+    data: Record<string, unknown>
+  ) => Promise<import("./exam.types").ExamSchedule>
+  examScheduleDelete: (id: string) => Promise<void>
+
+  // ExamAssignment
+  examAssignmentGetByScheduleId: (
+    scheduleId: string
+  ) => Promise<import("./exam.types").ExamAssignment[]>
+  examAssignmentBatchUpsert: (
+    scheduleId: string,
+    assignments: Record<string, unknown>[]
+  ) => Promise<import("./exam.types").ExamAssignment[]>
+  examAssignmentDelete: (id: string) => Promise<void>
+  examAssignmentClear: (scheduleId: string) => Promise<void>
+
+  // AppSetting
+  settingGet: (key: string) => Promise<string | null>
+  settingSet: (key: string, value: string) => Promise<void>
+  settingGetAll: () => Promise<import("./exam.types").AppSetting[]>
+
+  // Backup
+  backupCreate: () => Promise<{ success: boolean; path?: string; error?: string }>
+  backupRestore: (path: string) => Promise<{ success: boolean; error?: string }>
+  backupGetList: () => Promise<{ name: string; path: string; size: number; date: string }[]>
+  backupDelete: (path: string) => Promise<{ success: boolean; error?: string }>
+
   // Misc
   getAppVersion: () => Promise<string>
   getDataDirectoryInfo: () => Promise<{ path: string }>

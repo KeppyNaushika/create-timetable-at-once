@@ -42,6 +42,7 @@ export default function TimetableFramePage() {
   const [lunchAfterPeriod, setLunchAfterPeriod] = useState(4)
   const [periodNames, setPeriodNames] = useState<string[]>([])
   const [periodLengths, setPeriodLengths] = useState<number[]>([])
+  const [disabledSlots, setDisabledSlots] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -56,6 +57,21 @@ export default function TimetableFramePage() {
         if (Array.isArray(names) && names.length > 0) setPeriodNames(names)
         if (Array.isArray(lengths) && lengths.length > 0)
           setPeriodLengths(lengths)
+      } catch {
+        // use defaults
+      }
+      try {
+        const disabled = JSON.parse(school.disabledSlotsJson)
+        if (Array.isArray(disabled)) {
+          setDisabledSlots(
+            new Set(
+              disabled.map(
+                (s: { dayOfWeek: number; period: number }) =>
+                  `${s.dayOfWeek}:${s.period}`
+              )
+            )
+          )
+        }
       } catch {
         // use defaults
       }
@@ -86,6 +102,10 @@ export default function TimetableFramePage() {
     if (!school) return
     setSaving(true)
     try {
+      const disabledSlotsArray = Array.from(disabledSlots).map((key) => {
+        const [d, p] = key.split(":")
+        return { dayOfWeek: Number(d), period: Number(p) }
+      })
       await updateSchool(school.id, {
         daysPerWeek,
         maxPeriodsPerDay,
@@ -93,6 +113,7 @@ export default function TimetableFramePage() {
         lunchAfterPeriod,
         periodNamesJson: JSON.stringify(periodNames),
         periodLengthsJson: JSON.stringify(periodLengths),
+        disabledSlotsJson: JSON.stringify(disabledSlotsArray),
       })
       await fetchSchool()
       toast.success("時間割枠を保存しました")
@@ -109,6 +130,7 @@ export default function TimetableFramePage() {
     lunchAfterPeriod,
     periodNames,
     periodLengths,
+    disabledSlots,
     updateSchool,
     fetchSchool,
   ])
@@ -267,6 +289,9 @@ export default function TimetableFramePage() {
         <Card>
           <CardHeader>
             <CardTitle>プレビュー</CardTitle>
+            <CardDescription>
+              セルをクリックすると無効化できます（無効スロットには授業を配置できません）
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-auto">
@@ -291,16 +316,41 @@ export default function TimetableFramePage() {
                           <TableCell className="text-muted-foreground text-center text-xs">
                             {name}
                           </TableCell>
-                          {displayDays.map((day) => (
-                            <TableCell
-                              key={day}
-                              className="h-10 border text-center"
-                            >
-                              <span className="text-muted-foreground/40 text-xs">
-                                -
-                              </span>
-                            </TableCell>
-                          ))}
+                          {displayDays.map((day, dayIndex) => {
+                            const slotKey = `${dayIndex}:${periodNum}`
+                            const isDisabled = disabledSlots.has(slotKey)
+                            return (
+                              <TableCell
+                                key={day}
+                                className={`h-10 border text-center cursor-pointer select-none transition-colors ${
+                                  isDisabled
+                                    ? "bg-muted text-muted-foreground"
+                                    : "hover:bg-accent"
+                                }`}
+                                onClick={() => {
+                                  setDisabledSlots((prev) => {
+                                    const next = new Set(prev)
+                                    if (next.has(slotKey)) {
+                                      next.delete(slotKey)
+                                    } else {
+                                      next.add(slotKey)
+                                    }
+                                    return next
+                                  })
+                                }}
+                              >
+                                <span
+                                  className={`text-xs ${
+                                    isDisabled
+                                      ? "text-muted-foreground font-medium"
+                                      : "text-muted-foreground/40"
+                                  }`}
+                                >
+                                  {isDisabled ? "×" : "-"}
+                                </span>
+                              </TableCell>
+                            )
+                          })}
                         </TableRow>
                         {isLunchAfter && (
                           <TableRow>

@@ -7,6 +7,7 @@ import type { Metadata } from "next"
 
 import { ToastProvider } from "@/components/common/ToastProvider"
 import { AppShell } from "@/components/layout/AppShell"
+import { ThemeInitializer } from "@/components/layout/ThemeInitializer"
 
 export const metadata: Metadata = {
   title: "一括時間割作成",
@@ -19,8 +20,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning>
       <body style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
+        <ThemeInitializer />
         <ToastProvider>
           <AppShell>{children}</AppShell>
         </ToastProvider>

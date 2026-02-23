@@ -103,13 +103,26 @@ export default function AutoPage() {
         status: "candidate",
       })
 
-      // Save assignments to pattern
-      const slots = solver.result.assignments.map((a) => ({
-        komaId: a.komaId,
-        dayOfWeek: a.dayOfWeek,
-        period: a.period,
-        placedBy: "auto",
-      }))
+      // Save assignments to pattern (deduplicate by komaId+dayOfWeek+period)
+      const seen = new Set<string>()
+      const slots: {
+        komaId: string
+        dayOfWeek: number
+        period: number
+        placedBy: string
+      }[] = []
+      for (const a of solver.result.assignments) {
+        const key = `${a.komaId}:${a.dayOfWeek}:${a.period}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          slots.push({
+            komaId: a.komaId,
+            dayOfWeek: a.dayOfWeek,
+            period: a.period,
+            placedBy: "auto",
+          })
+        }
+      }
 
       await window.electronAPI.timetableBatchPlace(pattern.id, slots)
       await window.electronAPI.patternUpdateScore(pattern.id, {
@@ -118,7 +131,8 @@ export default function AutoPage() {
       })
 
       toast.success("パターンを保存しました")
-    } catch {
+    } catch (err) {
+      console.error("パターン保存エラー:", err)
       toast.error("保存に失敗しました")
     }
   }, [solver.result, createPattern])

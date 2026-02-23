@@ -27,6 +27,8 @@ model School {
   periodLengthsJson String  @default("[]")
   // 昼休み位置（何時限目の後）
   lunchAfterPeriod Int      @default(4)
+  // 無効スロット (JSON: [{"dayOfWeek":4,"period":6}])
+  disabledSlotsJson String  @default("[]")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -315,4 +317,109 @@ model TimetableSlot {
   @@index([patternId])
   @@index([komaId])
   @@index([patternId, dayOfWeek, period])
+}
+
+// ========== Phase 5: 日課管理・運用支援 ==========
+
+model DailySchedule {
+  id            String        @id @default(cuid())
+  date          String        // "YYYY-MM-DD"
+  // "normal" | "shortened" | "exam" | "event" | "holiday" | "custom"
+  scheduleType  String        @default("normal")
+  // 実施コマ数 (省略時は学校設定値)
+  periodsCount  Int?
+  reason        String        @default("")
+  notes         String        @default("")
+  changes       DailyChange[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([date])
+}
+
+model DailyChange {
+  id               String        @id @default(cuid())
+  dailyScheduleId  String
+  dailySchedule    DailySchedule @relation(fields: [dailyScheduleId], references: [id], onDelete: Cascade)
+  classId          String
+  period           Int
+  // "cancel" | "substitute" | "swap" | "special" | "self_study"
+  changeType       String
+  // 元の駒ID (参照用、FK不要)
+  originalKomaId   String?
+  // 代替先生ID
+  substituteTeacherId String?
+  // 振替先日付 "YYYY-MM-DD"
+  rescheduleDate   String?
+  // 振替先時限
+  reschedulePeriod Int?
+  // 備考
+  notes            String        @default("")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([dailyScheduleId, classId, period])
+  @@index([dailyScheduleId])
+  @@index([classId])
+}
+
+model SchoolEvent {
+  id         String   @id @default(cuid())
+  date       String   // "YYYY-MM-DD"
+  // "holiday" | "national_holiday" | "school_event" | "exam" | "ceremony" | "other"
+  eventType  String
+  name       String
+  // 終日かどうか
+  isAllDay   Boolean  @default(true)
+  // 影響するコマ数 (0=全コマ休止)
+  affectedPeriods Int @default(0)
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([date])
+  @@index([eventType])
+}
+
+// ========== Phase 6: 拡張機能 ==========
+
+model ExamSchedule {
+  id           String           @id @default(cuid())
+  name         String           // "1学期中間テスト" 等
+  startDate    String           // "YYYY-MM-DD"
+  endDate      String           // "YYYY-MM-DD"
+  // 科目リスト (JSON: ["数学","英語",...])
+  subjectsJson String           @default("[]")
+  notes        String           @default("")
+  assignments  ExamAssignment[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model ExamAssignment {
+  id             String       @id @default(cuid())
+  examScheduleId String
+  examSchedule   ExamSchedule @relation(fields: [examScheduleId], references: [id], onDelete: Cascade)
+  date           String       // "YYYY-MM-DD"
+  period         Int
+  subjectId      String
+  classId        String
+  // 監督教員ID
+  supervisorId   String
+  // "auto" | "manual"
+  assignedBy     String       @default("auto")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([examScheduleId, date, period, classId])
+  @@index([examScheduleId])
+  @@index([supervisorId])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
