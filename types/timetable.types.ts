@@ -15,7 +15,7 @@ export interface CellViolation {
 }
 
 // 表示モード
-export type ViewMode = "teacher" | "class" | "room"
+export type ViewMode = "all" | "teacher" | "class" | "room"
 
 // D&Dアイテム
 export interface DragItem {
@@ -57,6 +57,15 @@ export type TimetableAction =
       toDay: number
       toPeriod: number
     }
+  | {
+      type: "SWAP"
+      slotA: { id: string; komaId: string; dayOfWeek: number; period: number }
+      slotB: { id: string; komaId: string; dayOfWeek: number; period: number }
+      /** New DB slot IDs after swap */
+      newSlotAId: string
+      newSlotBId: string
+    }
+  | { type: "UPDATE_SLOT_ID"; oldId: string; newId: string }
   | { type: "FIX"; slotId: string; isFixed: boolean }
   | { type: "UNDO" }
   | { type: "REDO" }

@@ -29,6 +29,9 @@ interface TimetableCellProps {
   onCellClick: (dayOfWeek: number, period: number) => void
   onRemoveSlot: (slotId: string) => void
   onFixSlot: (slotId: string, isFixed: boolean) => void
+  compact?: boolean
+  /** Override droppable ID to avoid collisions in all-class grid */
+  cellId?: string
 }
 
 export function TimetableCell({
@@ -41,9 +44,12 @@ export function TimetableCell({
   onCellClick,
   onRemoveSlot,
   onFixSlot,
+  compact,
+  cellId,
 }: TimetableCellProps) {
+  const droppableId = cellId ?? `cell-${dayOfWeek}-${period}`
   const { isOver, setNodeRef } = useDroppable({
-    id: `cell-${dayOfWeek}-${period}`,
+    id: droppableId,
     data: { dayOfWeek, period },
   })
 
@@ -54,11 +60,12 @@ export function TimetableCell({
     <div
       ref={setNodeRef}
       className={cn(
-        "relative min-h-[48px] border p-0.5 transition-colors",
+        "relative border p-0.5 transition-colors",
+        compact ? "min-h-[32px]" : "min-h-[48px]",
         isOver && "bg-primary/10",
         isSelected && "ring-primary ring-2",
-        hasError && "bg-red-50",
-        hasWarning && !hasError && "bg-yellow-50"
+        hasError && "bg-red-50 dark:bg-red-950/30",
+        hasWarning && !hasError && "bg-yellow-50 dark:bg-yellow-950/30"
       )}
       onClick={() => onCellClick(dayOfWeek, period)}
     >
