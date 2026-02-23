@@ -6,13 +6,18 @@ import {
   Building2,
   Calendar,
   CheckSquare,
+  ClipboardCheck,
+  Eye,
+  FileSpreadsheet,
   GitCompare,
   GraduationCap,
   LayoutGrid,
   Play,
+  Printer,
   Puzzle,
   School,
   SlidersHorizontal,
+  Stethoscope,
   Users,
 } from "lucide-react"
 import Link from "next/link"
@@ -31,7 +36,7 @@ interface NavCard {
   description: string
   href: string
   icon: React.ReactNode
-  section: "setup" | "data" | "scheduler"
+  section: "setup" | "data" | "scheduler" | "review" | "print"
   step: number
 }
 
@@ -140,7 +145,47 @@ const navCards: NavCard[] = [
     section: "scheduler",
     step: 13,
   },
+  {
+    title: "全体表",
+    description: "先生別・クラス別の時間割一覧を確認します",
+    href: "/review/overview",
+    icon: <Eye className="h-6 w-6" />,
+    section: "review",
+    step: 14,
+  },
+  {
+    title: "個別表",
+    description: "先生・クラスごとの個別時間割を確認します",
+    href: "/review/individual",
+    icon: <ClipboardCheck className="h-6 w-6" />,
+    section: "review",
+    step: 15,
+  },
+  {
+    title: "品質診断",
+    description: "時間割の品質を5カテゴリで自動診断します",
+    href: "/review/diagnosis",
+    icon: <Stethoscope className="h-6 w-6" />,
+    section: "review",
+    step: 16,
+  },
+  {
+    title: "印刷・出力",
+    description: "各種帳票をPDF・Excel・印刷で出力します",
+    href: "/print/teacher-all",
+    icon: <Printer className="h-6 w-6" />,
+    section: "print",
+    step: 17,
+  },
 ]
+
+const sections = [
+  { key: "setup", label: "初期設定" },
+  { key: "data", label: "データ入力" },
+  { key: "scheduler", label: "時間割作成" },
+  { key: "review", label: "確認" },
+  { key: "print", label: "印刷・出力" },
+] as const
 
 export default function DashboardPage() {
   return (
@@ -152,95 +197,37 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold">初期設定</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {navCards
-            .filter((c) => c.section === "setup")
-            .map((card) => (
-              <Link key={card.href} href={card.href}>
-                <Card className="hover:bg-accent/50 h-full transition-colors">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
-                      {card.icon}
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        {card.title}
-                        <Badge variant="outline" className="text-xs">
-                          Step {card.step}
-                        </Badge>
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{card.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+      {sections.map((section) => (
+        <div key={section.key} className="mb-6">
+          <h2 className="mb-3 text-lg font-semibold">{section.label}</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {navCards
+              .filter((c) => c.section === section.key)
+              .map((card) => (
+                <Link key={card.href} href={card.href}>
+                  <Card className="hover:bg-accent/50 h-full transition-colors">
+                    <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                      <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+                        {card.icon}
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          {card.title}
+                          <Badge variant="outline" className="text-xs">
+                            Step {card.step}
+                          </Badge>
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription>{card.description}</CardDescription>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+          </div>
         </div>
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">データ入力</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {navCards
-            .filter((c) => c.section === "data")
-            .map((card) => (
-              <Link key={card.href} href={card.href}>
-                <Card className="hover:bg-accent/50 h-full transition-colors">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
-                      {card.icon}
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        {card.title}
-                        <Badge variant="outline" className="text-xs">
-                          Step {card.step}
-                        </Badge>
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{card.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-        </div>
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">時間割作成</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {navCards
-            .filter((c) => c.section === "scheduler")
-            .map((card) => (
-              <Link key={card.href} href={card.href}>
-                <Card className="hover:bg-accent/50 h-full transition-colors">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
-                      {card.icon}
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        {card.title}
-                        <Badge variant="outline" className="text-xs">
-                          Step {card.step}
-                        </Badge>
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{card.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-        </div>
-      </div>
+      ))}
     </div>
   )
 }

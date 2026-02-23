@@ -146,3 +146,42 @@
 *::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* ========== Phase 4: 印刷スタイル ========== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break-before {
+    page-break-before: always;
+  }
+
+  .print-break-before:first-child {
+    page-break-before: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 10pt;
+  }
+
+  .print-area {
+    width: 100%;
+  }
+
+  /* サイドバーを非表示 */
+  nav,
+  aside {
+    display: none !important;
+  }
+
+  /* メインコンテンツを全幅に */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
