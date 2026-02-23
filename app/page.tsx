@@ -98,8 +98,8 @@ const navCards: NavCard[] = [
     step: 7,
   },
   {
-    title: "駒設定",
-    description: "各学年の教科駒を設定・一括生成します",
+    title: "授業設定",
+    description: "各学年の授業時数と担当先生を設定します",
     href: "/data/koma",
     icon: <Puzzle className="h-6 w-6" />,
     section: "data",

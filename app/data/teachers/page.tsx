@@ -9,12 +9,6 @@ import { AvailabilityGrid } from "@/components/timetable/AvailabilityGrid"
 import { TeacherKomaList } from "@/components/timetable/TeacherKomaList"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -25,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useSchool } from "@/hooks/useSchool"
 import { useSubjects } from "@/hooks/useSubjects"
@@ -47,10 +40,6 @@ export default function TeachersPage() {
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
     null
   )
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [formName, setFormName] = useState("")
-  const [formNameKana, setFormNameKana] = useState("")
-  const [formMaxPeriods, setFormMaxPeriods] = useState(25)
 
   const selectedTeacher = teachers.find((t) => t.id === selectedTeacherId)
 
@@ -61,26 +50,18 @@ export default function TeachersPage() {
   }, [teachers, selectedTeacherId])
 
   const handleCreateTeacher = useCallback(async () => {
-    if (!formName.trim()) {
-      toast.error("先生名を入力してください")
-      return
-    }
     try {
       const created = await createTeacher({
-        name: formName,
-        nameKana: formNameKana,
-        maxPeriodsPerWeek: formMaxPeriods,
+        name: "新しい先生",
+        nameKana: "",
+        maxPeriodsPerWeek: 25,
       })
       setSelectedTeacherId(created.id)
-      setDialogOpen(false)
-      setFormName("")
-      setFormNameKana("")
-      setFormMaxPeriods(25)
       toast.success("先生を追加しました")
     } catch {
       toast.error("追加に失敗しました")
     }
-  }, [formName, formNameKana, formMaxPeriods, createTeacher])
+  }, [createTeacher])
 
   const handleDeleteTeacher = useCallback(
     async (teacher: Teacher) => {
@@ -140,7 +121,7 @@ export default function TeachersPage() {
         title="先生設定"
         description="先生の情報、都合、担当科目を設定します"
       >
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={handleCreateTeacher}>
           <Plus className="mr-1 h-4 w-4" />
           先生を追加
         </Button>
@@ -150,13 +131,13 @@ export default function TeachersPage() {
         {/* 左: 先生リスト */}
         <div className="w-56 border-r">
           <ScrollArea className="h-full">
-            <div className="space-y-1 p-2">
+            <div className="p-1.5">
               {teachers.map((teacher) => (
                 <div
                   key={teacher.id}
                   role="button"
                   tabIndex={0}
-                  className={`group flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                  className={`group flex w-full cursor-pointer items-center justify-between rounded px-2 py-1 text-left text-sm transition-colors ${
                     selectedTeacherId === teacher.id
                       ? "bg-accent font-medium"
                       : "hover:bg-accent/50"
@@ -167,11 +148,11 @@ export default function TeachersPage() {
                       setSelectedTeacherId(teacher.id)
                   }}
                 >
-                  <span>{teacher.name}</span>
+                  <span className="truncate">{teacher.name}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                    className="h-5 w-5 shrink-0 p-0 opacity-0 group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteTeacher(teacher)
@@ -190,176 +171,168 @@ export default function TeachersPage() {
           </ScrollArea>
         </div>
 
-        {/* 右: 詳細 */}
+        {/* 右: 詳細（縦並び） */}
         <div className="flex-1 overflow-auto">
           {selectedTeacher ? (
-            <div className="p-6">
-              <Tabs defaultValue="info">
-                <TabsList>
-                  <TabsTrigger value="info">基本情報</TabsTrigger>
-                  <TabsTrigger value="availability">都合</TabsTrigger>
-                  <TabsTrigger value="subjects">持ち駒</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="info" className="mt-4 space-y-4">
-                  <Card>
-                    <CardContent className="space-y-4 pt-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>先生名</Label>
-                          <Input
-                            key={selectedTeacher.id + "-name"}
-                            defaultValue={selectedTeacher.name}
-                            onBlur={(e) =>
-                              handleUpdateField("name", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>ふりがな</Label>
-                          <Input
-                            key={selectedTeacher.id + "-nameKana"}
-                            defaultValue={selectedTeacher.nameKana}
-                            onBlur={(e) =>
-                              handleUpdateField("nameKana", e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>担当教科</Label>
-                          <Select
-                            value={selectedTeacher.mainSubjectId ?? "none"}
-                            onValueChange={(v) =>
-                              handleUpdateField(
-                                "mainSubjectId",
-                                v === "none" ? null : v
-                              )
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="選択してください" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">未設定</SelectItem>
-                              {subjects.map((s) => (
-                                <SelectItem key={s.id} value={s.id}>
-                                  {s.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>週当たり最大コマ数</Label>
-                          <Input
-                            key={selectedTeacher.id + "-maxPeriodsPerWeek"}
-                            type="number"
-                            min={1}
-                            max={40}
-                            defaultValue={selectedTeacher.maxPeriodsPerWeek}
-                            onBlur={(e) =>
-                              handleUpdateField(
-                                "maxPeriodsPerWeek",
-                                parseInt(e.target.value) || 25
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>連続授業の最大数</Label>
-                          <Input
-                            key={selectedTeacher.id + "-maxConsecutive"}
-                            type="number"
-                            min={1}
-                            max={10}
-                            defaultValue={selectedTeacher.maxConsecutive}
-                            onBlur={(e) =>
-                              handleUpdateField(
-                                "maxConsecutive",
-                                parseInt(e.target.value) || 6
-                              )
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>1日の最大授業数</Label>
-                          <Input
-                            key={selectedTeacher.id + "-maxPerDay"}
-                            type="number"
-                            min={1}
-                            max={10}
-                            defaultValue={selectedTeacher.maxPerDay}
-                            onBlur={(e) =>
-                              handleUpdateField(
-                                "maxPerDay",
-                                parseInt(e.target.value) || 6
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>備考</Label>
-                        <Input
-                          key={selectedTeacher.id + "-notes"}
-                          defaultValue={selectedTeacher.notes}
-                          onBlur={(e) =>
-                            handleUpdateField("notes", e.target.value)
-                          }
-                        />
-                      </div>
-                      {(selectedTeacher.teacherDuties?.length ?? 0) > 0 && (
-                        <div className="space-y-2">
-                          <Label className="flex items-center gap-1">
-                            <Briefcase className="h-3.5 w-3.5" />
-                            携わる校務
-                          </Label>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedTeacher.teacherDuties?.map((td) => (
-                              <Badge key={td.id} variant="secondary">
-                                {td.duty?.name ?? "不明"}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="availability" className="mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>都合マトリクス</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <AvailabilityGrid
-                        teacherId={selectedTeacher.id}
-                        daysPerWeek={school?.daysPerWeek ?? 5}
-                        maxPeriodsPerDay={school?.maxPeriodsPerDay ?? 6}
-                        hasZeroPeriod={school?.hasZeroPeriod ?? false}
-                        availabilities={selectedTeacher.availabilities ?? []}
-                        onToggle={handleAvailabilityToggle}
+            <div className="space-y-4 p-6">
+              {/* 基本情報 */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">基本情報</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>先生名</Label>
+                      <Input
+                        key={selectedTeacher.id + "-name"}
+                        defaultValue={selectedTeacher.name}
+                        onBlur={(e) =>
+                          handleUpdateField("name", e.target.value)
+                        }
                       />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>ふりがな</Label>
+                      <Input
+                        key={selectedTeacher.id + "-nameKana"}
+                        defaultValue={selectedTeacher.nameKana}
+                        onBlur={(e) =>
+                          handleUpdateField("nameKana", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>担当教科</Label>
+                      <Select
+                        value={selectedTeacher.mainSubjectId ?? "none"}
+                        onValueChange={(v) =>
+                          handleUpdateField(
+                            "mainSubjectId",
+                            v === "none" ? null : v
+                          )
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="選択してください" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">未設定</SelectItem>
+                          {subjects.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>週当たり最大コマ数</Label>
+                      <Input
+                        key={selectedTeacher.id + "-maxPeriodsPerWeek"}
+                        type="number"
+                        min={1}
+                        max={40}
+                        defaultValue={selectedTeacher.maxPeriodsPerWeek}
+                        onBlur={(e) =>
+                          handleUpdateField(
+                            "maxPeriodsPerWeek",
+                            parseInt(e.target.value) || 25
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>連続授業の最大数</Label>
+                      <Input
+                        key={selectedTeacher.id + "-maxConsecutive"}
+                        type="number"
+                        min={1}
+                        max={10}
+                        defaultValue={selectedTeacher.maxConsecutive}
+                        onBlur={(e) =>
+                          handleUpdateField(
+                            "maxConsecutive",
+                            parseInt(e.target.value) || 6
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>1日の最大授業数</Label>
+                      <Input
+                        key={selectedTeacher.id + "-maxPerDay"}
+                        type="number"
+                        min={1}
+                        max={10}
+                        defaultValue={selectedTeacher.maxPerDay}
+                        onBlur={(e) =>
+                          handleUpdateField(
+                            "maxPerDay",
+                            parseInt(e.target.value) || 6
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>備考</Label>
+                    <Input
+                      key={selectedTeacher.id + "-notes"}
+                      defaultValue={selectedTeacher.notes}
+                      onBlur={(e) =>
+                        handleUpdateField("notes", e.target.value)
+                      }
+                    />
+                  </div>
+                  {(selectedTeacher.teacherDuties?.length ?? 0) > 0 && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-1">
+                        <Briefcase className="h-3.5 w-3.5" />
+                        携わる校務
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedTeacher.teacherDuties?.map((td) => (
+                          <Badge key={td.id} variant="secondary">
+                            {td.duty?.name ?? "不明"}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-                <TabsContent value="subjects" className="mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>持ち駒</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <TeacherKomaList teacherId={selectedTeacher.id} />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+              {/* 都合 */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">都合</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AvailabilityGrid
+                    teacherId={selectedTeacher.id}
+                    daysPerWeek={school?.daysPerWeek ?? 5}
+                    maxPeriodsPerDay={school?.maxPeriodsPerDay ?? 6}
+                    hasZeroPeriod={school?.hasZeroPeriod ?? false}
+                    availabilities={selectedTeacher.availabilities ?? []}
+                    onToggle={handleAvailabilityToggle}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* 持ち駒 */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">持ち駒</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TeacherKomaList teacherId={selectedTeacher.id} />
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <div className="flex h-full items-center justify-center">
@@ -370,50 +343,6 @@ export default function TeachersPage() {
           )}
         </div>
       </div>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>先生を追加</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>先生名</Label>
-              <Input
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="例: 山田太郎"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>ふりがな</Label>
-              <Input
-                value={formNameKana}
-                onChange={(e) => setFormNameKana(e.target.value)}
-                placeholder="例: やまだたろう"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>週当たり最大コマ数</Label>
-              <Input
-                type="number"
-                min={1}
-                max={40}
-                value={formMaxPeriods}
-                onChange={(e) =>
-                  setFormMaxPeriods(parseInt(e.target.value) || 25)
-                }
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                キャンセル
-              </Button>
-              <Button onClick={handleCreateTeacher}>追加</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

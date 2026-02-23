@@ -273,6 +273,8 @@ model PerSubjectCondition {
   conditionId          String
   condition            ScheduleCondition @relation(fields: [conditionId], references: [id], onDelete: Cascade)
   subjectId            String
+  // 制約レベル: "forbidden" | "consider" | "ignore"
+  level                String            @default("consider")
   // 教科別の配置制限: "any" | "morning_only" | "afternoon_only" | "not_first" | "not_last"
   placementRestriction String            @default("any")
   // 最大連続禁止

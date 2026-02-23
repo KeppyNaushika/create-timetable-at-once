@@ -213,6 +213,7 @@ export interface ElectronAPI {
   conditionUpsertPerSubject: (data: {
     conditionId: string
     subjectId: string
+    level?: string
     placementRestriction?: string
     maxPerDay?: number
   }) => Promise<import("./common.types").PerSubjectCondition>

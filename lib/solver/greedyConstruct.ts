@@ -63,34 +63,41 @@ export function greedyConstruct(
   let totalPlaced = fixedAssignments.length
   const totalTargets = targets.length
 
-  // 連続コマの処理済みフラグ
-  const consecutivePlaced = new Set<string>()
+  // 連続コマの貪欲構築中に配置した数を追跡
+  const consecutivePlacedCount: Record<string, number> = {}
 
   for (const target of ordered) {
     const { komaId } = target
     const koma = komaLookup[komaId]
     if (!koma) continue
 
-    // 連続コマ: ペアで配置
-    if (koma.type === "consecutive" && !consecutivePlaced.has(komaId)) {
-      consecutivePlaced.add(komaId)
-      const pairCount = (requiredCount[komaId] ?? 0) - (placedCount[komaId] ?? 0)
-      if (pairCount >= 2) {
+    // 連続コマ: ペアで配置、端数1コマは通常配置にフォールスルー
+    if (koma.type === "consecutive") {
+      const alreadyPlaced =
+        (consecutivePlacedCount[komaId] ?? 0) + (placedCount[komaId] ?? 0)
+      const totalNeeded = requiredCount[komaId] ?? 0
+      const remaining = totalNeeded - alreadyPlaced
+
+      if (remaining <= 0) {
+        continue // このコマは既に全数配置済み
+      }
+
+      if (remaining >= 2) {
         const pair = placeConsecutivePair(ctx, komaLookup, komaId, allPositions)
         if (pair) {
           result.push(pair[0], pair[1])
           totalPlaced += 2
+          consecutivePlacedCount[komaId] =
+            (consecutivePlacedCount[komaId] ?? 0) + 2
         }
         reportProgress(onProgress, totalPlaced, totalTargets)
         continue
       }
+
+      // remaining === 1: 端数1コマは通常配置にフォールスルー
     }
 
-    if (koma.type === "consecutive" && consecutivePlaced.has(komaId)) {
-      continue // ペア処理で配置済み
-    }
-
-    // 通常コマ: 全スロットのコストを評価し最小コストに配置
+    // 通常コマ（+ 連続コマの端数1コマ）: 全スロットのコストを評価し最小コストに配置
     let bestPos: SlotPosition | null = null
     let bestCost = Infinity
 
@@ -112,6 +119,10 @@ export function greedyConstruct(
       result.push(assignment)
       addToMaps(ctx, komaLookup, komaId, bestPos)
       totalPlaced++
+      if (koma.type === "consecutive") {
+        consecutivePlacedCount[komaId] =
+          (consecutivePlacedCount[komaId] ?? 0) + 1
+      }
     }
 
     reportProgress(onProgress, totalPlaced, totalTargets)

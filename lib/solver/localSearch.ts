@@ -125,7 +125,7 @@ export function tabuSearch(
         phase: "localSearch",
         phaseLabel: "局所探索",
         score: bestScore,
-        message: `リスタート${restartCount}/${maxRestarts}, best=${bestScore}`,
+        message: `リスタート ${restartCount}/${maxRestarts}回目 ｜ 最良スコア ${bestScore}`,
       })
     }
 
@@ -142,8 +142,8 @@ export function tabuSearch(
         phaseLabel: "局所探索",
         placedCount: assignments.length,
         score: bestScore,
-        violations: bestScore,
-        message: `探索: iter=${iteration}, best=${bestScore}, current=${vi.totalScore}`,
+        violations: 0,
+        message: `${iteration.toLocaleString()}手探索済み ｜ 探索中スコア ${vi.totalScore.toLocaleString()}`,
       })
     }
   }

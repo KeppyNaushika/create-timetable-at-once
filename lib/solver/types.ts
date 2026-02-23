@@ -97,6 +97,9 @@ export interface SolverResult {
   score: number
   elapsedMs: number
   isComplete: boolean
+  // 全パターンのスコア一覧（採用パターンのインデックス付き）
+  allPatternScores?: { index: number; score: number; violations: number }[]
+  selectedPatternIndex?: number
 }
 
 // Worker メッセージ型

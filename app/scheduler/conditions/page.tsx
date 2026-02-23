@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { toast } from "sonner"
 
 import { ConditionTable } from "@/components/scheduler/ConditionTable"
-import { PerSubjectDialog } from "@/components/scheduler/PerSubjectDialog"
+import { PerSubjectSection } from "@/components/scheduler/PerSubjectSection"
 import {
   Card,
   CardContent,
@@ -73,28 +73,37 @@ export default function ConditionsPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>制約条件一覧</CardTitle>
-              <CardDescription>
-                各制約のレベル（禁止/考慮/無視）と重み（0-100）を設定してください
-              </CardDescription>
-            </div>
-            <PerSubjectDialog
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>制約条件一覧</CardTitle>
+            <CardDescription>
+              各制約のレベル（禁止/考慮/無視）と重みを設定してください
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ConditionTable condition={condition} onUpdate={handleUpdate} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>教科別条件</CardTitle>
+            <CardDescription>
+              教科ごとの配置制限と1日あたりの最大コマ数を設定します
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PerSubjectSection
               conditionId={condition.id}
               subjects={subjects}
               perSubjectConditions={condition.perSubjectConditions ?? []}
               onUpsert={upsertPerSubject}
               onDelete={deletePerSubject}
             />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ConditionTable condition={condition} onUpdate={handleUpdate} />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

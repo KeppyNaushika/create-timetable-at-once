@@ -43,9 +43,9 @@ export function SolverProgressBar({
         <span>
           {progress?.placedCount ?? 0}/{progress?.totalKomas ?? 0} 駒配置
         </span>
-        <span>
-          違反: {progress?.violations ?? 0} | スコア: {progress?.score ?? 0}
-        </span>
+        {(progress?.score ?? 0) > 0 && (
+          <span>最良スコア: {(progress?.score ?? 0).toLocaleString()}</span>
+        )}
         <span>{((progress?.elapsedMs ?? 0) / 1000).toFixed(1)}秒</span>
       </div>
 

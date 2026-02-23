@@ -36,6 +36,7 @@ export async function upsertCondition(data: Record<string, unknown>) {
 export async function upsertPerSubjectCondition(data: {
   conditionId: string
   subjectId: string
+  level?: string
   placementRestriction?: string
   maxPerDay?: number
 }) {
@@ -53,6 +54,7 @@ export async function upsertPerSubjectCondition(data: {
       return await prisma.perSubjectCondition.update({
         where: { id: existing.id },
         data: {
+          level: data.level,
           placementRestriction: data.placementRestriction,
           maxPerDay: data.maxPerDay,
         },

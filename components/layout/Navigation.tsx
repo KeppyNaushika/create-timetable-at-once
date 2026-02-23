@@ -60,9 +60,9 @@ const setupItems: NavItem[] = [
 
 const dataItems: NavItem[] = [
   {
-    label: "先生設定",
-    href: "/data/teachers",
-    icon: <Users className="h-4 w-4" />,
+    label: "授業設定",
+    href: "/data/koma",
+    icon: <Puzzle className="h-4 w-4" />,
   },
   {
     label: "クラス設定",
@@ -80,9 +80,9 @@ const dataItems: NavItem[] = [
     icon: <Briefcase className="h-4 w-4" />,
   },
   {
-    label: "駒設定",
-    href: "/data/koma",
-    icon: <Puzzle className="h-4 w-4" />,
+    label: "先生設定",
+    href: "/data/teachers",
+    icon: <Users className="h-4 w-4" />,
   },
 ]
 

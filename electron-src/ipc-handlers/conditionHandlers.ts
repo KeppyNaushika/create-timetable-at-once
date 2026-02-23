@@ -18,6 +18,7 @@ export function registerConditionHandlers() {
       data: {
         conditionId: string
         subjectId: string
+        level?: string
         placementRestriction?: string
         maxPerDay?: number
       }
