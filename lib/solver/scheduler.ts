@@ -1,23 +1,14 @@
 import type { ConstraintContext } from "./constraints"
 import {
-  evaluateAllConstraints,
   calculateScoreFast,
   computeKomaPlacementCost,
+  evaluateAllConstraints,
   setTeacherCache,
 } from "./constraints"
 import { greedyConstruct } from "./greedyConstruct"
 import { addToMaps } from "./incrementalMaps"
 import { tabuSearch } from "./localSearch"
 import { SeededRandom } from "./random"
-import {
-  buildKomaLookup,
-  buildTeacherAvailabilityMap,
-  buildRoomAvailabilityMap,
-  buildDutyMap,
-  buildScheduleMaps,
-  getAllSlotPositions,
-  expandKomasToAssignmentTargets,
-} from "./utils"
 import type {
   Assignment,
   KomaLookup,
@@ -26,8 +17,16 @@ import type {
   SolverInput,
   SolverProgress,
   SolverResult,
-  DEFAULT_SOLVER_CONFIG,
 } from "./types"
+import {
+  buildDutyMap,
+  buildKomaLookup,
+  buildRoomAvailabilityMap,
+  buildScheduleMaps,
+  buildTeacherAvailabilityMap,
+  expandKomasToAssignmentTargets,
+  getAllSlotPositions,
+} from "./utils"
 
 export class TimetableScheduler {
   private input: SolverInput
@@ -82,7 +81,7 @@ export class TimetableScheduler {
 
     results.sort((a, b) => a.score - b.score)
     const best = results[0]
-    const selectedIndex = results.indexOf(best)
+    const _selectedIndex = results.indexOf(best)
 
     return {
       ...best,
@@ -112,7 +111,7 @@ export class TimetableScheduler {
       period: s.period,
     }))
 
-    const { teacherMap, classMap, roomMap } = buildScheduleMaps(
+    const { teacherMap, classMap, roomMap, komaSlotCount } = buildScheduleMaps(
       fixedAssignments,
       komaLookup
     )
@@ -127,6 +126,7 @@ export class TimetableScheduler {
       teacherMap,
       classMap,
       roomMap,
+      komaSlotCount,
       maxPeriodsPerDay: this.input.school.maxPeriodsPerDay,
       lunchAfterPeriod: this.input.school.lunchAfterPeriod,
     }
@@ -147,7 +147,9 @@ export class TimetableScheduler {
     }
 
     const targets = expandKomasToAssignmentTargets(this.input.komas)
-    const rng = new SeededRandom((this.config.seed ?? Date.now()) + patternIndex)
+    const rng = new SeededRandom(
+      (this.config.seed ?? Date.now()) + patternIndex
+    )
 
     // ── Phase 1: 貪欲構築 ──
     sendProgress({
@@ -167,11 +169,16 @@ export class TimetableScheduler {
     )
 
     // ── Phase 2: タブー探索 ──
-    // パターンごとの残り時間を正確に計算
-    const tabuDeadline = Math.max(
+    // 後最適化用に時間を確保（残り時間の15%、最低3秒、最大10秒）
+    const totalRemaining = Math.max(
       this.config.maxTimeMs - (Date.now() - this.startTime),
       5000
     )
+    const postOptReserveMs = Math.min(
+      Math.max(totalRemaining * 0.15, 3000),
+      10000
+    )
+    const tabuDeadline = Math.max(totalRemaining - postOptReserveMs, 5000)
 
     sendProgress({
       phase: "localSearch",
@@ -199,10 +206,12 @@ export class TimetableScheduler {
     for (const k of Object.keys(ctx.teacherMap)) delete ctx.teacherMap[k]
     for (const k of Object.keys(ctx.classMap)) delete ctx.classMap[k]
     for (const k of Object.keys(ctx.roomMap)) delete ctx.roomMap[k]
+    for (const k of Object.keys(ctx.komaSlotCount)) delete ctx.komaSlotCount[k]
     const rebuilt = buildScheduleMaps(deduped, komaLookup)
     Object.assign(ctx.teacherMap, rebuilt.teacherMap)
     Object.assign(ctx.classMap, rebuilt.classMap)
     Object.assign(ctx.roomMap, rebuilt.roomMap)
+    Object.assign(ctx.komaSlotCount, rebuilt.komaSlotCount)
 
     const filledAssignments = fillMissingAssignments(
       ctx,
@@ -219,25 +228,74 @@ export class TimetableScheduler {
       message: `補充完了: ${filledAssignments.length}/${totalKomas}コマ`,
     })
 
-    // ── Phase 3: 最終評価 ──
+    // ── Phase 2.6: 後最適化タブー探索 ──
+    // dedup+fill で生じた新たな衝突を解消する（衝突がある場合のみ実行）
+    let refinedAssignments = filledAssignments
+
+    // filled解のスコアを簡易チェック: 衝突が残っている場合のみ後最適化を実行
+    {
+      const filledMaps = buildScheduleMaps(filledAssignments, komaLookup)
+      const filledCtx: ConstraintContext = { ...ctx, ...filledMaps }
+      const filledScore = calculateScoreFast(filledCtx, filledAssignments)
+
+      if (filledScore > 0) {
+        const postOptRemaining = Math.max(
+          this.config.maxTimeMs - (Date.now() - this.startTime),
+          0
+        )
+        const postOptDeadline = Math.min(
+          Math.max(postOptRemaining, postOptReserveMs, 2000),
+          10000
+        )
+
+        sendProgress({
+          phase: "localSearch",
+          phaseLabel: "後最適化",
+          placedCount: filledAssignments.length,
+          message: `後最適化タブー探索を開始 (スコア: ${filledScore})...`,
+        })
+
+        refinedAssignments = tabuSearch(
+          ctx,
+          filledAssignments,
+          komaLookup,
+          allPositions,
+          {
+            ...this.config,
+            seed: (this.config.seed ?? Date.now()) + patternIndex + 9999,
+          },
+          (p) =>
+            sendProgress({
+              ...p,
+              phase: "localSearch",
+              phaseLabel: "後最適化",
+            }),
+          postOptDeadline
+        )
+      }
+    }
+
+    // ── Phase 3: 最終重複除去 + 評価 ──
+    // 後最適化で残った自己重複を最終除去
+    refinedAssignments = deduplicateAssignments(refinedAssignments)
     // 違反の詳細リストを取得（UI表示用）
-    const violations = evaluateAllConstraints(ctx, filledAssignments)
+    const violations = evaluateAllConstraints(ctx, refinedAssignments)
     // スコアは calculateScoreFast（タブー探索と同じ computeKomaPlacementCost ベース）
     // + 未配置コマペナルティで統一（evaluateAllConstraints のスコアズレを防止）
-    const scoreMapData = buildScheduleMaps(filledAssignments, komaLookup)
+    const scoreMapData = buildScheduleMaps(refinedAssignments, komaLookup)
     const scoreCtx: ConstraintContext = { ...ctx, ...scoreMapData }
-    let score = calculateScoreFast(scoreCtx, filledAssignments)
+    let score = calculateScoreFast(scoreCtx, refinedAssignments)
     for (const v of violations) {
       if (v.type === "unplaced") score += v.weight
     }
 
     return {
-      assignments: filledAssignments,
+      assignments: refinedAssignments,
       violations,
       score,
       elapsedMs: Date.now() - this.startTime,
       isComplete:
-        checkAllKomasPlaced(filledAssignments, targets) && score === 0,
+        checkAllKomasPlaced(refinedAssignments, targets) && score === 0,
     }
   }
 

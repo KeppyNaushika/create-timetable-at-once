@@ -9,8 +9,8 @@
  *   保健体育: forbidden, morning_only, maxPerDay=1
  *   音楽: consider, not_first, maxPerDay=1
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -19,23 +19,47 @@ import {
   launchApp,
 } from "./helpers/fixtures"
 import {
+  createPerSubjectConditions,
+  createTestCondition,
+  createTestKomas,
+  createTestRooms,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestRooms,
-  createTestKomas,
-  createTestCondition,
-  createPerSubjectConditions,
   runSolverViaUI,
-  validateNoTeacherConflicts,
-  validateNoClassConflicts,
   type SchoolIds,
+  validateNoClassConflicts,
+  validateNoTeacherConflicts,
 } from "./helpers/school-builder"
 
 // 学年別カリキュラム(28h/class)
 const CURRICULUM: Record<number, Record<string, number>> = {
-  1: { 国語: 4, 社会: 3, 数学: 4, 理科: 3, 英語: 4, 音楽: 1, 保健体育: 3, "技術・家庭": 2, 道徳: 1, 学活: 1, 総合: 2 },
-  2: { 国語: 4, 社会: 3, 数学: 4, 理科: 3, 英語: 4, 音楽: 1, 保健体育: 3, "技術・家庭": 2, 道徳: 1, 学活: 1, 総合: 2 },
+  1: {
+    国語: 4,
+    社会: 3,
+    数学: 4,
+    理科: 3,
+    英語: 4,
+    音楽: 1,
+    保健体育: 3,
+    "技術・家庭": 2,
+    道徳: 1,
+    学活: 1,
+    総合: 2,
+  },
+  2: {
+    国語: 4,
+    社会: 3,
+    数学: 4,
+    理科: 3,
+    英語: 4,
+    音楽: 1,
+    保健体育: 3,
+    "技術・家庭": 2,
+    道徳: 1,
+    学活: 1,
+    総合: 2,
+  },
 }
 
 // 教員定義: 12名
@@ -61,53 +85,89 @@ interface TeacherSpec {
 
 const TEACHERS: TeacherSpec[] = [
   // 国語 (4h×6=24h)
-  { name: "国語A", mainSubject: "国語", assignments: [
-    { subject: "国語", grade: 1, classes: [0, 1] },
-    { subject: "国語", grade: 2, classes: [0] },
-  ]},
-  { name: "国語B", mainSubject: "国語", assignments: [
-    { subject: "国語", grade: 1, classes: [2] },
-    { subject: "国語", grade: 2, classes: [1, 2] },
-  ]},
+  {
+    name: "国語A",
+    mainSubject: "国語",
+    assignments: [
+      { subject: "国語", grade: 1, classes: [0, 1] },
+      { subject: "国語", grade: 2, classes: [0] },
+    ],
+  },
+  {
+    name: "国語B",
+    mainSubject: "国語",
+    assignments: [
+      { subject: "国語", grade: 1, classes: [2] },
+      { subject: "国語", grade: 2, classes: [1, 2] },
+    ],
+  },
   // 社会 (3h×6=18h)
-  { name: "社会A", mainSubject: "社会", assignments: [
-    { subject: "社会", grade: 1, classes: [0, 1, 2] },
-  ]},
-  { name: "社会B", mainSubject: "社会", assignments: [
-    { subject: "社会", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "社会A",
+    mainSubject: "社会",
+    assignments: [{ subject: "社会", grade: 1, classes: [0, 1, 2] }],
+  },
+  {
+    name: "社会B",
+    mainSubject: "社会",
+    assignments: [{ subject: "社会", grade: 2, classes: [0, 1, 2] }],
+  },
   // 数学 (4h×6=24h)
-  { name: "数学A", mainSubject: "数学", assignments: [
-    { subject: "数学", grade: 1, classes: [0, 1, 2] },
-  ]},
-  { name: "数学B", mainSubject: "数学", assignments: [
-    { subject: "数学", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "数学A",
+    mainSubject: "数学",
+    assignments: [{ subject: "数学", grade: 1, classes: [0, 1, 2] }],
+  },
+  {
+    name: "数学B",
+    mainSubject: "数学",
+    assignments: [{ subject: "数学", grade: 2, classes: [0, 1, 2] }],
+  },
   // 理科 (3h×6=18h)
-  { name: "理科", mainSubject: "理科", assignments: [
-    { subject: "理科", grade: 1, classes: [0, 1, 2] },
-    { subject: "理科", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "理科",
+    mainSubject: "理科",
+    assignments: [
+      { subject: "理科", grade: 1, classes: [0, 1, 2] },
+      { subject: "理科", grade: 2, classes: [0, 1, 2] },
+    ],
+  },
   // 英語 (4h×6=24h)
-  { name: "英語", mainSubject: "英語", assignments: [
-    { subject: "英語", grade: 1, classes: [0, 1, 2] },
-    { subject: "英語", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "英語",
+    mainSubject: "英語",
+    assignments: [
+      { subject: "英語", grade: 1, classes: [0, 1, 2] },
+      { subject: "英語", grade: 2, classes: [0, 1, 2] },
+    ],
+  },
   // 音楽 (1h×6=6h)
-  { name: "音楽", mainSubject: "音楽", assignments: [
-    { subject: "音楽", grade: 1, classes: [0, 1, 2] },
-    { subject: "音楽", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "音楽",
+    mainSubject: "音楽",
+    assignments: [
+      { subject: "音楽", grade: 1, classes: [0, 1, 2] },
+      { subject: "音楽", grade: 2, classes: [0, 1, 2] },
+    ],
+  },
   // 保体 (3h×6=18h)
-  { name: "保体", mainSubject: "保健体育", assignments: [
-    { subject: "保健体育", grade: 1, classes: [0, 1, 2] },
-    { subject: "保健体育", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "保体",
+    mainSubject: "保健体育",
+    assignments: [
+      { subject: "保健体育", grade: 1, classes: [0, 1, 2] },
+      { subject: "保健体育", grade: 2, classes: [0, 1, 2] },
+    ],
+  },
   // 技家 (2h×6=12h)
-  { name: "技家", mainSubject: "技術・家庭", assignments: [
-    { subject: "技術・家庭", grade: 1, classes: [0, 1, 2] },
-    { subject: "技術・家庭", grade: 2, classes: [0, 1, 2] },
-  ]},
+  {
+    name: "技家",
+    mainSubject: "技術・家庭",
+    assignments: [
+      { subject: "技術・家庭", grade: 1, classes: [0, 1, 2] },
+      { subject: "技術・家庭", grade: 2, classes: [0, 1, 2] },
+    ],
+  },
   // 担任(道徳+学活+総合): 各クラス4h
   // T11: 担任教科を担当する副担
   { name: "副担任", mainSubject: "国語", assignments: [] },
@@ -128,10 +188,14 @@ const HOMEROOM_SUBJECTS = ["道徳", "学活", "総合"]
 // 教科→特別教室マッピング
 function getRoomIndex(subject: string): number | null {
   switch (subject) {
-    case "音楽": return 0
-    case "保健体育": return 1
-    case "技術・家庭": return 2
-    default: return null
+    case "音楽":
+      return 0
+    case "保健体育":
+      return 1
+    case "技術・家庭":
+      return 2
+    default:
+      return null
   }
 }
 
@@ -216,7 +280,7 @@ test.describe.serial("中規模校ソルバーテスト + 教科別条件", () =
       }
     }
 
-    const komaIds = await createTestKomas(
+    const _komaIds = await createTestKomas(
       page,
       komaDefs,
       schoolIds,
@@ -244,8 +308,18 @@ test.describe.serial("中規模校ソルバーテスト + 教科別条件", () =
       page,
       conditionId,
       [
-        { subjectName: "保健体育", level: "forbidden", placementRestriction: "morning_only", maxPerDay: 1 },
-        { subjectName: "音楽", level: "consider", placementRestriction: "not_first", maxPerDay: 1 },
+        {
+          subjectName: "保健体育",
+          level: "forbidden",
+          placementRestriction: "morning_only",
+          maxPerDay: 1,
+        },
+        {
+          subjectName: "音楽",
+          level: "consider",
+          placementRestriction: "not_first",
+          maxPerDay: 1,
+        },
       ],
       schoolIds.subjectMap
     )
@@ -281,15 +355,15 @@ test.describe.serial("中規模校ソルバーテスト + 教科別条件", () =
     if (!teacherCheck.valid) {
       console.log("[中規模校] 教員重複:", teacherCheck.conflicts.slice(0, 5))
     }
-    // 中規模校ではソルバーの最適化過程で僅かな重複が残る場合がある
-    expect(teacherCheck.conflicts.length).toBeLessThanOrEqual(5)
+    // komaSlotCount修正+後最適化により教員重複は0件であるべき
+    expect(teacherCheck.valid).toBe(true)
 
     const classCheck = validateNoClassConflicts(slots, komas)
     if (!classCheck.valid) {
       console.log("[中規模校] クラス重複:", classCheck.conflicts.slice(0, 5))
     }
-    // ソルバーの最適化過程で僅かな重複が残る場合がある（SA後の衝突除去漏れ）
-    // 重大な重複がないことを確認（5件以下は許容）
+    // komaSlotCount修正により自己重複検出が正確になり、ソルバーが異なるトレードオフを選択
+    // 中規模校（168スロット）では非決定的に少数のクラス重複が残る場合がある
     expect(classCheck.conflicts.length).toBeLessThanOrEqual(5)
 
     // 教科別条件の検証
@@ -304,7 +378,9 @@ test.describe.serial("中規模校ソルバーテスト + 教科別条件", () =
     })
     if (peSlots.length > 0) {
       const peAfternoon = peSlots.filter((s) => s.period > 4)
-      console.log(`[中規模校] 保体: ${peSlots.length}スロット, 午後${peAfternoon.length}件`)
+      console.log(
+        `[中規模校] 保体: ${peSlots.length}スロット, 午後${peAfternoon.length}件`
+      )
       // forbidden なので午後配置は0であるべき
       expect(peAfternoon.length).toBe(0)
     }
@@ -316,7 +392,9 @@ test.describe.serial("中規模校ソルバーテスト + 教科別条件", () =
     })
     if (musicSlots.length > 0) {
       const musicFirst = musicSlots.filter((s) => s.period === 1)
-      console.log(`[中規模校] 音楽: ${musicSlots.length}スロット, 1限${musicFirst.length}件`)
+      console.log(
+        `[中規模校] 音楽: ${musicSlots.length}スロット, 1限${musicFirst.length}件`
+      )
       // consider なので1限配置はwarning扱いだが、理想的には0
       // ここではconsiderなのでソフト制約 → 数件は許容
     }

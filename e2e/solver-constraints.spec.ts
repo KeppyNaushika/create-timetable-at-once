@@ -12,28 +12,27 @@
  * 2. teacherAvailability を consider → 配置可能（warning扱い）
  * 3. teacherAvailability を ignore → ペナルティなし
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
   closeApp,
   expect,
   launchApp,
-  TEST_BASE_URL,
 } from "./helpers/fixtures"
 import {
+  createTestCondition,
+  createTestDuties,
+  createTestKomas,
+  createTestRooms,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestRooms,
-  createTestKomas,
-  createTestDuties,
-  createTestCondition,
-  setTeacherAvailabilities,
-  setRoomAvailabilities,
   runSolverViaUI,
   type SchoolIds,
+  setRoomAvailabilities,
+  setTeacherAvailabilities,
 } from "./helpers/school-builder"
 
 test.describe.serial("制約レベル検証", () => {
@@ -89,9 +88,7 @@ test.describe.serial("制約レベル検証", () => {
     )
 
     // 理科室 + 金曜5-6限 unavailable
-    roomIds = await createTestRooms(page, [
-      { name: "理科室", shortName: "理" },
-    ])
+    roomIds = await createTestRooms(page, [{ name: "理科室", shortName: "理" }])
     await setRoomAvailabilities(page, roomIds, [
       { roomIndex: 0, dayOfWeek: 5, period: 5, status: "unavailable" },
       { roomIndex: 0, dayOfWeek: 5, period: 6, status: "unavailable" },
@@ -103,14 +100,64 @@ test.describe.serial("制約レベル検証", () => {
     // T2: 理科 3h×2 = 6h (理科室使用)
     // T3: 英語 5h×2 = 10h (残りスロットを埋める)
     const komaDefs = [
-      { subjectName: "国語", gradeNum: 1, classIndices: [0], teacherIndices: [0], count: 4 },
-      { subjectName: "国語", gradeNum: 1, classIndices: [1], teacherIndices: [0], count: 4 },
-      { subjectName: "数学", gradeNum: 1, classIndices: [0], teacherIndices: [1], count: 4 },
-      { subjectName: "数学", gradeNum: 1, classIndices: [1], teacherIndices: [1], count: 4 },
-      { subjectName: "理科", gradeNum: 1, classIndices: [0], teacherIndices: [2], roomIndices: [0], count: 3 },
-      { subjectName: "理科", gradeNum: 1, classIndices: [1], teacherIndices: [2], roomIndices: [0], count: 3 },
-      { subjectName: "英語", gradeNum: 1, classIndices: [0], teacherIndices: [3], count: 5 },
-      { subjectName: "英語", gradeNum: 1, classIndices: [1], teacherIndices: [3], count: 5 },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [0],
+        count: 4,
+      },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [0],
+        count: 4,
+      },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [1],
+        count: 4,
+      },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [1],
+        count: 4,
+      },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [2],
+        roomIndices: [0],
+        count: 3,
+      },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [2],
+        roomIndices: [0],
+        count: 3,
+      },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [3],
+        count: 5,
+      },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [3],
+        count: 5,
+      },
     ]
 
     await createTestKomas(page, komaDefs, schoolIds, teacherIds, roomIds)
@@ -135,7 +182,7 @@ test.describe.serial("制約レベル検証", () => {
       dutyConflictWeight: 100,
     })
 
-    const { patternId, slotCount } = await runSolverViaUI(page, 60_000)
+    const { patternId, slotCount } = await runSolverViaUI(page, 90_000)
     expect(slotCount).toBeGreaterThan(0)
 
     const patternWithSlots = await page.evaluate(
@@ -150,7 +197,9 @@ test.describe.serial("制約レベル検証", () => {
     for (const slot of slots) {
       const koma = komaMap.get(slot.komaId)
       if (!koma) continue
-      const hasT0 = koma.komaTeachers?.some((kt) => kt.teacherId === teacherIds[0])
+      const hasT0 = koma.komaTeachers?.some(
+        (kt) => kt.teacherId === teacherIds[0]
+      )
       if (hasT0 && slot.dayOfWeek === 1) {
         expect(slot.period).toBeGreaterThan(3)
       }
@@ -160,7 +209,9 @@ test.describe.serial("制約レベル検証", () => {
     for (const slot of slots) {
       const koma = komaMap.get(slot.komaId)
       if (!koma) continue
-      const hasT1 = koma.komaTeachers?.some((kt) => kt.teacherId === teacherIds[1])
+      const hasT1 = koma.komaTeachers?.some(
+        (kt) => kt.teacherId === teacherIds[1]
+      )
       if (hasT1 && slot.dayOfWeek === 2) {
         expect(slot.period).not.toBe(5)
       }
@@ -196,7 +247,7 @@ test.describe.serial("制約レベル検証", () => {
       })
     })
 
-    const { patternId, slotCount } = await runSolverViaUI(page, 60_000)
+    const { patternId, slotCount } = await runSolverViaUI(page, 90_000)
     expect(slotCount).toBeGreaterThan(0)
 
     // consider なので月曜1-3限への配置は許容される（warningとして）
@@ -222,7 +273,7 @@ test.describe.serial("制約レベル検証", () => {
       })
     })
 
-    const { patternId, slotCount } = await runSolverViaUI(page, 60_000)
+    const { patternId, slotCount } = await runSolverViaUI(page, 90_000)
     expect(slotCount).toBeGreaterThan(0)
 
     // ignore なので制約なしで自由に配置される

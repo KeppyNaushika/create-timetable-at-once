@@ -1,4 +1,5 @@
-import type { Koma, Teacher, SpecialRoom, Duty } from "@/types/common.types"
+import type { Duty, Koma, SpecialRoom, Teacher } from "@/types/common.types"
+
 import type {
   Assignment,
   ClassScheduleMap,
@@ -84,10 +85,12 @@ export function buildScheduleMaps(
   teacherMap: TeacherScheduleMap
   classMap: ClassScheduleMap
   roomMap: RoomScheduleMap
+  komaSlotCount: Record<string, Record<string, number>>
 } {
   const teacherMap: TeacherScheduleMap = {}
   const classMap: ClassScheduleMap = {}
   const roomMap: RoomScheduleMap = {}
+  const komaSlotCount: Record<string, Record<string, number>> = {}
 
   for (const a of assignments) {
     const koma = komaLookup[a.komaId]
@@ -110,9 +113,15 @@ export function buildScheduleMaps(
       if (!roomMap[rid][a.dayOfWeek]) roomMap[rid][a.dayOfWeek] = {}
       roomMap[rid][a.dayOfWeek][a.period] = a.komaId
     }
+
+    // komaSlotCount を構築
+    const slotKey = `${a.dayOfWeek}:${a.period}`
+    if (!komaSlotCount[a.komaId]) komaSlotCount[a.komaId] = {}
+    komaSlotCount[a.komaId][slotKey] =
+      (komaSlotCount[a.komaId][slotKey] ?? 0) + 1
   }
 
-  return { teacherMap, classMap, roomMap }
+  return { teacherMap, classMap, roomMap, komaSlotCount }
 }
 
 export function getTeacherDaySlots(
@@ -148,7 +157,10 @@ export function parseDisabledSlots(json: string): Set<string> {
     const arr = JSON.parse(json)
     if (!Array.isArray(arr)) return new Set()
     return new Set(
-      arr.map((s: { dayOfWeek: number; period: number }) => `${s.dayOfWeek}:${s.period}`)
+      arr.map(
+        (s: { dayOfWeek: number; period: number }) =>
+          `${s.dayOfWeek}:${s.period}`
+      )
     )
   } catch {
     return new Set()

@@ -2,16 +2,15 @@ import type { ConstraintContext } from "./constraints"
 import { computeKomaPlacementCost } from "./constraints"
 import {
   addToMaps,
-  removeFromMaps,
   buildSlotIndex,
   buildViolationIndex,
-  updateViolationIndex,
   getAffectedIndices,
+  removeFromMaps,
   type SlotIndex,
+  updateViolationIndex,
   type ViolationIndex,
 } from "./incrementalMaps"
 import { SeededRandom } from "./random"
-import { buildScheduleMaps } from "./utils"
 import type {
   Assignment,
   KomaLookup,
@@ -19,6 +18,7 @@ import type {
   SolverConfig,
   SolverProgress,
 } from "./types"
+import { buildScheduleMaps } from "./utils"
 
 interface TabuEntry {
   assignmentIdx: number
@@ -48,8 +48,8 @@ export function tabuSearch(
   // ctx マップ再構築
   rebuildCtxMaps(ctx, assignments, komaLookup)
 
-  // スロットインデックス構築
-  const slotIdx = buildSlotIndex(ctx)
+  // スロットインデックス構築（アサインメントから直接構築して重複も正確に追跡）
+  const slotIdx = buildSlotIndex(ctx, assignments)
 
   // 違反インデックス構築
   const vi = buildViolationIndex(ctx, komaLookup, assignments)
@@ -77,9 +77,19 @@ export function tabuSearch(
 
     if (vi.totalScore === 0) break
 
-    const improved = selectAndApplyMove(
-      ctx, assignments, komaLookup, allPositions, slotIdx, vi,
-      tabuList, tabuTenure, iteration, bestScore, rng, indicesForKoma
+    const _improved = selectAndApplyMove(
+      ctx,
+      assignments,
+      komaLookup,
+      allPositions,
+      slotIdx,
+      vi,
+      tabuList,
+      tabuTenure,
+      iteration,
+      bestScore,
+      rng,
+      indicesForKoma
     )
 
     if (vi.totalScore < bestScore) {
@@ -94,7 +104,10 @@ export function tabuSearch(
 
     // 時間ベースの停滞検出 → 多様化リスタート
     const now = Date.now()
-    if (now - lastImprovementTime > RESTART_STAGNATION_MS && restartCount < maxRestarts) {
+    if (
+      now - lastImprovementTime > RESTART_STAGNATION_MS &&
+      restartCount < maxRestarts
+    ) {
       restartCount++
 
       // 最良解に復元
@@ -104,11 +117,18 @@ export function tabuSearch(
       rebuildCtxMaps(ctx, assignments, komaLookup)
 
       // 摂動率をリスタート回数に応じて増加
-      const perturbRatio = 0.10 + restartCount * 0.05
-      perturbAssignments(ctx, assignments, komaLookup, allPositions, rng, perturbRatio)
+      const perturbRatio = 0.1 + restartCount * 0.05
+      perturbAssignments(
+        ctx,
+        assignments,
+        komaLookup,
+        allPositions,
+        rng,
+        perturbRatio
+      )
 
       // インデックス再構築
-      const newSlotIdx = buildSlotIndex(ctx)
+      const newSlotIdx = buildSlotIndex(ctx, assignments)
       for (const k of Object.keys(slotIdx)) delete slotIdx[k]
       Object.assign(slotIdx, newSlotIdx)
 
@@ -170,13 +190,61 @@ function selectAndApplyMove(
   const r = rng.next()
 
   if (r < 0.45) {
-    return moveTargeted(ctx, assignments, komaLookup, allPositions, slotIdx, vi, tabuList, tabuTenure, iteration, bestGlobalScore, rng, indicesForKoma)
-  } else if (r < 0.80) {
-    return moveResourceSwap(ctx, assignments, komaLookup, slotIdx, vi, tabuList, tabuTenure, iteration, rng, indicesForKoma)
+    return moveTargeted(
+      ctx,
+      assignments,
+      komaLookup,
+      allPositions,
+      slotIdx,
+      vi,
+      tabuList,
+      tabuTenure,
+      iteration,
+      bestGlobalScore,
+      rng,
+      indicesForKoma
+    )
+  } else if (r < 0.8) {
+    return moveResourceSwap(
+      ctx,
+      assignments,
+      komaLookup,
+      slotIdx,
+      vi,
+      tabuList,
+      tabuTenure,
+      iteration,
+      rng,
+      indicesForKoma
+    )
   } else if (r < 0.95) {
-    return moveChainEjection(ctx, assignments, komaLookup, allPositions, slotIdx, vi, tabuList, tabuTenure, iteration, rng, indicesForKoma)
+    return moveChainEjection(
+      ctx,
+      assignments,
+      komaLookup,
+      allPositions,
+      slotIdx,
+      vi,
+      tabuList,
+      tabuTenure,
+      iteration,
+      rng,
+      indicesForKoma
+    )
   } else {
-    return moveRandom(ctx, assignments, komaLookup, allPositions, slotIdx, vi, tabuList, tabuTenure, iteration, rng, indicesForKoma)
+    return moveRandom(
+      ctx,
+      assignments,
+      komaLookup,
+      allPositions,
+      slotIdx,
+      vi,
+      tabuList,
+      tabuTenure,
+      iteration,
+      rng,
+      indicesForKoma
+    )
   }
 }
 
@@ -214,7 +282,8 @@ function moveTargeted(
   removeFromMaps(ctx, komaLookup, komaId, oldPos, slotIdx)
 
   for (const pos of allPositions) {
-    if (pos.dayOfWeek === oldPos.dayOfWeek && pos.period === oldPos.period) continue
+    if (pos.dayOfWeek === oldPos.dayOfWeek && pos.period === oldPos.period)
+      continue
 
     const sk = `${pos.dayOfWeek}:${pos.period}`
     const tabu = isTabu(tabuList, assignIdx, sk, iteration)
@@ -239,7 +308,16 @@ function moveTargeted(
   if (!bestPos) return false
 
   // 移動実行（悪化でも実行 — タブーリストが循環を防止）
-  applyMove(ctx, assignments, komaLookup, assignIdx, bestPos, slotIdx, vi, indicesForKoma)
+  applyMove(
+    ctx,
+    assignments,
+    komaLookup,
+    assignIdx,
+    bestPos,
+    slotIdx,
+    vi,
+    indicesForKoma
+  )
   tabuList.push({
     assignmentIdx: assignIdx,
     slotKey: `${oldPos.dayOfWeek}:${oldPos.period}`,
@@ -300,23 +378,52 @@ function moveResourceSwap(
   // タブーチェック
   const skA = `${aB.dayOfWeek}:${aB.period}`
   const skB = `${aA.dayOfWeek}:${aA.period}`
-  if (isTabu(tabuList, idxA, skA, iteration) || isTabu(tabuList, idxB, skB, iteration)) {
+  if (
+    isTabu(tabuList, idxA, skA, iteration) ||
+    isTabu(tabuList, idxB, skB, iteration)
+  ) {
     return false
   }
 
   const scoreBefore = vi.totalScore
 
   // 交換実行
-  applySwap(ctx, assignments, komaLookup, idxA, idxB, slotIdx, vi, indicesForKoma)
+  applySwap(
+    ctx,
+    assignments,
+    komaLookup,
+    idxA,
+    idxB,
+    slotIdx,
+    vi,
+    indicesForKoma
+  )
 
   if (vi.totalScore < scoreBefore) {
-    tabuList.push({ assignmentIdx: idxA, slotKey: skB, expiry: iteration + tabuTenure })
-    tabuList.push({ assignmentIdx: idxB, slotKey: skA, expiry: iteration + tabuTenure })
+    tabuList.push({
+      assignmentIdx: idxA,
+      slotKey: skB,
+      expiry: iteration + tabuTenure,
+    })
+    tabuList.push({
+      assignmentIdx: idxB,
+      slotKey: skA,
+      expiry: iteration + tabuTenure,
+    })
     return true
   }
 
   // 改善なし: 元に戻す
-  applySwap(ctx, assignments, komaLookup, idxA, idxB, slotIdx, vi, indicesForKoma)
+  applySwap(
+    ctx,
+    assignments,
+    komaLookup,
+    idxA,
+    idxB,
+    slotIdx,
+    vi,
+    indicesForKoma
+  )
   return false
 }
 
@@ -344,18 +451,22 @@ function moveChainEjection(
   if (!koma) return false
 
   const targetPos = rng.pick(allPositions)
-  if (targetPos.dayOfWeek === aA.dayOfWeek && targetPos.period === aA.period) return false
+  if (targetPos.dayOfWeek === aA.dayOfWeek && targetPos.period === aA.period)
+    return false
 
   // 移動先にいるコマを特定
   let ejectedIdx: number | null = null
   for (const cid of koma.classIds) {
-    const existing = ctx.classMap[cid]?.[targetPos.dayOfWeek]?.[targetPos.period]
+    const existing =
+      ctx.classMap[cid]?.[targetPos.dayOfWeek]?.[targetPos.period]
     if (existing && existing !== aA.komaId) {
       const idxList = indicesForKoma.get(existing)
       if (idxList) {
         for (const idx of idxList) {
-          if (assignments[idx].dayOfWeek === targetPos.dayOfWeek &&
-              assignments[idx].period === targetPos.period) {
+          if (
+            assignments[idx].dayOfWeek === targetPos.dayOfWeek &&
+            assignments[idx].period === targetPos.period
+          ) {
             ejectedIdx = idx
             break
           }
@@ -369,7 +480,16 @@ function moveChainEjection(
     // 空きスロット: 通常移動
     const scoreBefore = vi.totalScore
     const origPos: SlotPosition = { dayOfWeek: aA.dayOfWeek, period: aA.period }
-    applyMove(ctx, assignments, komaLookup, idxA, targetPos, slotIdx, vi, indicesForKoma)
+    applyMove(
+      ctx,
+      assignments,
+      komaLookup,
+      idxA,
+      targetPos,
+      slotIdx,
+      vi,
+      indicesForKoma
+    )
     if (vi.totalScore < scoreBefore) {
       tabuList.push({
         assignmentIdx: idxA,
@@ -379,7 +499,16 @@ function moveChainEjection(
       return true
     }
     // 元に戻す
-    applyMove(ctx, assignments, komaLookup, idxA, origPos, slotIdx, vi, indicesForKoma)
+    applyMove(
+      ctx,
+      assignments,
+      komaLookup,
+      idxA,
+      origPos,
+      slotIdx,
+      vi,
+      indicesForKoma
+    )
     return false
   }
 
@@ -390,37 +519,89 @@ function moveChainEjection(
   const scoreBefore = vi.totalScore
 
   // 影響範囲計算（移動前）
-  const aff1 = getAffectedIndices(ctx, komaLookup, aA.komaId, oldPosA, slotIdx, indicesForKoma)
-  const aff2 = getAffectedIndices(ctx, komaLookup, aB.komaId, oldPosB, slotIdx, indicesForKoma)
+  const aff1 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aA.komaId,
+    oldPosA,
+    slotIdx,
+    indicesForKoma
+  )
+  const aff2 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aB.komaId,
+    oldPosB,
+    slotIdx,
+    indicesForKoma
+  )
 
   // 両方除去
   removeFromMaps(ctx, komaLookup, aA.komaId, oldPosA, slotIdx)
   removeFromMaps(ctx, komaLookup, aB.komaId, oldPosB, slotIdx)
 
   // 新位置に配置
-  assignments[idxA] = { komaId: aA.komaId, dayOfWeek: targetPos.dayOfWeek, period: targetPos.period }
-  assignments[ejectedIdx] = { komaId: aB.komaId, dayOfWeek: oldPosA.dayOfWeek, period: oldPosA.period }
+  assignments[idxA] = {
+    komaId: aA.komaId,
+    dayOfWeek: targetPos.dayOfWeek,
+    period: targetPos.period,
+  }
+  assignments[ejectedIdx] = {
+    komaId: aB.komaId,
+    dayOfWeek: oldPosA.dayOfWeek,
+    period: oldPosA.period,
+  }
 
   addToMaps(ctx, komaLookup, aA.komaId, targetPos, slotIdx)
   addToMaps(ctx, komaLookup, aB.komaId, oldPosA, slotIdx)
 
   // 影響範囲計算（移動後）
-  const aff3 = getAffectedIndices(ctx, komaLookup, aA.komaId, targetPos, slotIdx, indicesForKoma)
-  const aff4 = getAffectedIndices(ctx, komaLookup, aB.komaId, oldPosA, slotIdx, indicesForKoma)
+  const aff3 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aA.komaId,
+    targetPos,
+    slotIdx,
+    indicesForKoma
+  )
+  const aff4 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aB.komaId,
+    oldPosA,
+    slotIdx,
+    indicesForKoma
+  )
   const allAff = new Set([...aff1, ...aff2, ...aff3, ...aff4])
   updateViolationIndex(vi, allAff, ctx, komaLookup, assignments)
 
   if (vi.totalScore < scoreBefore) {
-    tabuList.push({ assignmentIdx: idxA, slotKey: `${oldPosA.dayOfWeek}:${oldPosA.period}`, expiry: iteration + tabuTenure })
-    tabuList.push({ assignmentIdx: ejectedIdx, slotKey: `${oldPosB.dayOfWeek}:${oldPosB.period}`, expiry: iteration + tabuTenure })
+    tabuList.push({
+      assignmentIdx: idxA,
+      slotKey: `${oldPosA.dayOfWeek}:${oldPosA.period}`,
+      expiry: iteration + tabuTenure,
+    })
+    tabuList.push({
+      assignmentIdx: ejectedIdx,
+      slotKey: `${oldPosB.dayOfWeek}:${oldPosB.period}`,
+      expiry: iteration + tabuTenure,
+    })
     return true
   }
 
   // 元に戻す
   removeFromMaps(ctx, komaLookup, aA.komaId, targetPos, slotIdx)
   removeFromMaps(ctx, komaLookup, aB.komaId, oldPosA, slotIdx)
-  assignments[idxA] = { komaId: aA.komaId, dayOfWeek: oldPosA.dayOfWeek, period: oldPosA.period }
-  assignments[ejectedIdx] = { komaId: aB.komaId, dayOfWeek: oldPosB.dayOfWeek, period: oldPosB.period }
+  assignments[idxA] = {
+    komaId: aA.komaId,
+    dayOfWeek: oldPosA.dayOfWeek,
+    period: oldPosA.period,
+  }
+  assignments[ejectedIdx] = {
+    komaId: aB.komaId,
+    dayOfWeek: oldPosB.dayOfWeek,
+    period: oldPosB.period,
+  }
   addToMaps(ctx, komaLookup, aA.komaId, oldPosA, slotIdx)
   addToMaps(ctx, komaLookup, aB.komaId, oldPosB, slotIdx)
   updateViolationIndex(vi, allAff, ctx, komaLookup, assignments)
@@ -449,10 +630,20 @@ function moveRandom(
   const a = assignments[assignIdx]
   const oldPos: SlotPosition = { dayOfWeek: a.dayOfWeek, period: a.period }
   const newPos = rng.pick(allPositions)
-  if (newPos.dayOfWeek === oldPos.dayOfWeek && newPos.period === oldPos.period) return false
+  if (newPos.dayOfWeek === oldPos.dayOfWeek && newPos.period === oldPos.period)
+    return false
 
   const scoreBefore = vi.totalScore
-  applyMove(ctx, assignments, komaLookup, assignIdx, newPos, slotIdx, vi, indicesForKoma)
+  applyMove(
+    ctx,
+    assignments,
+    komaLookup,
+    assignIdx,
+    newPos,
+    slotIdx,
+    vi,
+    indicesForKoma
+  )
 
   tabuList.push({
     assignmentIdx: assignIdx,
@@ -478,13 +669,31 @@ function applyMove(
   const a = assignments[idx]
   const oldPos: SlotPosition = { dayOfWeek: a.dayOfWeek, period: a.period }
 
-  const affBefore = getAffectedIndices(ctx, komaLookup, a.komaId, oldPos, slotIdx, indicesForKoma)
+  const affBefore = getAffectedIndices(
+    ctx,
+    komaLookup,
+    a.komaId,
+    oldPos,
+    slotIdx,
+    indicesForKoma
+  )
 
   removeFromMaps(ctx, komaLookup, a.komaId, oldPos, slotIdx)
-  assignments[idx] = { komaId: a.komaId, dayOfWeek: newPos.dayOfWeek, period: newPos.period }
+  assignments[idx] = {
+    komaId: a.komaId,
+    dayOfWeek: newPos.dayOfWeek,
+    period: newPos.period,
+  }
   addToMaps(ctx, komaLookup, a.komaId, newPos, slotIdx)
 
-  const affAfter = getAffectedIndices(ctx, komaLookup, a.komaId, newPos, slotIdx, indicesForKoma)
+  const affAfter = getAffectedIndices(
+    ctx,
+    komaLookup,
+    a.komaId,
+    newPos,
+    slotIdx,
+    indicesForKoma
+  )
   const allAff = new Set([...affBefore, ...affAfter])
   updateViolationIndex(vi, allAff, ctx, komaLookup, assignments)
 }
@@ -504,20 +713,56 @@ function applySwap(
   const posA: SlotPosition = { dayOfWeek: aA.dayOfWeek, period: aA.period }
   const posB: SlotPosition = { dayOfWeek: aB.dayOfWeek, period: aB.period }
 
-  const affA = getAffectedIndices(ctx, komaLookup, aA.komaId, posA, slotIdx, indicesForKoma)
-  const affB = getAffectedIndices(ctx, komaLookup, aB.komaId, posB, slotIdx, indicesForKoma)
+  const affA = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aA.komaId,
+    posA,
+    slotIdx,
+    indicesForKoma
+  )
+  const affB = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aB.komaId,
+    posB,
+    slotIdx,
+    indicesForKoma
+  )
 
   removeFromMaps(ctx, komaLookup, aA.komaId, posA, slotIdx)
   removeFromMaps(ctx, komaLookup, aB.komaId, posB, slotIdx)
 
-  assignments[idxA] = { komaId: aA.komaId, dayOfWeek: posB.dayOfWeek, period: posB.period }
-  assignments[idxB] = { komaId: aB.komaId, dayOfWeek: posA.dayOfWeek, period: posA.period }
+  assignments[idxA] = {
+    komaId: aA.komaId,
+    dayOfWeek: posB.dayOfWeek,
+    period: posB.period,
+  }
+  assignments[idxB] = {
+    komaId: aB.komaId,
+    dayOfWeek: posA.dayOfWeek,
+    period: posA.period,
+  }
 
   addToMaps(ctx, komaLookup, aA.komaId, posB, slotIdx)
   addToMaps(ctx, komaLookup, aB.komaId, posA, slotIdx)
 
-  const affA2 = getAffectedIndices(ctx, komaLookup, aA.komaId, posB, slotIdx, indicesForKoma)
-  const affB2 = getAffectedIndices(ctx, komaLookup, aB.komaId, posA, slotIdx, indicesForKoma)
+  const affA2 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aA.komaId,
+    posB,
+    slotIdx,
+    indicesForKoma
+  )
+  const affB2 = getAffectedIndices(
+    ctx,
+    komaLookup,
+    aB.komaId,
+    posA,
+    slotIdx,
+    indicesForKoma
+  )
   const allAff = new Set([...affA, ...affB, ...affA2, ...affB2])
   updateViolationIndex(vi, allAff, ctx, komaLookup, assignments)
 }
@@ -529,7 +774,10 @@ function isTabu(
   iteration: number
 ): boolean {
   return tabuList.some(
-    (e) => e.assignmentIdx === assignmentIdx && e.slotKey === slotKey && e.expiry > iteration
+    (e) =>
+      e.assignmentIdx === assignmentIdx &&
+      e.slotKey === slotKey &&
+      e.expiry > iteration
   )
 }
 
@@ -564,11 +812,18 @@ function rebuildCtxMaps(
   for (const k of Object.keys(ctx.teacherMap)) delete ctx.teacherMap[k]
   for (const k of Object.keys(ctx.classMap)) delete ctx.classMap[k]
   for (const k of Object.keys(ctx.roomMap)) delete ctx.roomMap[k]
+  if (ctx.komaSlotCount) {
+    for (const k of Object.keys(ctx.komaSlotCount)) delete ctx.komaSlotCount[k]
+  }
 
-  const { teacherMap, classMap, roomMap } = buildScheduleMaps(assignments, komaLookup)
+  const { teacherMap, classMap, roomMap, komaSlotCount } = buildScheduleMaps(
+    assignments,
+    komaLookup
+  )
   Object.assign(ctx.teacherMap, teacherMap)
   Object.assign(ctx.classMap, classMap)
   Object.assign(ctx.roomMap, roomMap)
+  Object.assign(ctx.komaSlotCount, komaSlotCount)
 }
 
 function perturbAssignments(
@@ -587,7 +842,11 @@ function perturbAssignments(
     const newPos = rng.pick(allPositions)
 
     removeFromMaps(ctx, komaLookup, a.komaId, oldPos)
-    assignments[idx] = { komaId: a.komaId, dayOfWeek: newPos.dayOfWeek, period: newPos.period }
+    assignments[idx] = {
+      komaId: a.komaId,
+      dayOfWeek: newPos.dayOfWeek,
+      period: newPos.period,
+    }
     addToMaps(ctx, komaLookup, a.komaId, newPos)
   }
 }

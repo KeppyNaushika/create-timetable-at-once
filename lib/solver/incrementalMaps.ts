@@ -1,10 +1,6 @@
 import type { ConstraintContext } from "./constraints"
 import { computeKomaPlacementCost } from "./constraints"
-import type {
-  Assignment,
-  KomaLookup,
-  SlotPosition,
-} from "./types"
+import type { Assignment, KomaLookup, SlotPosition } from "./types"
 
 // ── スロットインデックス: スロット→コマIDのSet ──
 
@@ -17,22 +13,16 @@ function slotKey(day: number, period: number): string {
 }
 
 export function buildSlotIndex(
-  ctx: ConstraintContext
+  _ctx: ConstraintContext,
+  assignments?: Assignment[]
 ): SlotIndex {
   const idx: SlotIndex = {}
-  for (const classId of Object.keys(ctx.classMap)) {
-    const days = ctx.classMap[classId]
-    if (!days) continue
-    for (const dayStr of Object.keys(days)) {
-      const periods = days[Number(dayStr)]
-      if (!periods) continue
-      for (const periodStr of Object.keys(periods)) {
-        const komaId = periods[Number(periodStr)]
-        if (!komaId) continue
-        const key = slotKey(Number(dayStr), Number(periodStr))
-        if (!idx[key]) idx[key] = new Set()
-        idx[key].add(komaId)
-      }
+  if (assignments) {
+    // アサインメント配列から構築（単一値classMapの制限を回避）
+    for (const a of assignments) {
+      const key = slotKey(a.dayOfWeek, a.period)
+      if (!idx[key]) idx[key] = new Set()
+      idx[key].add(a.komaId)
     }
   }
   return idx
@@ -52,7 +42,8 @@ export function addToMaps(
 
   for (const tid of koma.teacherIds) {
     if (!ctx.teacherMap[tid]) ctx.teacherMap[tid] = {}
-    if (!ctx.teacherMap[tid][pos.dayOfWeek]) ctx.teacherMap[tid][pos.dayOfWeek] = {}
+    if (!ctx.teacherMap[tid][pos.dayOfWeek])
+      ctx.teacherMap[tid][pos.dayOfWeek] = {}
     ctx.teacherMap[tid][pos.dayOfWeek][pos.period] = komaId
   }
   for (const cid of koma.classIds) {
@@ -64,6 +55,13 @@ export function addToMaps(
     if (!ctx.roomMap[rid]) ctx.roomMap[rid] = {}
     if (!ctx.roomMap[rid][pos.dayOfWeek]) ctx.roomMap[rid][pos.dayOfWeek] = {}
     ctx.roomMap[rid][pos.dayOfWeek][pos.period] = komaId
+  }
+
+  // komaSlotCount をインクリメント
+  if (ctx.komaSlotCount) {
+    const sk = `${pos.dayOfWeek}:${pos.period}`
+    if (!ctx.komaSlotCount[komaId]) ctx.komaSlotCount[komaId] = {}
+    ctx.komaSlotCount[komaId][sk] = (ctx.komaSlotCount[komaId][sk] ?? 0) + 1
   }
 
   if (slotIdx) {
@@ -99,6 +97,17 @@ export function removeFromMaps(
     }
   }
 
+  // komaSlotCount をデクリメント
+  if (ctx.komaSlotCount) {
+    const sk = `${pos.dayOfWeek}:${pos.period}`
+    if (ctx.komaSlotCount[komaId]?.[sk]) {
+      ctx.komaSlotCount[komaId][sk]--
+      if (ctx.komaSlotCount[komaId][sk] <= 0) {
+        delete ctx.komaSlotCount[komaId][sk]
+      }
+    }
+  }
+
   if (slotIdx) {
     const key = slotKey(pos.dayOfWeek, pos.period)
     slotIdx[key]?.delete(komaId)
@@ -108,8 +117,8 @@ export function removeFromMaps(
 // ── 違反インデックス (配列インデックスベース) ──
 
 export interface ViolationIndex {
-  costByIndex: number[]       // assignment配列インデックス → コスト
-  violatingIndices: number[]  // コスト降順ソート
+  costByIndex: number[] // assignment配列インデックス → コスト
+  violatingIndices: number[] // コスト降順ソート
   totalScore: number
 }
 

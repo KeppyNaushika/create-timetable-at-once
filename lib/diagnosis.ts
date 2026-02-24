@@ -1,33 +1,33 @@
-import type {
-  Teacher,
-  ClassInfo,
-  Subject,
-  SpecialRoom,
-  Duty,
-  Koma,
-  TimetableSlot,
-  School,
-  ScheduleCondition,
-} from "@/types/common.types"
-import type {
-  DiagnosisResult,
-  DiagnosisGrade,
-  CategoryDiagnosis,
-} from "@/types/review.types"
-import type { Assignment } from "@/lib/solver/types"
-import {
-  evaluateAllConstraints,
-  calculateScore,
-  setTeacherCache,
-} from "@/lib/solver/constraints"
 import type { ConstraintContext } from "@/lib/solver/constraints"
 import {
-  buildKomaLookup,
-  buildTeacherAvailabilityMap,
-  buildRoomAvailabilityMap,
+  calculateScore,
+  evaluateAllConstraints,
+  setTeacherCache,
+} from "@/lib/solver/constraints"
+import type { Assignment } from "@/lib/solver/types"
+import {
   buildDutyMap,
+  buildKomaLookup,
+  buildRoomAvailabilityMap,
   buildScheduleMaps,
+  buildTeacherAvailabilityMap,
 } from "@/lib/solver/utils"
+import type {
+  ClassInfo,
+  Duty,
+  Koma,
+  ScheduleCondition,
+  School,
+  SpecialRoom,
+  Subject,
+  Teacher,
+  TimetableSlot,
+} from "@/types/common.types"
+import type {
+  CategoryDiagnosis,
+  DiagnosisGrade,
+  DiagnosisResult,
+} from "@/types/review.types"
 
 interface DiagnosisInput {
   school: School
@@ -180,7 +180,7 @@ function diagnoseClassGaps(
   slots: TimetableSlot[],
   komas: Koma[],
   daysPerWeek: number,
-  maxPeriodsPerDay: number
+  _maxPeriodsPerDay: number
 ): CategoryDiagnosis {
   const komaMap = new Map(komas.map((k) => [k.id, k]))
 
@@ -194,8 +194,7 @@ function diagnoseClassGaps(
       if (!classDayPeriods.has(kc.classId))
         classDayPeriods.set(kc.classId, new Map())
       const dayMap = classDayPeriods.get(kc.classId)!
-      if (!dayMap.has(slot.dayOfWeek))
-        dayMap.set(slot.dayOfWeek, new Set())
+      if (!dayMap.has(slot.dayOfWeek)) dayMap.set(slot.dayOfWeek, new Set())
       dayMap.get(slot.dayOfWeek)!.add(slot.period)
     }
   }
@@ -318,7 +317,7 @@ function diagnoseSubjectDistribution(
   subjects: Subject[],
   slots: TimetableSlot[],
   komas: Koma[],
-  daysPerWeek: number
+  _daysPerWeek: number
 ): CategoryDiagnosis {
   const komaMap = new Map(komas.map((k) => [k.id, k]))
   const subjectMap = new Map(subjects.map((s) => [s.id, s]))
@@ -331,11 +330,9 @@ function diagnoseSubjectDistribution(
     const koma = komaMap.get(slot.komaId)
     if (!koma) continue
     for (const kc of koma.komaClasses ?? []) {
-      if (!distribution.has(kc.classId))
-        distribution.set(kc.classId, new Map())
+      if (!distribution.has(kc.classId)) distribution.set(kc.classId, new Map())
       const subjMap = distribution.get(kc.classId)!
-      if (!subjMap.has(koma.subjectId))
-        subjMap.set(koma.subjectId, new Set())
+      if (!subjMap.has(koma.subjectId)) subjMap.set(koma.subjectId, new Set())
       subjMap.get(koma.subjectId)!.add(slot.dayOfWeek)
     }
   }
@@ -422,7 +419,7 @@ export function runDiagnosis(input: DiagnosisInput): DiagnosisResult {
     period: s.period,
   }))
 
-  const { teacherMap, classMap, roomMap } = buildScheduleMaps(
+  const { teacherMap, classMap, roomMap, komaSlotCount } = buildScheduleMaps(
     assignments,
     komaLookup
   )
@@ -439,6 +436,7 @@ export function runDiagnosis(input: DiagnosisInput): DiagnosisResult {
     teacherMap,
     classMap,
     roomMap,
+    komaSlotCount,
     maxPeriodsPerDay,
     lunchAfterPeriod: school.lunchAfterPeriod,
   }
