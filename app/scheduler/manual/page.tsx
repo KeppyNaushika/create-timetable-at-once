@@ -28,9 +28,9 @@ import { useTeachers } from "@/hooks/useTeachers"
 import { useTimetable } from "@/hooks/useTimetable"
 import { useTimetableEditor } from "@/hooks/useTimetableEditor"
 import {
+  type ConstraintContext,
   evaluateAllConstraints,
   setTeacherCache,
-  type ConstraintContext,
 } from "@/lib/solver/constraints"
 import type { Assignment, Violation } from "@/lib/solver/types"
 import {
@@ -48,20 +48,14 @@ export default function ManualPage() {
   const { school } = useSchool()
   const { komas, fetchKomas } = useKomas()
   const { teachers, fetchTeachers } = useTeachers()
-  const { classes, grades, fetchClasses } = useClasses()
+  const { classes, grades: _grades, fetchClasses } = useClasses()
   const { rooms, fetchRooms } = useRooms()
   const { condition } = useConditions()
   const { duties } = useDuties()
   const { patterns, createPattern } = usePatterns()
   const [activePatternId, setActivePatternId] = useState<string | null>(null)
-  const {
-    slots,
-    fetchSlots,
-    placeSlot,
-    removeSlot,
-    fixSlot,
-    clearSlots,
-  } = useTimetable(activePatternId)
+  const { slots, fetchSlots, placeSlot, removeSlot, fixSlot, clearSlots } =
+    useTimetable(activePatternId)
   const editor = useTimetableEditor()
 
   const [viewMode, setViewMode] = useState<ViewMode>("all")
@@ -98,7 +92,7 @@ export default function ManualPage() {
   // Sync DB slots to editor
   useEffect(() => {
     editor.load(slots)
-  }, [slots]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slots])
 
   // Auto-select first entity when in entity mode
   useEffect(() => {
@@ -109,7 +103,7 @@ export default function ManualPage() {
         setSelectedEntity(entities[0].id)
       }
     }
-  }, [viewMode, teachers, classes, rooms]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [viewMode, teachers, classes, rooms])
 
   // Disabled slots
   const disabledSlots = useMemo(
@@ -158,10 +152,8 @@ export default function ManualPage() {
         const teacherAvailMap = buildTeacherAvailabilityMap(teachers)
         const roomAvailMap = buildRoomAvailabilityMap(rooms)
         const dutyMap = buildDutyMap(duties)
-        const { teacherMap, classMap, roomMap } = buildScheduleMaps(
-          assignments,
-          komaLookupSolver
-        )
+        const { teacherMap, classMap, roomMap, komaSlotCount } =
+          buildScheduleMaps(assignments, komaLookupSolver)
 
         const ctx: ConstraintContext = {
           condition,
@@ -173,6 +165,7 @@ export default function ManualPage() {
           teacherMap,
           classMap,
           roomMap,
+          komaSlotCount,
           maxPeriodsPerDay: school?.maxPeriodsPerDay ?? 6,
           lunchAfterPeriod: school?.lunchAfterPeriod ?? 4,
         }
@@ -277,9 +270,7 @@ export default function ManualPage() {
 
       if (activeSlotId) {
         // --- MOVE or SWAP ---
-        const activeSlot = editor.state.slots.find(
-          (s) => s.id === activeSlotId
-        )
+        const activeSlot = editor.state.slots.find((s) => s.id === activeSlotId)
         if (!activeSlot) return
         // If dropped on same cell, do nothing
         if (

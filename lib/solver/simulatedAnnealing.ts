@@ -1,8 +1,5 @@
 import type { ConstraintContext } from "./constraints"
-import {
-  calculateScoreFast,
-  isPlacementValid,
-} from "./constraints"
+import { calculateScoreFast, isPlacementValid } from "./constraints"
 import { SeededRandom } from "./random"
 import type {
   Assignment,
@@ -30,7 +27,14 @@ export function simulatedAnnealing(
   // Phase 0: 未配置ターゲットを貪欲に追加
   let current = [...initialAssignments]
   if (targets && targets.length > 0) {
-    current = greedyFillMissing(ctx, current, komaLookup, allPositions, targets, rng)
+    current = greedyFillMissing(
+      ctx,
+      current,
+      komaLookup,
+      allPositions,
+      targets,
+      rng
+    )
   }
 
   // 現在のスケジュールマップを構築（以降インクリメンタルに更新）
@@ -111,9 +115,19 @@ export function simulatedAnnealing(
 // ── スケジュールマップ構築 ──────────────────────────
 
 function buildMaps(assignments: Assignment[], komaLookup: KomaLookup) {
-  const teacherMap: Record<string, Record<number, Record<number, string | null>>> = {}
-  const classMap: Record<string, Record<number, Record<number, string | null>>> = {}
-  const roomMap: Record<string, Record<number, Record<number, string | null>>> = {}
+  const teacherMap: Record<
+    string,
+    Record<number, Record<number, string | null>>
+  > = {}
+  const classMap: Record<
+    string,
+    Record<number, Record<number, string | null>>
+  > = {}
+  const roomMap: Record<
+    string,
+    Record<number, Record<number, string | null>>
+  > = {}
+  const komaSlotCount: Record<string, Record<string, number>> = {}
 
   for (const a of assignments) {
     const koma = komaLookup[a.komaId]
@@ -133,9 +147,14 @@ function buildMaps(assignments: Assignment[], komaLookup: KomaLookup) {
       if (!roomMap[rid][a.dayOfWeek]) roomMap[rid][a.dayOfWeek] = {}
       roomMap[rid][a.dayOfWeek][a.period] = a.komaId
     }
+    // komaSlotCount を構築
+    const slotKey = `${a.dayOfWeek}:${a.period}`
+    if (!komaSlotCount[a.komaId]) komaSlotCount[a.komaId] = {}
+    komaSlotCount[a.komaId][slotKey] =
+      (komaSlotCount[a.komaId][slotKey] ?? 0) + 1
   }
 
-  return { teacherMap, classMap, roomMap }
+  return { teacherMap, classMap, roomMap, komaSlotCount }
 }
 
 // ── Greedy Fill ────────────────────────────────────
@@ -157,7 +176,10 @@ function greedyFillMissing(
 
   const requiredCount: Record<string, number> = {}
   for (const t of targets) {
-    requiredCount[t.komaId] = Math.max(requiredCount[t.komaId] ?? 0, t.index + 1)
+    requiredCount[t.komaId] = Math.max(
+      requiredCount[t.komaId] ?? 0,
+      t.index + 1
+    )
   }
 
   const missing: string[] = []
@@ -182,7 +204,10 @@ function greedyFillMissing(
   const shuffledPositions = [...allPositions]
   for (let i = shuffledPositions.length - 1; i > 0; i--) {
     const j = rng.nextInt(0, i)
-    ;[shuffledPositions[i], shuffledPositions[j]] = [shuffledPositions[j], shuffledPositions[i]]
+    ;[shuffledPositions[i], shuffledPositions[j]] = [
+      shuffledPositions[j],
+      shuffledPositions[i],
+    ]
   }
 
   for (const komaId of missing) {
@@ -194,17 +219,20 @@ function greedyFillMissing(
         if (koma) {
           for (const tid of koma.teacherIds) {
             if (!tempCtx.teacherMap[tid]) tempCtx.teacherMap[tid] = {}
-            if (!tempCtx.teacherMap[tid][pos.dayOfWeek]) tempCtx.teacherMap[tid][pos.dayOfWeek] = {}
+            if (!tempCtx.teacherMap[tid][pos.dayOfWeek])
+              tempCtx.teacherMap[tid][pos.dayOfWeek] = {}
             tempCtx.teacherMap[tid][pos.dayOfWeek][pos.period] = komaId
           }
           for (const cid of koma.classIds) {
             if (!tempCtx.classMap[cid]) tempCtx.classMap[cid] = {}
-            if (!tempCtx.classMap[cid][pos.dayOfWeek]) tempCtx.classMap[cid][pos.dayOfWeek] = {}
+            if (!tempCtx.classMap[cid][pos.dayOfWeek])
+              tempCtx.classMap[cid][pos.dayOfWeek] = {}
             tempCtx.classMap[cid][pos.dayOfWeek][pos.period] = komaId
           }
           for (const rid of koma.roomIds) {
             if (!tempCtx.roomMap[rid]) tempCtx.roomMap[rid] = {}
-            if (!tempCtx.roomMap[rid][pos.dayOfWeek]) tempCtx.roomMap[rid][pos.dayOfWeek] = {}
+            if (!tempCtx.roomMap[rid][pos.dayOfWeek])
+              tempCtx.roomMap[rid][pos.dayOfWeek] = {}
             tempCtx.roomMap[rid][pos.dayOfWeek][pos.period] = komaId
           }
         }
