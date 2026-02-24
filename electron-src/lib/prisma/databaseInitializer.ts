@@ -56,6 +56,7 @@ CREATE TABLE "School" (
     "periodNamesJson" TEXT NOT NULL DEFAULT '[]',
     "periodLengthsJson" TEXT NOT NULL DEFAULT '[]',
     "lunchAfterPeriod" INTEGER NOT NULL DEFAULT 4,
+    "disabledSlotsJson" TEXT NOT NULL DEFAULT '[]',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -263,6 +264,7 @@ CREATE TABLE "PerSubjectCondition" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "conditionId" TEXT NOT NULL,
     "subjectId" TEXT NOT NULL,
+    "level" TEXT NOT NULL DEFAULT 'consider',
     "placementRestriction" TEXT NOT NULL DEFAULT 'any',
     "maxPerDay" INTEGER NOT NULL DEFAULT 2,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -448,6 +450,18 @@ export const upgradeDatabase = async (): Promise<void> => {
         )
         console.log("Added maxConsecutive and maxPerDay columns to Teacher")
       }
+      // School に disabledSlotsJson カラムがあるかチェック
+      try {
+        await prisma.$queryRawUnsafe(
+          `SELECT "disabledSlotsJson" FROM "School" LIMIT 1`
+        )
+      } catch {
+        await prisma.$executeRawUnsafe(
+          `ALTER TABLE "School" ADD COLUMN "disabledSlotsJson" TEXT NOT NULL DEFAULT '[]'`
+        )
+        console.log("Added disabledSlotsJson column to School")
+      }
+
       // Phase 3 アップグレードもチェック
       await upgradeToPhase3(prisma)
       return
@@ -588,7 +602,21 @@ async function upgradeToPhase3(prisma: PrismaClient): Promise<void> {
     `SELECT name FROM sqlite_master WHERE type='table' AND name='ScheduleCondition'`
   )
 
-  if (tables.length > 0) return
+  if (tables.length > 0) {
+    // PerSubjectCondition に level カラムがあるかチェック
+    try {
+      await prisma.$queryRawUnsafe(
+        `SELECT "level" FROM "PerSubjectCondition" LIMIT 1`
+      )
+    } catch {
+      await prisma.$executeRawUnsafe(
+        `ALTER TABLE "PerSubjectCondition" ADD COLUMN "level" TEXT NOT NULL DEFAULT 'consider'`
+      )
+      console.log("Added level column to PerSubjectCondition")
+    }
+    await upgradeToPhase5(prisma)
+    return
+  }
 
   const phase3SQL = `
 CREATE TABLE "ScheduleCondition" (
@@ -623,6 +651,7 @@ CREATE TABLE "PerSubjectCondition" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "conditionId" TEXT NOT NULL,
     "subjectId" TEXT NOT NULL,
+    "level" TEXT NOT NULL DEFAULT 'consider',
     "placementRestriction" TEXT NOT NULL DEFAULT 'any',
     "maxPerDay" INTEGER NOT NULL DEFAULT 2,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
