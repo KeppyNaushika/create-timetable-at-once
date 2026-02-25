@@ -1,7 +1,9 @@
 "use client"
 
+import { AlertTriangle, Trophy, Users } from "lucide-react"
 import { useMemo } from "react"
-import { Users, AlertTriangle, Trophy } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -9,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import type { ElectiveResult, ElectiveStudent } from "@/types/exam.types"
 
 interface ElectiveResultGridProps {
@@ -99,7 +100,7 @@ export function ElectiveResultGrid({
       {result.unassigned.length > 0 && (
         <Card className="border-destructive/50">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2 text-sm">
               <AlertTriangle className="h-4 w-4" />
               未配置の生徒 ({result.unassigned.length}名)
             </CardTitle>

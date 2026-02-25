@@ -1,14 +1,15 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import {
-  PAPER_SIZES,
-  LINE_STYLES,
-  OUTPUT_ORDERS,
-} from "@/lib/constants"
-import type { PrintSettings, PaperSize, LineStyle, OutputOrder } from "@/types/review.types"
+import { Label } from "@/components/ui/label"
+import { LINE_STYLES, OUTPUT_ORDERS, PAPER_SIZES } from "@/lib/constants"
+import type {
+  LineStyle,
+  OutputOrder,
+  PaperSize,
+  PrintSettings,
+} from "@/types/review.types"
 
 interface PrintSettingsPanelProps {
   settings: PrintSettings
@@ -43,7 +44,7 @@ export function PrintSettingsPanel({
           <div className="space-y-1">
             <Label className="text-xs">用紙サイズ</Label>
             <select
-              className="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-8 w-full rounded border px-2 text-sm"
               value={settings.paperSize}
               onChange={(e) =>
                 update({ paperSize: e.target.value as PaperSize })
@@ -60,7 +61,7 @@ export function PrintSettingsPanel({
           <div className="space-y-1">
             <Label className="text-xs">出力順序</Label>
             <select
-              className="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-8 w-full rounded border px-2 text-sm"
               value={settings.outputOrder}
               onChange={(e) =>
                 update({ outputOrder: e.target.value as OutputOrder })
@@ -87,11 +88,11 @@ export function PrintSettingsPanel({
               ] as const
             ).map(([key, label]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-16">
+                <span className="text-muted-foreground w-16 text-xs">
                   {label}
                 </span>
                 <select
-                  className="h-7 flex-1 rounded border border-input bg-background px-1 text-xs"
+                  className="border-input bg-background h-7 flex-1 rounded border px-1 text-xs"
                   value={settings.gridLines[key]}
                   onChange={(e) =>
                     updateGridLine(key, e.target.value as LineStyle)

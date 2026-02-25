@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMemo } from "react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { SCHEDULE_TYPES } from "@/lib/constants"
 import type { DailySchedule, SchoolEvent } from "@/types/daily.types"
 
@@ -124,7 +125,7 @@ export function DailyCalendar({
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-px rounded-lg border bg-border">
+      <div className="bg-border grid grid-cols-7 gap-px rounded-lg border">
         {/* Weekday headers */}
         {WEEKDAY_HEADERS.map((name, i) => (
           <div
@@ -159,7 +160,7 @@ export function DailyCalendar({
             <button
               key={day}
               type="button"
-              className={`min-h-[80px] p-1.5 text-left transition-colors hover:bg-accent/50 ${
+              className={`hover:bg-accent/50 min-h-[80px] p-1.5 text-left transition-colors ${
                 weekend ? "bg-muted/40" : "bg-background"
               }`}
               onClick={() => onDateClick(dateStr)}
@@ -168,7 +169,7 @@ export function DailyCalendar({
               {typeLabel && colorClass && (
                 <Badge
                   variant="outline"
-                  className={`mt-0.5 text-[10px] px-1 py-0 ${colorClass}`}
+                  className={`mt-0.5 px-1 py-0 text-[10px] ${colorClass}`}
                 >
                   {typeLabel}
                 </Badge>

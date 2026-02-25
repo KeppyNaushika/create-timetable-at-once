@@ -1,12 +1,13 @@
 "use client"
 
-import { Plus, Trash2, Briefcase } from "lucide-react"
+import { Briefcase, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/PageHeader"
 import { AvailabilityGrid } from "@/components/timetable/AvailabilityGrid"
 import { TeacherKomaList } from "@/components/timetable/TeacherKomaList"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
 import { useSchool } from "@/hooks/useSchool"
 import { useSubjects } from "@/hooks/useSubjects"
 import { useTeachers } from "@/hooks/useTeachers"
@@ -284,9 +284,7 @@ export default function TeachersPage() {
                     <Input
                       key={selectedTeacher.id + "-notes"}
                       defaultValue={selectedTeacher.notes}
-                      onBlur={(e) =>
-                        handleUpdateField("notes", e.target.value)
-                      }
+                      onBlur={(e) => handleUpdateField("notes", e.target.value)}
                     />
                   </div>
                   {(selectedTeacher.teacherDuties?.length ?? 0) > 0 && (

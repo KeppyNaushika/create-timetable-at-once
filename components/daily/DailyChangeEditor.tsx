@@ -1,8 +1,11 @@
 "use client"
 
+import { Pencil, Plus, Save, Trash2, X } from "lucide-react"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+import { ChangeTypeSelector } from "@/components/daily/ChangeTypeSelector"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -20,16 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ChangeTypeSelector } from "@/components/daily/ChangeTypeSelector"
-import { Plus, Pencil, Trash2, Save, X } from "lucide-react"
-import { SCHEDULE_TYPES, CHANGE_TYPES } from "@/lib/constants"
-import type { DailySchedule, DailyChange } from "@/types/daily.types"
+import { CHANGE_TYPES, SCHEDULE_TYPES } from "@/lib/constants"
 import type {
   ClassInfo,
-  Teacher,
   Koma,
+  Teacher,
   TimetableSlot,
 } from "@/types/common.types"
+import type { DailyChange, DailySchedule } from "@/types/daily.types"
 
 interface DailyChangeEditorProps {
   schedule: DailySchedule | null
@@ -66,8 +67,8 @@ export function DailyChangeEditor({
   changes,
   classes,
   teachers,
-  komas,
-  slots,
+  komas: _komas,
+  slots: _slots,
   maxPeriods,
   onSaveSchedule,
   onAddChange,
@@ -254,9 +255,7 @@ export function DailyChangeEditor({
                       <TableCell>
                         <Select
                           value={form.period}
-                          onValueChange={(v) =>
-                            setForm({ ...form, period: v })
-                          }
+                          onValueChange={(v) => setForm({ ...form, period: v })}
                         >
                           <SelectTrigger className="w-[80px]">
                             <SelectValue placeholder="時限" />
@@ -273,9 +272,7 @@ export function DailyChangeEditor({
                       <TableCell>
                         <ChangeTypeSelector
                           value={form.changeType}
-                          onChange={(v) =>
-                            setForm({ ...form, changeType: v })
-                          }
+                          onChange={(v) => setForm({ ...form, changeType: v })}
                         />
                       </TableCell>
                       <TableCell>
@@ -358,7 +355,7 @@ export function DailyChangeEditor({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-destructive"
+                          className="text-destructive h-7 w-7"
                           onClick={() => onDeleteChange(change.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -470,7 +467,7 @@ export function DailyChangeEditor({
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="text-center text-muted-foreground py-6"
+                    className="text-muted-foreground py-6 text-center"
                   >
                     変更はありません
                   </TableCell>

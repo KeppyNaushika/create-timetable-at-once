@@ -131,7 +131,7 @@ export function PrintableGrid({
         </tbody>
       </table>
       {footer && (
-        <div className="mt-1 text-right text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-1 text-right text-xs">
           {footer}
         </div>
       )}

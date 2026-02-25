@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type {
-  School,
-  Teacher,
   ClassInfo,
-  Subject,
-  SpecialRoom,
   Duty,
+  Grade,
   Koma,
+  School,
+  SpecialRoom,
+  Subject,
+  Teacher,
   TimetablePattern,
   TimetableSlot,
-  Grade,
 } from "@/types/common.types"
 
 export interface TimetableData {
@@ -49,18 +49,27 @@ export function useTimetableData() {
       setLoading(true)
       setError(null)
 
-      const [school, teachers, classes, subjects, rooms, duties, komas, patterns, grades] =
-        await Promise.all([
-          window.electronAPI.schoolGet(),
-          window.electronAPI.teacherGetAll(),
-          window.electronAPI.classGetAll(),
-          window.electronAPI.subjectGetAll(),
-          window.electronAPI.roomGetAll(),
-          window.electronAPI.dutyGetAll(),
-          window.electronAPI.komaGetAll(),
-          window.electronAPI.patternGetAll(),
-          window.electronAPI.gradeGetAll(),
-        ])
+      const [
+        school,
+        teachers,
+        classes,
+        subjects,
+        rooms,
+        duties,
+        komas,
+        patterns,
+        grades,
+      ] = await Promise.all([
+        window.electronAPI.schoolGet(),
+        window.electronAPI.teacherGetAll(),
+        window.electronAPI.classGetAll(),
+        window.electronAPI.subjectGetAll(),
+        window.electronAPI.roomGetAll(),
+        window.electronAPI.dutyGetAll(),
+        window.electronAPI.komaGetAll(),
+        window.electronAPI.patternGetAll(),
+        window.electronAPI.gradeGetAll(),
+      ])
 
       const adopted = patterns.find(
         (p: TimetablePattern) => p.status === "adopted"

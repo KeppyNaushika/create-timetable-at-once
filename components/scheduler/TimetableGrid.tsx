@@ -101,7 +101,8 @@ export function TimetableGrid({
                   {period}
                 </td>
                 {Array.from({ length: daysPerWeek }, (_, d) => {
-                  const isDisabled = disabledSlots?.has(`${d}:${period}`) ?? false
+                  const isDisabled =
+                    disabledSlots?.has(`${d}:${period}`) ?? false
                   const cellSlots = filteredSlots.filter(
                     (s) => s.dayOfWeek === d && s.period === period
                   )
@@ -113,11 +114,7 @@ export function TimetableGrid({
 
                   if (isDisabled) {
                     return (
-                      <td
-                        key={d}
-                        className="bg-muted p-0"
-                        title="無効スロット"
-                      >
+                      <td key={d} className="bg-muted p-0" title="無効スロット">
                         <div className="flex h-12 items-center justify-center border">
                           <span className="text-muted-foreground text-xs">
                             ×
@@ -218,7 +215,8 @@ function AllClassGrid({
                     className="border p-0.5 font-medium"
                     style={{ minWidth: 64 }}
                   >
-                    {cls.grade?.name ?? ""}{cls.name}
+                    {cls.grade?.name ?? ""}
+                    {cls.name}
                   </th>
                 ))}
               </tr>
@@ -245,10 +243,7 @@ function AllClassGrid({
 
                       if (isDisabled) {
                         return (
-                          <td
-                            key={cls.id}
-                            className="bg-muted border p-0"
-                          >
+                          <td key={cls.id} className="bg-muted border p-0">
                             <div className="flex h-8 items-center justify-center">
                               <span className="text-muted-foreground">×</span>
                             </div>

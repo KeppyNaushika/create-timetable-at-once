@@ -16,13 +16,19 @@ export default function KomaListPrintPage() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr>
-                  {["教科", "学年", "タイプ", "コマ数", "ラベル", "担当先生", "優先度"].map(
-                    (h) => (
-                      <th key={h} className="border bg-muted px-3 py-2 text-left">
-                        {h}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "教科",
+                    "学年",
+                    "タイプ",
+                    "コマ数",
+                    "ラベル",
+                    "担当先生",
+                    "優先度",
+                  ].map((h) => (
+                    <th key={h} className="bg-muted border px-3 py-2 text-left">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -35,22 +41,30 @@ export default function KomaListPrintPage() {
                     .join(", ")
                   return (
                     <tr key={koma.id}>
-                      <td className="border px-3 py-2">{subject?.name ?? ""}</td>
+                      <td className="border px-3 py-2">
+                        {subject?.name ?? ""}
+                      </td>
                       <td className="border px-3 py-2">{grade?.name ?? ""}</td>
                       <td className="border px-3 py-2">
                         {koma.type === "consecutive" ? "連続" : "普通"}
                       </td>
-                      <td className="border px-3 py-2 text-center">{koma.count}</td>
+                      <td className="border px-3 py-2 text-center">
+                        {koma.count}
+                      </td>
                       <td className="border px-3 py-2">{koma.label}</td>
                       <td className="border px-3 py-2">{teachers ?? ""}</td>
-                      <td className="border px-3 py-2 text-center">{koma.priority}</td>
+                      <td className="border px-3 py-2 text-center">
+                        {koma.priority}
+                      </td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
             {settings.footer && (
-              <div className="mt-2 text-right text-xs text-muted-foreground">{settings.footer}</div>
+              <div className="text-muted-foreground mt-2 text-right text-xs">
+                {settings.footer}
+              </div>
             )}
           </div>
         )

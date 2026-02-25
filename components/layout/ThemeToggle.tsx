@@ -1,6 +1,7 @@
 "use client"
 
 import { Moon, Sun } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -35,9 +36,7 @@ export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {isDark ? "ライトモード" : "ダークモード"}に切替 (Ctrl+D)
-          </p>
+          <p>{isDark ? "ライトモード" : "ダークモード"}に切替 (Ctrl+D)</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

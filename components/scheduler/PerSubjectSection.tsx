@@ -68,7 +68,10 @@ export function PerSubjectSection({
             const level = cond?.level ?? "consider"
             const isIgnored = level === "ignore"
             return (
-              <TableRow key={subject.id} className={isIgnored ? "opacity-40" : ""}>
+              <TableRow
+                key={subject.id}
+                className={isIgnored ? "opacity-40" : ""}
+              >
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div

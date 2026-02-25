@@ -1,6 +1,6 @@
 "use client"
 
-import { Settings, UserPlus, Users, Unlink } from "lucide-react"
+import { Settings, Unlink, UserPlus, Users } from "lucide-react"
 
 import {
   ContextMenu,
@@ -42,12 +42,15 @@ export function TeacherCell({
     <td
       colSpan={colSpan}
       className="border p-0"
-      style={{ borderLeftColor: subjectColor, borderLeftWidth: colSpan > 1 ? 2 : undefined }}
+      style={{
+        borderLeftColor: subjectColor,
+        borderLeftWidth: colSpan > 1 ? 2 : undefined,
+      }}
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div
-            className="flex min-h-[2.5rem] cursor-pointer flex-col justify-center px-2 py-1 transition-colors hover:bg-accent/50"
+            className="hover:bg-accent/50 flex min-h-[2.5rem] cursor-pointer flex-col justify-center px-2 py-1 transition-colors"
             onClick={() => onClickTeacher(cell.komaId)}
           >
             {hasTeacher ? (
@@ -56,7 +59,8 @@ export function TeacherCell({
                   {mainTeacher?.name ?? ""}
                   {subTeachers.length > 0 && (
                     <span className="text-muted-foreground text-[10px]">
-                      {" "}(主)
+                      {" "}
+                      (主)
                     </span>
                   )}
                 </span>

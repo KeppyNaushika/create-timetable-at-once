@@ -1,5 +1,5 @@
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -36,7 +36,5 @@ test("個別表ページが表示される", async () => {
 })
 
 test("個別表ページにナビゲーションからアクセスできる", async () => {
-  await expect(
-    page.getByRole("link", { name: "個別表" })
-  ).toBeVisible()
+  await expect(page.getByRole("link", { name: "個別表" })).toBeVisible()
 })

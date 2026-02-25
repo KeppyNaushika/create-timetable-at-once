@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+
 import type { SchoolEvent } from "@/types/daily.types"
 
 interface AnnualCalendarProps {
@@ -24,22 +25,6 @@ const MONTH_NAMES = [
   "11月",
   "12月",
 ] as const
-
-function getEventColor(eventType: string): string {
-  switch (eventType) {
-    case "holiday":
-    case "national_holiday":
-      return "bg-red-200 text-red-800"
-    case "school_event":
-      return "bg-orange-200 text-orange-800"
-    case "exam":
-      return "bg-blue-200 text-blue-800"
-    case "ceremony":
-      return "bg-purple-200 text-purple-800"
-    default:
-      return "bg-gray-200 text-gray-800"
-  }
-}
 
 interface MiniMonthProps {
   year: number
@@ -95,7 +80,7 @@ function MiniMonth({ year, month, eventMap, onDateClick }: MiniMonthProps) {
         {WEEKDAY_HEADERS.map((name) => (
           <div
             key={name}
-            className="text-center font-medium text-muted-foreground py-0.5"
+            className="text-muted-foreground py-0.5 text-center font-medium"
           >
             {name}
           </div>
@@ -174,7 +159,7 @@ export function AnnualCalendar({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-center">{year}年</h2>
+      <h2 className="text-center text-lg font-semibold">{year}年</h2>
       <div className="grid grid-cols-4 gap-4">
         {months.map((month) => (
           <MiniMonth
@@ -188,13 +173,13 @@ export function AnnualCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap justify-center gap-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-red-100 border border-red-200" />
+          <div className="h-3 w-3 rounded-sm border border-red-200 bg-red-100" />
           <span>休日・祝日</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-orange-100 border border-orange-200" />
+          <div className="h-3 w-3 rounded-sm border border-orange-200 bg-orange-100" />
           <span>行事</span>
         </div>
       </div>

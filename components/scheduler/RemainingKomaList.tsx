@@ -15,7 +15,7 @@ interface RemainingKomaListProps {
 export function RemainingKomaList({
   komas,
   slots,
-  selectedKomaId,
+  selectedKomaId: _selectedKomaId,
   onKomaClick,
 }: RemainingKomaListProps) {
   // Count placed slots per koma

@@ -4,8 +4,8 @@
  * subjectSeedDefaults, subjectCreate, subjectUpdate, subjectDelete
  * subjectGetByCategory
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -32,7 +32,14 @@ test.describe.serial("教科管理 CRUD", () => {
         maxPeriodsPerDay: 6,
         hasZeroPeriod: false,
         namingConvention: "number",
-        periodNamesJson: JSON.stringify(["1限", "2限", "3限", "4限", "5限", "6限"]),
+        periodNamesJson: JSON.stringify([
+          "1限",
+          "2限",
+          "3限",
+          "4限",
+          "5限",
+          "6限",
+        ]),
         periodLengthsJson: JSON.stringify([50, 50, 50, 50, 50, 50]),
         lunchAfterPeriod: 4,
         classCountsJson: JSON.stringify({ "1": 2 }),
@@ -55,7 +62,15 @@ test.describe.serial("教科管理 CRUD", () => {
 
     // 主要教科の存在確認
     const names = subjects.map((s) => s.name)
-    for (const name of ["国語", "社会", "数学", "理科", "英語", "音楽", "保健体育"]) {
+    for (const name of [
+      "国語",
+      "社会",
+      "数学",
+      "理科",
+      "英語",
+      "音楽",
+      "保健体育",
+    ]) {
       expect(names).toContain(name)
     }
   })
@@ -95,9 +110,7 @@ test.describe.serial("教科管理 CRUD", () => {
   })
 
   test("subjectDelete で教科を削除できる", async () => {
-    const before = await page.evaluate(() =>
-      window.electronAPI.subjectGetAll()
-    )
+    const before = await page.evaluate(() => window.electronAPI.subjectGetAll())
     const countBefore = before.length
 
     await page.evaluate(
@@ -105,9 +118,7 @@ test.describe.serial("教科管理 CRUD", () => {
       customSubjectId
     )
 
-    const after = await page.evaluate(() =>
-      window.electronAPI.subjectGetAll()
-    )
+    const after = await page.evaluate(() => window.electronAPI.subjectGetAll())
     expect(after.length).toBe(countBefore - 1)
     expect(after.find((s) => s.id === customSubjectId)).toBeUndefined()
   })

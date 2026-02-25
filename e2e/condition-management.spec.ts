@@ -6,8 +6,8 @@
  * conditionDeletePerSubject
  * UI: /scheduler/conditions ページ
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -36,7 +36,14 @@ test.describe.serial("制約条件 + 教科別条件", () => {
         maxPeriodsPerDay: 6,
         hasZeroPeriod: false,
         namingConvention: "number",
-        periodNamesJson: JSON.stringify(["1限", "2限", "3限", "4限", "5限", "6限"]),
+        periodNamesJson: JSON.stringify([
+          "1限",
+          "2限",
+          "3限",
+          "4限",
+          "5限",
+          "6限",
+        ]),
         periodLengthsJson: JSON.stringify([50, 50, 50, 50, 50, 50]),
         lunchAfterPeriod: 4,
         classCountsJson: JSON.stringify({ "1": 2 }),

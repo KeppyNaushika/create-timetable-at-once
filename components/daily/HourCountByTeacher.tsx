@@ -27,7 +27,7 @@ export function HourCountByTeacher({
           <CardTitle className="text-base">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground py-4 text-center text-sm">
             データがありません
           </div>
         </CardContent>
@@ -74,7 +74,7 @@ export function HourCountByTeacher({
               </TableRow>
             ))}
             {/* Total row */}
-            <TableRow className="font-bold border-t-2">
+            <TableRow className="border-t-2 font-bold">
               <TableCell>合計</TableCell>
               <TableCell className="text-right">{totalPlanned}</TableCell>
               <TableCell className="text-right">{totalActual}</TableCell>

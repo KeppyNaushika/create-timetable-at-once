@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
 import { Clock, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -24,7 +24,7 @@ import { useTimetableData } from "@/hooks/useTimetableData"
 import type { TimetablePattern } from "@/types/common.types"
 
 export default function HoursPage() {
-  const { data, loading: timetableLoading } = useTimetableData()
+  const { loading: timetableLoading } = useTimetableData()
   const { hourCounts, teacherCounts, loading, error, calculateHours } =
     useHourCount()
 
@@ -66,7 +66,7 @@ export default function HoursPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">時数集計</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           科目別・クラス別の配置時数を確認します
         </p>
       </div>
@@ -81,7 +81,7 @@ export default function HoursPage() {
         </CardHeader>
         <CardContent>
           <select
-            className="h-9 w-full max-w-sm rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 w-full max-w-sm rounded-md border px-3 text-sm"
             value={selectedPatternId ?? ""}
             onChange={(e) => setSelectedPatternId(e.target.value || null)}
           >
@@ -98,25 +98,23 @@ export default function HoursPage() {
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : error ? (
-        <div className="p-4 text-destructive">エラー: {error}</div>
+        <div className="text-destructive p-4">エラー: {error}</div>
       ) : (
         <>
           {/* Subject x Class hour counts */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">
-                科目別・クラス別時数
-              </CardTitle>
+              <CardTitle className="text-base">科目別・クラス別時数</CardTitle>
               <CardDescription>
                 予定時数と配置時数の比較 ({hourCounts.length}件)
               </CardDescription>
             </CardHeader>
             <CardContent>
               {hourCounts.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground py-8 text-center text-sm">
                   データがありません。パターンを選択してください。
                 </p>
               ) : (
@@ -175,7 +173,7 @@ export default function HoursPage() {
             </CardHeader>
             <CardContent>
               {teacherCounts.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground py-8 text-center text-sm">
                   データがありません
                 </p>
               ) : (

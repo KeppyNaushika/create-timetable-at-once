@@ -1,11 +1,12 @@
 "use client"
 
+import { X } from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { HIGHLIGHT_COLORS } from "@/lib/constants"
 import type { Subject } from "@/types/common.types"
 import type { SubjectHighlight } from "@/types/review.types"
-import { X } from "lucide-react"
 
 interface SubjectHighlightPickerProps {
   subjects: Subject[]
@@ -37,13 +38,12 @@ export function SubjectHighlightPicker({
 
   const availableSubjects = subjects.filter(
     (s) =>
-      s.category === "general" &&
-      !highlights.some((h) => h.subjectId === s.id)
+      s.category === "general" && !highlights.some((h) => h.subjectId === s.id)
   )
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm text-muted-foreground">ハイライト:</span>
+      <span className="text-muted-foreground text-sm">ハイライト:</span>
       {highlights.map((h) => {
         const subject = subjects.find((s) => s.id === h.subjectId)
         return (
@@ -56,7 +56,7 @@ export function SubjectHighlightPicker({
             {subject?.shortName ?? subject?.name ?? "?"}
             <button
               onClick={() => removeHighlight(h.subjectId)}
-              className="ml-1 hover:text-destructive"
+              className="hover:text-destructive ml-1"
             >
               <X className="h-3 w-3" />
             </button>
@@ -65,7 +65,7 @@ export function SubjectHighlightPicker({
       })}
       {highlights.length < 4 && availableSubjects.length > 0 && (
         <select
-          className="h-7 rounded border border-input bg-background px-2 text-sm"
+          className="border-input bg-background h-7 rounded border px-2 text-sm"
           value=""
           onChange={(e) => {
             if (e.target.value) addHighlight(e.target.value)

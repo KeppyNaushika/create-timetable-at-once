@@ -8,7 +8,6 @@ import type {
   SolverProgress,
   SolverResult,
   WorkerResponse,
-  DEFAULT_SOLVER_CONFIG,
 } from "@/lib/solver/types"
 import { DEFAULT_SOLVER_CONFIG as DEFAULTS } from "@/lib/solver/types"
 

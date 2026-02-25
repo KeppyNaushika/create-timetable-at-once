@@ -1,8 +1,11 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { ArrowLeft, Loader2, ClipboardList } from "lucide-react"
+import { ArrowLeft, ClipboardList, Loader2 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react"
+
+import { ExamAssignmentGrid } from "@/components/exam/ExamAssignmentGrid"
+import { SupervisorCandidateDialog } from "@/components/exam/SupervisorCandidateDialog"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,11 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ExamAssignmentGrid } from "@/components/exam/ExamAssignmentGrid"
-import { SupervisorCandidateDialog } from "@/components/exam/SupervisorCandidateDialog"
 import { useExamSchedule } from "@/hooks/useExamSchedule"
 import { useTimetableData } from "@/hooks/useTimetableData"
-import type { ExamAssignment, SupervisorCandidate } from "@/types/exam.types"
+import type { SupervisorCandidate } from "@/types/exam.types"
 
 function ExamAssignContent() {
   const searchParams = useSearchParams()
@@ -228,7 +229,7 @@ function ExamAssignContent() {
 
   if (!scheduleId) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
+      <div className="text-muted-foreground p-8 text-center">
         考査日程IDが指定されていません
       </div>
     )
@@ -249,7 +250,7 @@ function ExamAssignContent() {
             <ClipboardList className="mr-2 inline h-5 w-5" />
             {currentSchedule?.name ?? "考査監督割当"}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {currentSchedule
               ? `${currentSchedule.startDate} ~ ${currentSchedule.endDate}`
               : "読込中..."}
@@ -259,12 +260,12 @@ function ExamAssignContent() {
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : examError ? (
-        <div className="p-4 text-destructive">エラー: {examError}</div>
+        <div className="text-destructive p-4">エラー: {examError}</div>
       ) : !currentSchedule ? (
-        <div className="p-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground p-8 text-center">
           考査日程が見つかりません
         </div>
       ) : (
@@ -273,7 +274,7 @@ function ExamAssignContent() {
             <CardTitle className="text-base">監督割当表</CardTitle>
             <CardDescription>
               セルをクリックして監督者を割り当てます。
-              {(currentSchedule.assignments?.length ?? 0)}件の割当済み。
+              {currentSchedule.assignments?.length ?? 0}件の割当済み。
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -293,9 +294,7 @@ function ExamAssignContent() {
 
       <SupervisorCandidateDialog
         open={candidateDialog.open}
-        onClose={() =>
-          setCandidateDialog((prev) => ({ ...prev, open: false }))
-        }
+        onClose={() => setCandidateDialog((prev) => ({ ...prev, open: false }))}
         candidates={candidates}
         onSelect={handleSelectSupervisor}
         date={candidateDialog.date}
@@ -304,8 +303,7 @@ function ExamAssignContent() {
           classNameMap.get(candidateDialog.classId) ?? candidateDialog.classId
         }
         subjectName={
-          subjectMap.get(candidateDialog.subjectId) ??
-          candidateDialog.subjectId
+          subjectMap.get(candidateDialog.subjectId) ?? candidateDialog.subjectId
         }
       />
     </div>
@@ -317,7 +315,7 @@ export default function ExamAssignPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       }
     >

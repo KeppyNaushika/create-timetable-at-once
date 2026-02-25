@@ -1,7 +1,6 @@
 "use client"
 
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
 import {
   Select,
   SelectContent,
@@ -9,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
 import type { SolverConfig } from "@/lib/solver/types"
 
 interface SolverConfigPanelProps {
@@ -70,9 +70,7 @@ export function SolverConfigPanel({
             min={1}
             max={20}
             step={1}
-            onValueChange={([v]) =>
-              onChange({ ...config, ilsRestarts: v })
-            }
+            onValueChange={([v]) => onChange({ ...config, ilsRestarts: v })}
             className="flex-1"
           />
           <span className="text-muted-foreground w-10 text-xs">

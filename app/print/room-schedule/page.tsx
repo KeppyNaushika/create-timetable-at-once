@@ -1,7 +1,7 @@
 "use client"
 
-import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 import { PrintableGrid } from "@/components/print/PrintableGrid"
+import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 
 export default function RoomSchedulePrintPage() {
   return (
@@ -13,7 +13,7 @@ export default function RoomSchedulePrintPage() {
 
         if (data.rooms.length === 0) {
           return (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center">
               特別教室が登録されていません
             </div>
           )

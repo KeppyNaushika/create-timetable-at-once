@@ -4,12 +4,39 @@ const DAY_NAMES = ["月", "火", "水", "木", "金", "土"]
 
 interface ExcelData {
   school: { daysPerWeek: number; maxPeriodsPerDay: number } | null
-  teachers: { id: string; name: string; nameKana: string; mainSubjectId: string | null; maxPerDay: number; maxConsecutive: number; maxPeriodsPerWeek: number; notes: string }[]
+  teachers: {
+    id: string
+    name: string
+    nameKana: string
+    mainSubjectId: string | null
+    maxPerDay: number
+    maxConsecutive: number
+    maxPeriodsPerWeek: number
+    notes: string
+  }[]
   classes: { id: string; name: string }[]
   subjects: { id: string; name: string; shortName: string; color: string }[]
   rooms: { id: string; name: string; shortName: string }[]
-  duties: { id: string; name: string; shortName: string; dayOfWeek: number; period: number; teacherDuties?: { teacherId: string; teacher?: { name: string } }[] }[]
-  komas: { id: string; subjectId: string; gradeId: string; type: string; count: number; label: string; priority: number; komaTeachers?: { teacherId: string }[]; komaClasses?: { classId: string }[]; komaRooms?: { roomId: string }[] }[]
+  duties: {
+    id: string
+    name: string
+    shortName: string
+    dayOfWeek: number
+    period: number
+    teacherDuties?: { teacherId: string; teacher?: { name: string } }[]
+  }[]
+  komas: {
+    id: string
+    subjectId: string
+    gradeId: string
+    type: string
+    count: number
+    label: string
+    priority: number
+    komaTeachers?: { teacherId: string }[]
+    komaClasses?: { classId: string }[]
+    komaRooms?: { roomId: string }[]
+  }[]
   grades: { id: string; name: string }[]
   slots: { komaId: string; dayOfWeek: number; period: number }[]
 }
@@ -61,14 +88,22 @@ function createScheduleSheet(
     ws.getCell(headerRow, 1).value = "時限"
     addThinBorders(ws.getCell(headerRow, 1))
     ws.getCell(headerRow, 1).font = { bold: true }
-    ws.getCell(headerRow, 1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0F0F0" } }
+    ws.getCell(headerRow, 1).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFF0F0F0" },
+    }
 
     for (let d = 0; d < daysPerWeek; d++) {
       const cell = ws.getCell(headerRow, d + 2)
       cell.value = DAY_NAMES[d]
       cell.font = { bold: true }
       cell.alignment = { horizontal: "center" }
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0F0F0" } }
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF0F0F0" },
+      }
       addThinBorders(cell)
     }
     startRow++
@@ -81,11 +116,13 @@ function createScheduleSheet(
       addThinBorders(cell)
 
       for (let d = 0; d < daysPerWeek; d++) {
-        const slot = entitySlots.find((s) => s.dayOfWeek === d && s.period === p)
+        const slot = entitySlots.find(
+          (s) => s.dayOfWeek === d && s.period === p
+        )
         const koma = slot ? komaMap.get(slot.komaId) : null
         const subject = koma ? subjectMap.get(koma.subjectId) : null
         const c = ws.getCell(startRow, d + 2)
-        c.value = subject ? (subject.shortName || subject.name) : ""
+        c.value = subject ? subject.shortName || subject.name : ""
         c.alignment = { horizontal: "center" }
         addThinBorders(c)
         if (subject?.color) {
@@ -151,8 +188,11 @@ export async function generateExcel(
           for (let p = 1; p <= maxPeriods; p++) {
             const slot = data.slots.find((s) => {
               const k = komaMap.get(s.komaId)
-              return s.dayOfWeek === d && s.period === p &&
+              return (
+                s.dayOfWeek === d &&
+                s.period === p &&
                 k?.komaTeachers?.some((kt) => kt.teacherId === teacher.id)
+              )
             })
             const koma = slot ? komaMap.get(slot.komaId) : null
             const subject = koma ? subjectMap.get(koma.subjectId) : null
@@ -199,8 +239,11 @@ export async function generateExcel(
           for (let p = 1; p <= maxPeriods; p++) {
             const slot = data.slots.find((s) => {
               const k = komaMap.get(s.komaId)
-              return s.dayOfWeek === d && s.period === p &&
+              return (
+                s.dayOfWeek === d &&
+                s.period === p &&
                 k?.komaClasses?.some((kc) => kc.classId === cls.id)
+              )
             })
             const koma = slot ? komaMap.get(slot.komaId) : null
             const subject = koma ? subjectMap.get(koma.subjectId) : null
@@ -219,29 +262,50 @@ export async function generateExcel(
     }
 
     case "teacher-schedule":
-      createScheduleSheet(wb, "先生時間割", "先生用時間割", "時間割", data.teachers, data, (tid) =>
-        data.slots.filter((s) => {
-          const k = komaMap.get(s.komaId)
-          return k?.komaTeachers?.some((kt) => kt.teacherId === tid)
-        })
+      createScheduleSheet(
+        wb,
+        "先生時間割",
+        "先生用時間割",
+        "時間割",
+        data.teachers,
+        data,
+        (tid) =>
+          data.slots.filter((s) => {
+            const k = komaMap.get(s.komaId)
+            return k?.komaTeachers?.some((kt) => kt.teacherId === tid)
+          })
       )
       break
 
     case "class-schedule":
-      createScheduleSheet(wb, "クラス時間割", "クラス用時間割", "時間割", data.classes, data, (cid) =>
-        data.slots.filter((s) => {
-          const k = komaMap.get(s.komaId)
-          return k?.komaClasses?.some((kc) => kc.classId === cid)
-        })
+      createScheduleSheet(
+        wb,
+        "クラス時間割",
+        "クラス用時間割",
+        "時間割",
+        data.classes,
+        data,
+        (cid) =>
+          data.slots.filter((s) => {
+            const k = komaMap.get(s.komaId)
+            return k?.komaClasses?.some((kc) => kc.classId === cid)
+          })
       )
       break
 
     case "room-schedule":
-      createScheduleSheet(wb, "教室時間割", "特別教室用時間割", "利用予定", data.rooms, data, (rid) =>
-        data.slots.filter((s) => {
-          const k = komaMap.get(s.komaId)
-          return k?.komaRooms?.some((kr) => kr.roomId === rid)
-        })
+      createScheduleSheet(
+        wb,
+        "教室時間割",
+        "特別教室用時間割",
+        "利用予定",
+        data.rooms,
+        data,
+        (rid) =>
+          data.slots.filter((s) => {
+            const k = komaMap.get(s.komaId)
+            return k?.komaRooms?.some((kr) => kr.roomId === rid)
+          })
       )
       break
 
@@ -260,7 +324,11 @@ export async function generateExcel(
         ws.getCell(row, 2).value = duty.shortName
         ws.getCell(row, 3).value = DAY_NAMES[duty.dayOfWeek] ?? ""
         ws.getCell(row, 4).value = duty.period
-        ws.getCell(row, 5).value = duty.teacherDuties?.map((td) => td.teacher?.name ?? "").filter(Boolean).join(", ") ?? ""
+        ws.getCell(row, 5).value =
+          duty.teacherDuties
+            ?.map((td) => td.teacher?.name ?? "")
+            .filter(Boolean)
+            .join(", ") ?? ""
         for (let i = 1; i <= 5; i++) addThinBorders(ws.getCell(row, i))
         row++
       }
@@ -269,7 +337,15 @@ export async function generateExcel(
 
     case "teacher-list": {
       const ws = wb.addWorksheet("先生一覧")
-      const headers = ["氏名", "カナ", "主担当教科", "1日最大", "連続最大", "週最大", "備考"]
+      const headers = [
+        "氏名",
+        "カナ",
+        "主担当教科",
+        "1日最大",
+        "連続最大",
+        "週最大",
+        "備考",
+      ]
       headers.forEach((h, i) => {
         const c = ws.getCell(1, i + 1)
         c.value = h
@@ -278,7 +354,9 @@ export async function generateExcel(
       })
       let row = 2
       for (const teacher of data.teachers) {
-        const mainSubject = teacher.mainSubjectId ? subjectMap.get(teacher.mainSubjectId) : null
+        const mainSubject = teacher.mainSubjectId
+          ? subjectMap.get(teacher.mainSubjectId)
+          : null
         ws.getCell(row, 1).value = teacher.name
         ws.getCell(row, 2).value = teacher.nameKana
         ws.getCell(row, 3).value = mainSubject?.name ?? ""
@@ -294,7 +372,15 @@ export async function generateExcel(
 
     case "koma-list": {
       const ws = wb.addWorksheet("駒一覧")
-      const headers = ["教科", "学年", "タイプ", "コマ数", "ラベル", "担当先生", "優先度"]
+      const headers = [
+        "教科",
+        "学年",
+        "タイプ",
+        "コマ数",
+        "ラベル",
+        "担当先生",
+        "優先度",
+      ]
       headers.forEach((h, i) => {
         const c = ws.getCell(1, i + 1)
         c.value = h
@@ -305,7 +391,10 @@ export async function generateExcel(
       for (const koma of data.komas) {
         const subject = subjectMap.get(koma.subjectId)
         const grade = gradeMap.get(koma.gradeId)
-        const teachers = koma.komaTeachers?.map((kt) => teacherMap.get(kt.teacherId)?.name ?? "").filter(Boolean).join(", ")
+        const teachers = koma.komaTeachers
+          ?.map((kt) => teacherMap.get(kt.teacherId)?.name ?? "")
+          .filter(Boolean)
+          .join(", ")
         ws.getCell(row, 1).value = subject?.name ?? ""
         ws.getCell(row, 2).value = grade?.name ?? ""
         ws.getCell(row, 3).value = koma.type === "consecutive" ? "連続" : "普通"
@@ -325,7 +414,15 @@ export async function generateExcel(
       for (const slot of data.slots) {
         placedCount.set(slot.komaId, (placedCount.get(slot.komaId) ?? 0) + 1)
       }
-      const headers = ["教科", "学年", "ラベル", "必要数", "配置済", "残り", "担当先生"]
+      const headers = [
+        "教科",
+        "学年",
+        "ラベル",
+        "必要数",
+        "配置済",
+        "残り",
+        "担当先生",
+      ]
       headers.forEach((h, i) => {
         const c = ws.getCell(1, i + 1)
         c.value = h
@@ -339,7 +436,10 @@ export async function generateExcel(
         if (remaining <= 0) continue
         const subject = subjectMap.get(koma.subjectId)
         const grade = gradeMap.get(koma.gradeId)
-        const teachers = koma.komaTeachers?.map((kt) => teacherMap.get(kt.teacherId)?.name ?? "").filter(Boolean).join(", ")
+        const teachers = koma.komaTeachers
+          ?.map((kt) => teacherMap.get(kt.teacherId)?.name ?? "")
+          .filter(Boolean)
+          .join(", ")
         ws.getCell(row, 1).value = subject?.name ?? ""
         ws.getCell(row, 2).value = grade?.name ?? ""
         ws.getCell(row, 3).value = koma.label

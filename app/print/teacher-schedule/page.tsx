@@ -1,7 +1,7 @@
 "use client"
 
-import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 import { PrintableGrid } from "@/components/print/PrintableGrid"
+import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 
 export default function TeacherSchedulePrintPage() {
   return (
@@ -16,7 +16,9 @@ export default function TeacherSchedulePrintPage() {
             {data.teachers.map((teacher) => {
               const teacherSlots = data.slots.filter((s) => {
                 const k = komaMap.get(s.komaId)
-                return k?.komaTeachers?.some((kt) => kt.teacherId === teacher.id)
+                return k?.komaTeachers?.some(
+                  (kt) => kt.teacherId === teacher.id
+                )
               })
               return (
                 <PrintableGrid

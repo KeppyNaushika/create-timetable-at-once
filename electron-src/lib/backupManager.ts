@@ -1,14 +1,17 @@
 import * as fs from "fs/promises"
 import * as path from "path"
 
-import { getDatabasePath } from "./prisma/databaseInitializer"
 import { getDataDirectory } from "./dataManager"
+import { getDatabasePath } from "./prisma/databaseInitializer"
 
 function getBackupDirectory(): string {
   return path.join(getDataDirectory(), "backups")
 }
 
-export async function createBackup(): Promise<{ success: boolean; path?: string }> {
+export async function createBackup(): Promise<{
+  success: boolean
+  path?: string
+}> {
   try {
     const backupDir = getBackupDirectory()
     await fs.mkdir(backupDir, { recursive: true })

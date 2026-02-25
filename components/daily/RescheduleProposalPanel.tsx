@@ -1,10 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle, CalendarClock, Loader2 } from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Loader2, CalendarClock, AlertTriangle } from "lucide-react"
 import type { RescheduleProposal } from "@/types/daily.types"
 
 interface RescheduleProposalPanelProps {
@@ -30,34 +31,34 @@ export function RescheduleProposalPanel({
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="flex items-center justify-center py-8 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center py-8">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             候補を検索中...
           </div>
         ) : proposals.length === 0 ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground py-6 text-center text-sm">
             振替候補が見つかりませんでした
           </div>
         ) : (
           <div className="space-y-2">
-            {proposals.map((proposal, i) => (
+            {proposals.map((proposal, _i) => (
               <div
                 key={`${proposal.targetDate}-${proposal.targetPeriod}`}
-                className="flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-accent/30"
+                className="hover:bg-accent/30 flex items-start gap-3 rounded-md border p-3 transition-colors"
               >
                 <div className="flex-1 space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">
+                    <span className="text-sm font-medium">
                       {proposal.targetDate}（
                       {DAY_LABELS[proposal.targetDayOfWeek]}）
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       {proposal.targetPeriod}時限
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Progress value={proposal.score} className="h-2 flex-1" />
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    <span className="text-muted-foreground text-xs whitespace-nowrap">
                       {proposal.score}点
                     </span>
                   </div>
@@ -66,7 +67,7 @@ export function RescheduleProposalPanel({
                       <Badge
                         key={j}
                         variant="outline"
-                        className="text-[10px] px-1.5 py-0"
+                        className="px-1.5 py-0 text-[10px]"
                       >
                         {reason}
                       </Badge>
@@ -78,7 +79,7 @@ export function RescheduleProposalPanel({
                         <Badge
                           key={j}
                           variant="destructive"
-                          className="text-[10px] px-1.5 py-0"
+                          className="px-1.5 py-0 text-[10px]"
                         >
                           <AlertTriangle className="mr-0.5 h-2.5 w-2.5" />
                           {conflict}

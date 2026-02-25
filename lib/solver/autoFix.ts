@@ -1,9 +1,9 @@
 import type { ConstraintContext } from "./constraints"
 import {
-  evaluateAllConstraints,
-  isPlacementValid,
   calculateScore,
   checkPlacement,
+  evaluateAllConstraints,
+  isPlacementValid,
 } from "./constraints"
 import type { Assignment, SlotPosition, Violation } from "./types"
 

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
 import {
   CalendarRange,
   ChevronLeft,
@@ -8,6 +7,9 @@ import {
   Download,
   Loader2,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,7 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -25,29 +26,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useSchoolEvents } from "@/hooks/useSchoolEvents"
 import { useAnnualHours } from "@/hooks/useAnnualHours"
+import { useSchoolEvents } from "@/hooks/useSchoolEvents"
 import { useTimetableData } from "@/hooks/useTimetableData"
 import type { SchoolEvent } from "@/types/daily.types"
 
-const MONTH_NAMES = [
-  "4月", "5月", "6月", "7月", "8月", "9月",
-  "10月", "11月", "12月", "1月", "2月", "3月",
-]
-
 const EVENT_TYPE_COLORS: Record<string, string> = {
   holiday: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  national_holiday: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  school_event: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  national_holiday:
+    "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  school_event:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   exam: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  ceremony: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+  ceremony:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   other: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 }
 
 export default function AnnualCalendarPage() {
   const { data: timetableData, loading: timetableLoading } = useTimetableData()
-  const { events, loading: eventsLoading, fetchByDateRange, importHolidays } =
-    useSchoolEvents()
+  const {
+    events,
+    loading: eventsLoading,
+    fetchByDateRange,
+    importHolidays,
+  } = useSchoolEvents()
   const { annualData, loading: annualLoading, calculate } = useAnnualHours()
 
   const [year, setYear] = useState(() => {
@@ -135,7 +138,7 @@ export default function AnnualCalendarPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">年間カレンダー</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             年間行事予定と時数見込み
           </p>
         </div>
@@ -173,7 +176,7 @@ export default function AnnualCalendarPage() {
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : (
         <>
@@ -186,10 +189,8 @@ export default function AnnualCalendarPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-2xl font-bold">
-                      {annualData.totalDays}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-2xl font-bold">{annualData.totalDays}</p>
+                    <p className="text-muted-foreground text-sm">
                       総授業可能日
                     </p>
                   </div>
@@ -197,13 +198,13 @@ export default function AnnualCalendarPage() {
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {annualData.classDays}
                     </p>
-                    <p className="text-sm text-muted-foreground">授業日数</p>
+                    <p className="text-muted-foreground text-sm">授業日数</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                       {annualData.eventDays}
                     </p>
-                    <p className="text-sm text-muted-foreground">行事・休日</p>
+                    <p className="text-muted-foreground text-sm">行事・休日</p>
                   </div>
                 </div>
               </CardContent>
@@ -211,45 +212,44 @@ export default function AnnualCalendarPage() {
           )}
 
           {/* Annual hours by subject */}
-          {annualData &&
-            Object.keys(annualData.hoursBySubject).length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">
-                    科目別年間見込み時数
-                  </CardTitle>
-                  <CardDescription>
-                    授業日数と週あたりコマ数から算出
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>科目</TableHead>
-                        <TableHead className="text-right">
-                          年間見込み時数
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {Object.entries(annualData.hoursBySubject)
-                        .sort(([, a], [, b]) => b - a)
-                        .map(([subjectId, hours]) => (
-                          <TableRow key={subjectId}>
-                            <TableCell className="font-medium">
-                              {subjectNameMap.get(subjectId) ?? subjectId}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Badge variant="secondary">{hours}時間</Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
+          {annualData && Object.keys(annualData.hoursBySubject).length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">
+                  科目別年間見込み時数
+                </CardTitle>
+                <CardDescription>
+                  授業日数と週あたりコマ数から算出
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>科目</TableHead>
+                      <TableHead className="text-right">
+                        年間見込み時数
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Object.entries(annualData.hoursBySubject)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([subjectId, hours]) => (
+                        <TableRow key={subjectId}>
+                          <TableCell className="font-medium">
+                            {subjectNameMap.get(subjectId) ?? subjectId}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="secondary">{hours}時間</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Monthly event listing */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -265,9 +265,7 @@ export default function AnnualCalendarPage() {
                   </CardHeader>
                   <CardContent>
                     {monthEvents.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">
-                        行事なし
-                      </p>
+                      <p className="text-muted-foreground text-xs">行事なし</p>
                     ) : (
                       <div className="space-y-1">
                         {monthEvents
@@ -277,11 +275,11 @@ export default function AnnualCalendarPage() {
                               key={ev.id}
                               className="flex items-center gap-2 text-xs"
                             >
-                              <span className="font-mono text-muted-foreground">
+                              <span className="text-muted-foreground font-mono">
                                 {ev.date.slice(8)}日
                               </span>
                               <Badge
-                                className={`text-[10px] px-1 py-0 ${
+                                className={`px-1 py-0 text-[10px] ${
                                   EVENT_TYPE_COLORS[ev.eventType] ?? ""
                                 }`}
                               >

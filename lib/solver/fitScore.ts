@@ -1,6 +1,6 @@
 import type { ConstraintContext } from "./constraints"
 import { checkPlacement } from "./constraints"
-import type { Assignment, KomaLookup, SlotPosition } from "./types"
+import type { Assignment, SlotPosition } from "./types"
 
 // 適合度スコア: 低いほど良い（0 = 完全適合）
 export function calculateFitScore(

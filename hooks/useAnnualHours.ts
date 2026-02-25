@@ -2,8 +2,7 @@
 
 import { useCallback, useState } from "react"
 
-import type { SchoolEvent } from "@/types/daily.types"
-import type { TimetablePattern, Koma } from "@/types/common.types"
+import type { Koma, TimetablePattern } from "@/types/common.types"
 
 export interface AnnualData {
   totalDays: number

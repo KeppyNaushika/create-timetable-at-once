@@ -2,10 +2,10 @@
 
 import { DAY_NAMES } from "@/lib/constants"
 import type {
+  ClassInfo,
   Koma,
   Subject,
   Teacher,
-  ClassInfo,
   TimetableSlot,
 } from "@/types/common.types"
 import type { SubjectHighlight } from "@/types/review.types"
@@ -49,8 +49,8 @@ export function OverviewMatrix({
 
     const entityIds: string[] =
       mode === "teacher"
-        ? koma.komaTeachers?.map((kt) => kt.teacherId) ?? []
-        : koma.komaClasses?.map((kc) => kc.classId) ?? []
+        ? (koma.komaTeachers?.map((kt) => kt.teacherId) ?? [])
+        : (koma.komaClasses?.map((kc) => kc.classId) ?? [])
 
     for (const eid of entityIds) {
       if (!entitySlotMap.has(eid)) entitySlotMap.set(eid, new Map())
@@ -81,18 +81,18 @@ export function OverviewMatrix({
       <table className="w-full border-collapse text-xs">
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 border bg-muted px-2 py-1 text-left min-w-[80px]">
+            <th className="bg-muted sticky left-0 z-10 min-w-[80px] border px-2 py-1 text-left">
               {mode === "teacher" ? "先生" : "クラス"}
             </th>
             {days.map((d) =>
               periods.map((p) => (
                 <th
                   key={`${d}-${p}`}
-                  className={`border bg-muted px-1 py-1 text-center min-w-[50px] ${
-                    p === 1 ? "border-l-2 border-l-border" : ""
+                  className={`bg-muted min-w-[50px] border px-1 py-1 text-center ${
+                    p === 1 ? "border-l-border border-l-2" : ""
                   }`}
                 >
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-muted-foreground text-[10px]">
                     {DAY_NAMES[d]}
                   </div>
                   <div>{p}</div>
@@ -106,7 +106,7 @@ export function OverviewMatrix({
             const slotMap = entitySlotMap.get(entity.id)
             return (
               <tr key={entity.id} className="hover:bg-accent/30">
-                <td className="sticky left-0 z-10 border bg-background px-2 py-1 font-medium whitespace-nowrap">
+                <td className="bg-background sticky left-0 z-10 border px-2 py-1 font-medium whitespace-nowrap">
                   {entity.name}
                 </td>
                 {days.map((d) =>
@@ -123,7 +123,7 @@ export function OverviewMatrix({
                       <td
                         key={`${d}-${p}`}
                         className={`border px-1 py-0.5 text-center ${
-                          p === 1 ? "border-l-2 border-l-border" : ""
+                          p === 1 ? "border-l-border border-l-2" : ""
                         }`}
                         style={{
                           backgroundColor: highlightColor
@@ -151,7 +151,7 @@ export function OverviewMatrix({
         </tbody>
       </table>
       {filteredEntities.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground py-8 text-center">
           {filterSubjectId
             ? "該当する教科の配置がありません"
             : "データがありません"}

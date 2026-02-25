@@ -8,7 +8,6 @@ import type {
   SpecialRoom,
   Subject,
   Teacher,
-  TeacherAvailability,
   TimetableSlot,
 } from "@/types/common.types"
 
@@ -78,7 +77,15 @@ export const DEFAULT_SOLVER_CONFIG: SolverConfig = {
 
 // ソルバー進捗
 export interface SolverProgress {
-  phase: "propagation" | "backtrack" | "annealing" | "chain" | "construction" | "localSearch" | "done" | "error"
+  phase:
+    | "propagation"
+    | "backtrack"
+    | "annealing"
+    | "chain"
+    | "construction"
+    | "localSearch"
+    | "done"
+    | "error"
   phaseLabel: string
   patternIndex: number
   totalPatterns: number

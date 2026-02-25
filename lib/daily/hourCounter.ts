@@ -1,15 +1,15 @@
 import type {
-  Koma,
-  TimetableSlot,
   ClassInfo,
+  Koma,
   Subject,
   Teacher,
+  TimetableSlot,
 } from "@/types/common.types"
 import type {
   DailyChange,
   DailySchedule,
-  HourCountRow,
   HourCountByTeacherRow,
+  HourCountRow,
 } from "@/types/daily.types"
 
 interface HourCountInput {
@@ -214,10 +214,7 @@ export function calculateTeacherHours(
     }
   }
 
-  const teacherMap = new Map<
-    string,
-    { planned: number; actual: number }
-  >()
+  const teacherMap = new Map<string, { planned: number; actual: number }>()
 
   for (const koma of komas) {
     const komaTeachers = koma.komaTeachers ?? []

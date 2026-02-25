@@ -394,7 +394,13 @@ CREATE UNIQUE INDEX "AppSetting_key_key" ON "AppSetting"("key");
         `
 
         const allSQL =
-          migrationSQL + phase2SQL + indexSQL + phase3SQL + phase3IndexSQL + phase5SQL + phase5IndexSQL
+          migrationSQL +
+          phase2SQL +
+          indexSQL +
+          phase3SQL +
+          phase3IndexSQL +
+          phase5SQL +
+          phase5IndexSQL
         const statements = allSQL.split(";").filter((stmt) => stmt.trim())
 
         for (const statement of statements) {

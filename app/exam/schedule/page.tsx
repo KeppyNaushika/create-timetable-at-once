@@ -1,14 +1,11 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { ArrowRight, CalendarDays, Loader2, Plus, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import {
-  Plus,
-  CalendarDays,
-  Loader2,
-  Trash2,
-  ArrowRight,
-} from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+
+import { ExamScheduleForm } from "@/components/exam/ExamScheduleForm"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,20 +21,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { ExamScheduleForm } from "@/components/exam/ExamScheduleForm"
 import { useExamSchedule } from "@/hooks/useExamSchedule"
 import type { Subject } from "@/types/common.types"
 
 export default function ExamScheduleListPage() {
   const router = useRouter()
-  const {
-    schedules,
-    loading,
-    error,
-    createSchedule,
-    deleteSchedule,
-  } = useExamSchedule()
+  const { schedules, loading, error, createSchedule, deleteSchedule } =
+    useExamSchedule()
 
   const [showForm, setShowForm] = useState(false)
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -66,7 +56,9 @@ export default function ExamScheduleListPage() {
   const handleDelete = useCallback(
     async (id: string) => {
       if (
-        !window.confirm("この考査日程を削除しますか？割当データも削除されます。")
+        !window.confirm(
+          "この考査日程を削除しますか？割当データも削除されます。"
+        )
       ) {
         return
       }
@@ -85,7 +77,7 @@ export default function ExamScheduleListPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -95,7 +87,7 @@ export default function ExamScheduleListPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">考査日程管理</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             定期考査の日程を作成し、監督割当を行います
           </p>
         </div>
@@ -105,14 +97,12 @@ export default function ExamScheduleListPage() {
         </Button>
       </div>
 
-      {error && (
-        <div className="p-4 text-destructive">エラー: {error}</div>
-      )}
+      {error && <div className="text-destructive p-4">エラー: {error}</div>}
 
       {schedules.length === 0 && !error ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <CalendarDays className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
             <p className="text-muted-foreground">
               考査日程がありません。「新規作成」から追加してください。
             </p>
@@ -150,7 +140,7 @@ export default function ExamScheduleListPage() {
                     </div>
                   )}
                   {schedule.notes && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {schedule.notes}
                     </p>
                   )}

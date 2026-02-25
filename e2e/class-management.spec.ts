@@ -4,8 +4,8 @@
  * gradeCreate, classBatchCreate, classUpdate, classDelete
  * classGetByGradeId
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -33,7 +33,14 @@ test.describe.serial("学年・クラス CRUD", () => {
         maxPeriodsPerDay: 6,
         hasZeroPeriod: false,
         namingConvention: "number",
-        periodNamesJson: JSON.stringify(["1限", "2限", "3限", "4限", "5限", "6限"]),
+        periodNamesJson: JSON.stringify([
+          "1限",
+          "2限",
+          "3限",
+          "4限",
+          "5限",
+          "6限",
+        ]),
         periodLengthsJson: JSON.stringify([50, 50, 50, 50, 50, 50]),
         lunchAfterPeriod: 4,
         classCountsJson: JSON.stringify({ "1": 3, "2": 3, "3": 3 }),

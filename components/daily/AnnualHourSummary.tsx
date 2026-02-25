@@ -1,5 +1,7 @@
 "use client"
 
+import { Calendar, CalendarDays, GraduationCap } from "lucide-react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
@@ -9,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { CalendarDays, GraduationCap, Calendar } from "lucide-react"
 
 interface AnnualHourSummaryProps {
   totalDays: number
@@ -39,7 +40,7 @@ export function AnnualHourSummary({
               <CalendarDays className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">総日数</p>
+              <p className="text-muted-foreground text-xs">総日数</p>
               <p className="text-2xl font-bold">{totalDays}</p>
             </div>
           </CardContent>
@@ -51,7 +52,7 @@ export function AnnualHourSummary({
               <GraduationCap className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">授業日数</p>
+              <p className="text-muted-foreground text-xs">授業日数</p>
               <p className="text-2xl font-bold">{classDays}</p>
             </div>
           </CardContent>
@@ -63,7 +64,7 @@ export function AnnualHourSummary({
               <Calendar className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">行事日数</p>
+              <p className="text-muted-foreground text-xs">行事日数</p>
               <p className="text-2xl font-bold">{eventDays}</p>
             </div>
           </CardContent>
@@ -77,7 +78,7 @@ export function AnnualHourSummary({
         </CardHeader>
         <CardContent>
           {subjectEntries.length === 0 ? (
-            <div className="py-4 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground py-4 text-center text-sm">
               データがありません
             </div>
           ) : (
@@ -94,7 +95,7 @@ export function AnnualHourSummary({
                   <TableRow key={subject}>
                     <TableCell className="font-medium">{subject}</TableCell>
                     <TableCell className="text-right">{hours}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-right">
                       {totalHours > 0
                         ? `${((hours / totalHours) * 100).toFixed(1)}%`
                         : "-"}
@@ -102,7 +103,7 @@ export function AnnualHourSummary({
                   </TableRow>
                 ))}
                 {/* Total row */}
-                <TableRow className="font-bold border-t-2">
+                <TableRow className="border-t-2 font-bold">
                   <TableCell>合計</TableCell>
                   <TableCell className="text-right">{totalHours}</TableCell>
                   <TableCell className="text-right">100%</TableCell>

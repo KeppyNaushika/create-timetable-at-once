@@ -322,7 +322,7 @@ export default function TimetableFramePage() {
                             return (
                               <TableCell
                                 key={day}
-                                className={`h-10 border text-center cursor-pointer select-none transition-colors ${
+                                className={`h-10 cursor-pointer border text-center transition-colors select-none ${
                                   isDisabled
                                     ? "bg-muted text-muted-foreground"
                                     : "hover:bg-accent"

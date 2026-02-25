@@ -1,6 +1,12 @@
 "use client"
 
-import { Settings, Palette, Keyboard } from "lucide-react"
+import { Keyboard, Palette, Settings } from "lucide-react"
+import { useCallback, useState } from "react"
+
+import { ShortcutHelpDialog } from "@/components/common/ShortcutHelpDialog"
+import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { BackupSettings } from "@/components/settings/BackupSettings"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -9,14 +15,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { BackupSettings } from "@/components/settings/BackupSettings"
-import { ThemeToggle } from "@/components/layout/ThemeToggle"
-import { ShortcutHelpDialog } from "@/components/common/ShortcutHelpDialog"
 import { useBackup } from "@/hooks/useBackup"
 import { useTheme } from "@/hooks/useTheme"
-import { useState, useCallback } from "react"
 
 export default function SettingsPage() {
   const {
@@ -41,7 +42,7 @@ export default function SettingsPage() {
           <Settings className="mr-2 inline h-5 w-5" />
           設定
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           アプリケーションの設定を管理します
         </p>
       </div>
@@ -59,7 +60,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label>カラーモード</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 現在: {resolvedTheme === "dark" ? "ダーク" : "ライト"}モード
                 {theme === "system" ? "（システム設定に追従）" : ""}
               </p>
@@ -72,7 +73,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label>テーマ追従</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 OSのダークモード設定に自動で追従します
               </p>
             </div>
@@ -99,10 +100,7 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => setShortcutHelpOpen(true)}
-          >
+          <Button variant="outline" onClick={() => setShortcutHelpOpen(true)}>
             <Keyboard className="mr-2 h-4 w-4" />
             ショートカット一覧を表示
           </Button>

@@ -15,17 +15,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useClasses } from "@/hooks/useClasses"
 import { useConditions } from "@/hooks/useConditions"
+import { useDuties } from "@/hooks/useDuties"
 import { useKomas } from "@/hooks/useKomas"
 import { usePatterns } from "@/hooks/usePatterns"
+import { useRooms } from "@/hooks/useRooms"
 import { useSchool } from "@/hooks/useSchool"
 import { useSolver } from "@/hooks/useSolver"
 import { useTeachers } from "@/hooks/useTeachers"
-import { useClasses } from "@/hooks/useClasses"
-import { useRooms } from "@/hooks/useRooms"
-import { useDuties } from "@/hooks/useDuties"
-import { DEFAULT_SOLVER_CONFIG } from "@/lib/solver/types"
 import type { SolverConfig, SolverInput } from "@/lib/solver/types"
+import { DEFAULT_SOLVER_CONFIG } from "@/lib/solver/types"
 
 export default function AutoPage() {
   const { school } = useSchool()

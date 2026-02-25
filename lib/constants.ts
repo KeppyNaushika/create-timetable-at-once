@@ -247,7 +247,11 @@ export const KEYBOARD_SHORTCUTS = {
   redo: { key: "z", modifiers: ["ctrl", "shift"], label: "やり直す" },
   save: { key: "s", modifiers: ["ctrl"], label: "保存" },
   help: { key: "/", modifiers: ["ctrl"], label: "ショートカットヘルプ" },
-  toggleDark: { key: "d", modifiers: ["ctrl", "shift"], label: "ダークモード切替" },
+  toggleDark: {
+    key: "d",
+    modifiers: ["ctrl", "shift"],
+    label: "ダークモード切替",
+  },
 } as const
 
 export const COLOR_PALETTE = [

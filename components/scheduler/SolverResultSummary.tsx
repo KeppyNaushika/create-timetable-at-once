@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import type { SolverResult } from "@/lib/solver/types"

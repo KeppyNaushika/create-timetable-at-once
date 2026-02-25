@@ -4,8 +4,8 @@
  * solver-small-school と同一データで maxPatterns=3 でソルバー実行
  * 複数パターンの結果表示・スコア比較・採用
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -15,11 +15,11 @@ import {
   TEST_BASE_URL,
 } from "./helpers/fixtures"
 import {
+  createTestCondition,
+  createTestKomas,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestKomas,
-  createTestCondition,
   type SchoolIds,
 } from "./helpers/school-builder"
 
@@ -62,20 +62,104 @@ test.describe.serial("複数パターン生成テスト", () => {
     )
 
     const komaDefs = [
-      { subjectName: "国語", gradeNum: 1, classIndices: [0], teacherIndices: [0], count: 4 },
-      { subjectName: "国語", gradeNum: 1, classIndices: [1], teacherIndices: [0], count: 4 },
-      { subjectName: "数学", gradeNum: 1, classIndices: [0], teacherIndices: [1], count: 4 },
-      { subjectName: "数学", gradeNum: 1, classIndices: [1], teacherIndices: [1], count: 4 },
-      { subjectName: "英語", gradeNum: 1, classIndices: [0], teacherIndices: [2], count: 4 },
-      { subjectName: "英語", gradeNum: 1, classIndices: [1], teacherIndices: [2], count: 4 },
-      { subjectName: "理科", gradeNum: 1, classIndices: [0], teacherIndices: [3], count: 3 },
-      { subjectName: "理科", gradeNum: 1, classIndices: [1], teacherIndices: [3], count: 3 },
-      { subjectName: "社会", gradeNum: 1, classIndices: [0], teacherIndices: [4], count: 3 },
-      { subjectName: "社会", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 3 },
-      { subjectName: "道徳", gradeNum: 1, classIndices: [0], teacherIndices: [3], count: 1 },
-      { subjectName: "道徳", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 1 },
-      { subjectName: "学活", gradeNum: 1, classIndices: [0], teacherIndices: [4], count: 1 },
-      { subjectName: "学活", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 1 },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [0],
+        count: 4,
+      },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [0],
+        count: 4,
+      },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [1],
+        count: 4,
+      },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [1],
+        count: 4,
+      },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [2],
+        count: 4,
+      },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [2],
+        count: 4,
+      },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [3],
+        count: 3,
+      },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [3],
+        count: 3,
+      },
+      {
+        subjectName: "社会",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [4],
+        count: 3,
+      },
+      {
+        subjectName: "社会",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 3,
+      },
+      {
+        subjectName: "道徳",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [3],
+        count: 1,
+      },
+      {
+        subjectName: "道徳",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 1,
+      },
+      {
+        subjectName: "学活",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [4],
+        count: 1,
+      },
+      {
+        subjectName: "学活",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 1,
+      },
     ]
 
     await createTestKomas(page, komaDefs, schoolIds, teacherIds, [])
@@ -110,7 +194,9 @@ test.describe.serial("複数パターン生成テスト", () => {
 
     // "全Nパターンの結果" テキストの確認（パターン数表示）
     const resultText = await page.locator("body").textContent()
-    console.log(`[複数パターン] 結果テキスト抜粋: ${resultText?.substring(0, 500)}`)
+    console.log(
+      `[複数パターン] 結果テキスト抜粋: ${resultText?.substring(0, 500)}`
+    )
 
     // 結果を保存
     await page.getByRole("button", { name: "結果を保存" }).click()

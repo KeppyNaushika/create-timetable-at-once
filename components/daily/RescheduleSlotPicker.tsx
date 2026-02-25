@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+
 import type { RescheduleProposal } from "@/types/daily.types"
 
 interface RescheduleSlotPickerProps {
@@ -52,7 +53,7 @@ export function RescheduleSlotPicker({
 
   if (proposals.length === 0) {
     return (
-      <div className="py-4 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground py-4 text-center text-sm">
         振替候補がありません
       </div>
     )
@@ -64,14 +65,11 @@ export function RescheduleSlotPicker({
         <table className="border-collapse text-xs">
           <thead>
             <tr>
-              <th className="border bg-muted px-2 py-1.5 text-left whitespace-nowrap">
+              <th className="bg-muted border px-2 py-1.5 text-left whitespace-nowrap">
                 日付
               </th>
               {periods.map((p) => (
-                <th
-                  key={p}
-                  className="border bg-muted px-2 py-1.5 text-center"
-                >
+                <th key={p} className="bg-muted border px-2 py-1.5 text-center">
                   {p}
                 </th>
               ))}
@@ -85,7 +83,7 @@ export function RescheduleSlotPicker({
 
               return (
                 <tr key={date}>
-                  <td className="border bg-muted/50 px-2 py-1.5 whitespace-nowrap font-medium">
+                  <td className="bg-muted/50 border px-2 py-1.5 font-medium whitespace-nowrap">
                     {date}
                   </td>
                   {periods.map((p) => {
@@ -95,7 +93,7 @@ export function RescheduleSlotPicker({
                       return (
                         <td
                           key={p}
-                          className="border px-2 py-1.5 text-center text-muted-foreground"
+                          className="text-muted-foreground border px-2 py-1.5 text-center"
                         >
                           -
                         </td>
@@ -106,7 +104,7 @@ export function RescheduleSlotPicker({
                       <td key={p} className="border p-0.5">
                         <button
                           type="button"
-                          className={`w-full rounded px-2 py-1 text-center font-medium border transition-colors ${getScoreColor(
+                          className={`w-full rounded border px-2 py-1 text-center font-medium transition-colors ${getScoreColor(
                             proposal.score
                           )}`}
                           onClick={() => onSelect(date, p)}
@@ -125,25 +123,25 @@ export function RescheduleSlotPicker({
       </div>
 
       {/* Score legend */}
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-green-100 border border-green-300" />
+          <div className="h-3 w-3 rounded-sm border border-green-300 bg-green-100" />
           <span>80+</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-blue-100 border border-blue-300" />
+          <div className="h-3 w-3 rounded-sm border border-blue-300 bg-blue-100" />
           <span>60-79</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-yellow-100 border border-yellow-300" />
+          <div className="h-3 w-3 rounded-sm border border-yellow-300 bg-yellow-100" />
           <span>40-59</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-orange-100 border border-orange-300" />
+          <div className="h-3 w-3 rounded-sm border border-orange-300 bg-orange-100" />
           <span>20-39</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-red-100 border border-red-300" />
+          <div className="h-3 w-3 rounded-sm border border-red-300 bg-red-100" />
           <span>0-19</span>
         </div>
       </div>

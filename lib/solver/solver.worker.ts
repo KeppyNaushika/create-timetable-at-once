@@ -1,9 +1,9 @@
 import { TimetableScheduler } from "./scheduler"
 import type {
-  WorkerMessage,
-  WorkerResponse,
   SolverProgress,
   SolverResult,
+  WorkerMessage,
+  WorkerResponse,
 } from "./types"
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {

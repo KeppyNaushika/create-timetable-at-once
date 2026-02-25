@@ -48,20 +48,17 @@ export function KomaDetailDialog({
     }
   }, [open, koma])
 
-  const handleRoomToggle = useCallback(
-    (roomId: string, checked: boolean) => {
-      setRoomIds((prev) => {
-        const next = new Set(prev)
-        if (checked) {
-          next.add(roomId)
-        } else {
-          next.delete(roomId)
-        }
-        return next
-      })
-    },
-    []
-  )
+  const handleRoomToggle = useCallback((roomId: string, checked: boolean) => {
+    setRoomIds((prev) => {
+      const next = new Set(prev)
+      if (checked) {
+        next.add(roomId)
+      } else {
+        next.delete(roomId)
+      }
+      return next
+    })
+  }, [])
 
   const handleSave = useCallback(async () => {
     if (!koma) return
@@ -73,7 +70,16 @@ export function KomaDetailDialog({
     } finally {
       setSaving(false)
     }
-  }, [koma, type, priority, label, roomIds, onUpdateKoma, onSetRooms, onOpenChange])
+  }, [
+    koma,
+    type,
+    priority,
+    label,
+    roomIds,
+    onUpdateKoma,
+    onSetRooms,
+    onOpenChange,
+  ])
 
   if (!koma) return null
 
@@ -110,9 +116,7 @@ export function KomaDetailDialog({
                 min={0}
                 max={9}
                 value={priority}
-                onChange={(e) =>
-                  setPriority(parseInt(e.target.value) || 5)
-                }
+                onChange={(e) => setPriority(parseInt(e.target.value) || 5)}
               />
             </div>
             <div className="space-y-2">

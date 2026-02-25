@@ -1,6 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { useMemo, useState } from "react"
+
+import { HourCountSummary } from "@/components/review/HourCountSummary"
+import { IndividualTimetableCard } from "@/components/review/IndividualTimetableCard"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -10,10 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IndividualTimetableCard } from "@/components/review/IndividualTimetableCard"
-import { HourCountSummary } from "@/components/review/HourCountSummary"
 import { useTimetableData } from "@/hooks/useTimetableData"
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 
 export default function IndividualPage() {
   const { data, loading, error } = useTimetableData()
@@ -58,22 +59,18 @@ export default function IndividualPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-destructive">
-        エラー: {error}
-      </div>
-    )
+    return <div className="text-destructive p-4">エラー: {error}</div>
   }
 
   if (!data.adoptedPattern) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
+      <div className="text-muted-foreground p-8 text-center">
         採用済みの時間割パターンがありません。
         <br />
         先に時間割を作成し、パターンを採用してください。
@@ -88,7 +85,7 @@ export default function IndividualPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">個別表</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           先生別・クラス別の個別時間割を表示します
         </p>
       </div>
@@ -101,7 +98,7 @@ export default function IndividualPage() {
 
         <TabsContent value={mode}>
           {entities.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center">
               {mode === "teacher" ? "先生" : "クラス"}が登録されていません
             </div>
           ) : (
@@ -109,7 +106,7 @@ export default function IndividualPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <select
-                    className="h-9 rounded border border-input bg-background px-3 text-sm"
+                    className="border-input bg-background h-9 rounded border px-3 text-sm"
                     value={currentIndex}
                     onChange={(e) => setCurrentIndex(Number(e.target.value))}
                   >
@@ -119,7 +116,7 @@ export default function IndividualPage() {
                       </option>
                     ))}
                   </select>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     ({currentIndex + 1} / {entities.length})
                   </span>
                 </div>
@@ -159,9 +156,7 @@ export default function IndividualPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base">時間数集計</CardTitle>
-                      <CardDescription>
-                        教科別・曜日別のコマ数
-                      </CardDescription>
+                      <CardDescription>教科別・曜日別のコマ数</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <HourCountSummary

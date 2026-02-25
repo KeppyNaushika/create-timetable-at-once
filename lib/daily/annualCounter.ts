@@ -104,10 +104,7 @@ export function calculateAnnualHours(
         eventDays++
       } else {
         // This is a class day (possibly with partial reduction)
-        const effectiveHours = Math.max(
-          0,
-          maxPeriodsPerDay - periodReduction
-        )
+        const effectiveHours = Math.max(0, maxPeriodsPerDay - periodReduction)
         hoursByDayOfWeek[dayOfWeek] += effectiveHours
         partialReductions += periodReduction
       }
@@ -117,8 +114,7 @@ export function calculateAnnualHours(
   }
 
   const classDays = totalWeekdays - eventDays
-  const totalPlannedHours =
-    classDays * maxPeriodsPerDay - partialReductions
+  const totalPlannedHours = classDays * maxPeriodsPerDay - partialReductions
 
   return {
     totalWeekdays,

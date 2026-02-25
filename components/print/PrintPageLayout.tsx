@@ -1,15 +1,19 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { FileDown, FileSpreadsheet, Loader2, Printer } from "lucide-react"
+import { useCallback, useState } from "react"
+
 import { Button } from "@/components/ui/button"
-import { PrintSettingsPanel, getDefaultPrintSettings } from "./PrintSettingsPanel"
-import { PrintPreview } from "./PrintPreview"
-import { useTimetableData } from "@/hooks/useTimetableData"
 import type { TimetableData } from "@/hooks/useTimetableData"
-import type { PrintSettings, ReportType } from "@/types/review.types"
+import { useTimetableData } from "@/hooks/useTimetableData"
 import { REPORT_TYPES } from "@/lib/constants"
 import { generatePdfBlob } from "@/lib/pdf/generatePdf"
-import { Loader2, FileDown, FileSpreadsheet, Printer } from "lucide-react"
+import type { PrintSettings, ReportType } from "@/types/review.types"
+
+import {
+  getDefaultPrintSettings,
+  PrintSettingsPanel,
+} from "./PrintSettingsPanel"
 
 interface PrintPageLayoutProps {
   reportType: ReportType
@@ -19,9 +23,14 @@ interface PrintPageLayoutProps {
   }) => React.ReactNode
 }
 
-export function PrintPageLayout({ reportType, children }: PrintPageLayoutProps) {
+export function PrintPageLayout({
+  reportType,
+  children,
+}: PrintPageLayoutProps) {
   const { data, loading, error } = useTimetableData()
-  const [settings, setSettings] = useState<PrintSettings>(getDefaultPrintSettings)
+  const [settings, setSettings] = useState<PrintSettings>(
+    getDefaultPrintSettings
+  )
   const [exporting, setExporting] = useState(false)
 
   const handlePdfExport = useCallback(async () => {
@@ -81,25 +90,21 @@ export function PrintPageLayout({ reportType, children }: PrintPageLayoutProps) 
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-destructive">エラー: {error}</div>
-    )
+    return <div className="text-destructive p-4">エラー: {error}</div>
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between no-print">
+      <div className="no-print flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{REPORT_TYPES[reportType]}</h1>
-          <p className="text-sm text-muted-foreground">
-            印刷・PDF・Excel出力
-          </p>
+          <p className="text-muted-foreground text-sm">印刷・PDF・Excel出力</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -131,14 +136,14 @@ export function PrintPageLayout({ reportType, children }: PrintPageLayoutProps) 
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[250px_1fr] no-print">
+      <div className="no-print grid gap-4 lg:grid-cols-[250px_1fr]">
         <PrintSettingsPanel settings={settings} onChange={setSettings} />
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           下のプレビューエリアに表示されている内容が出力されます
         </div>
       </div>
 
-      <div className="border rounded-lg p-4 print-area">
+      <div className="print-area rounded-lg border p-4">
         {children({ data, settings })}
       </div>
     </div>

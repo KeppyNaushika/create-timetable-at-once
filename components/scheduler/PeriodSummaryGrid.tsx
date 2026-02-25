@@ -1,8 +1,8 @@
 "use client"
 
+import type { PeriodSummaryResult } from "@/hooks/useKomaCheck"
 import { DAY_NAMES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import type { PeriodSummaryResult } from "@/hooks/useKomaCheck"
 
 interface PeriodSummaryGridProps {
   data: PeriodSummaryResult[]

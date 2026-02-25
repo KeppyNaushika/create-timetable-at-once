@@ -6,8 +6,9 @@ import type { DailySchedule } from "@/types/daily.types"
 
 export function useDailySchedule() {
   const [schedules, setSchedules] = useState<DailySchedule[]>([])
-  const [currentSchedule, setCurrentSchedule] =
-    useState<DailySchedule | null>(null)
+  const [currentSchedule, setCurrentSchedule] = useState<DailySchedule | null>(
+    null
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,9 +34,7 @@ export function useDailySchedule() {
       const data = await window.electronAPI.dailyScheduleGetByDate(date)
       setCurrentSchedule(data)
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "日課の取得に失敗しました"
-      )
+      setError(err instanceof Error ? err.message : "日課の取得に失敗しました")
     } finally {
       setLoading(false)
     }

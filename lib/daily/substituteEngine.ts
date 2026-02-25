@@ -1,10 +1,10 @@
 import type {
-  Teacher,
-  Koma,
-  TimetableSlot,
-  TeacherAvailability,
   Duty,
+  Koma,
+  Teacher,
+  TeacherAvailability,
   TeacherDutyInfo,
+  TimetableSlot,
 } from "@/types/common.types"
 import type { DailyChange, SubstituteCandidate } from "@/types/daily.types"
 
@@ -45,7 +45,7 @@ export function findSubstituteCandidates(
   const {
     targetDate,
     targetPeriod,
-    targetClassId,
+    targetClassId: _targetClassId,
     originalKomaId,
     teachers,
     komas,
@@ -146,8 +146,7 @@ export function findSubstituteCandidates(
 
     // Check if teacher is already assigned a substitute at this time
     const hasExistingChange = existingChanges.some(
-      (c) =>
-        c.substituteTeacherId === teacher.id && c.period === targetPeriod
+      (c) => c.substituteTeacherId === teacher.id && c.period === targetPeriod
     )
 
     const teacherIsAvailable =

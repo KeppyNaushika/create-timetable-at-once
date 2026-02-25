@@ -269,11 +269,21 @@ export interface ElectronAPI {
     reportType: string,
     data: unknown,
     defaultFileName: string
-  ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
+  ) => Promise<{
+    success: boolean
+    canceled?: boolean
+    filePath?: string
+    error?: string
+  }>
   exportSavePdf: (
     pdfData: number[],
     defaultFileName: string
-  ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
+  ) => Promise<{
+    success: boolean
+    canceled?: boolean
+    filePath?: string
+    error?: string
+  }>
 
   // DailySchedule
   dailyScheduleGetByMonth: (
@@ -285,9 +295,7 @@ export interface ElectronAPI {
   dailyScheduleUpsert: (
     data: Record<string, unknown>
   ) => Promise<import("./daily.types").DailySchedule>
-  dailyScheduleDelete: (
-    id: string
-  ) => Promise<void>
+  dailyScheduleDelete: (id: string) => Promise<void>
 
   // DailyChange
   dailyChangeGetByScheduleId: (
@@ -351,9 +359,15 @@ export interface ElectronAPI {
   settingGetAll: () => Promise<import("./exam.types").AppSetting[]>
 
   // Backup
-  backupCreate: () => Promise<{ success: boolean; path?: string; error?: string }>
+  backupCreate: () => Promise<{
+    success: boolean
+    path?: string
+    error?: string
+  }>
   backupRestore: (path: string) => Promise<{ success: boolean; error?: string }>
-  backupGetList: () => Promise<{ name: string; path: string; size: number; date: string }[]>
+  backupGetList: () => Promise<
+    { name: string; path: string; size: number; date: string }[]
+  >
   backupDelete: (path: string) => Promise<{ success: boolean; error?: string }>
 
   // Misc

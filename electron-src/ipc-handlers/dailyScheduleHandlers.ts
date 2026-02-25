@@ -1,7 +1,7 @@
 import { ipcMain } from "electron"
 
-import * as dailyScheduleDAL from "../lib/prisma/dailySchedule"
 import * as dailyChangeDAL from "../lib/prisma/dailyChange"
+import * as dailyScheduleDAL from "../lib/prisma/dailySchedule"
 
 export function registerDailyScheduleHandlers() {
   ipcMain.handle(
@@ -11,12 +11,9 @@ export function registerDailyScheduleHandlers() {
     }
   )
 
-  ipcMain.handle(
-    "dailySchedule:getByDate",
-    async (_event, date: string) => {
-      return await dailyScheduleDAL.getDailyScheduleByDate(date)
-    }
-  )
+  ipcMain.handle("dailySchedule:getByDate", async (_event, date: string) => {
+    return await dailyScheduleDAL.getDailyScheduleByDate(date)
+  })
 
   ipcMain.handle("dailySchedule:upsert", async (_event, data) => {
     return await dailyScheduleDAL.upsertDailySchedule(data)
@@ -37,12 +34,9 @@ export function registerDailyScheduleHandlers() {
     return await dailyChangeDAL.createDailyChange(data)
   })
 
-  ipcMain.handle(
-    "dailyChange:update",
-    async (_event, id: string, data) => {
-      return await dailyChangeDAL.updateDailyChange(id, data)
-    }
-  )
+  ipcMain.handle("dailyChange:update", async (_event, id: string, data) => {
+    return await dailyChangeDAL.updateDailyChange(id, data)
+  })
 
   ipcMain.handle("dailyChange:delete", async (_event, id: string) => {
     return await dailyChangeDAL.deleteDailyChange(id)

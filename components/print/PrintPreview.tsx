@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback } from "react"
-import { Button } from "@/components/ui/button"
 import { Printer } from "lucide-react"
+import { useCallback } from "react"
+
+import { Button } from "@/components/ui/button"
 
 interface PrintPreviewProps {
   children: React.ReactNode
@@ -15,7 +16,7 @@ export function PrintPreview({ children }: PrintPreviewProps) {
 
   return (
     <div>
-      <div className="mb-2 flex justify-end no-print">
+      <div className="no-print mb-2 flex justify-end">
         <Button variant="outline" size="sm" onClick={handlePrint}>
           <Printer className="mr-2 h-4 w-4" />
           印刷

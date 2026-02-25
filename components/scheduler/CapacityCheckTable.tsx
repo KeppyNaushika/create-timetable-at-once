@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
 import type { TeacherCapacityResult } from "@/hooks/useKomaCheck"
+import { cn } from "@/lib/utils"
 
 interface CapacityCheckTableProps {
   data: TeacherCapacityResult[]

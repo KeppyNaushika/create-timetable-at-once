@@ -1,9 +1,11 @@
-import React from "react"
 import { Document, Page, Text, View } from "@react-pdf/renderer"
-import { pdfStyles, lineStyleToBorderWidth } from "../styles"
-import { DAY_NAMES } from "@/lib/constants"
+import React from "react"
+
 import type { TimetableData } from "@/hooks/useTimetableData"
+import { DAY_NAMES } from "@/lib/constants"
 import type { PrintSettings } from "@/types/review.types"
+
+import { lineStyleToBorderWidth, pdfStyles } from "../styles"
 
 interface Props {
   data: TimetableData
@@ -26,25 +28,51 @@ export function RoomScheduleReport({ data, settings }: Props) {
   return (
     <Document>
       {targetRooms.map((room) => (
-        <Page key={room.id} size="A4" orientation="landscape" style={pdfStyles.page}>
+        <Page
+          key={room.id}
+          size="A4"
+          orientation="landscape"
+          style={pdfStyles.page}
+        >
           <Text style={pdfStyles.title}>{room.name} 利用予定</Text>
-          <View style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}>
+          <View
+            style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}
+          >
             <View style={pdfStyles.tableHeaderRow}>
-              <View style={[pdfStyles.headerCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+              <View
+                style={[
+                  pdfStyles.headerCell,
+                  { borderRightWidth: bw, borderColor: "#000" },
+                ]}
+              >
                 <Text>時限</Text>
               </View>
               {Array.from({ length: daysPerWeek }, (_, d) => (
                 <View
                   key={d}
-                  style={[pdfStyles.tableCellHeader, { borderRightWidth: bw, borderColor: "#000" }]}
+                  style={[
+                    pdfStyles.tableCellHeader,
+                    { borderRightWidth: bw, borderColor: "#000" },
+                  ]}
                 >
                   <Text>{DAY_NAMES[d]}</Text>
                 </View>
               ))}
             </View>
             {Array.from({ length: maxPeriods }, (_, p) => (
-              <View key={p} style={[pdfStyles.tableRow, { borderTopWidth: bw, borderColor: "#000" }]}>
-                <View style={[pdfStyles.labelCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+              <View
+                key={p}
+                style={[
+                  pdfStyles.tableRow,
+                  { borderTopWidth: bw, borderColor: "#000" },
+                ]}
+              >
+                <View
+                  style={[
+                    pdfStyles.labelCell,
+                    { borderRightWidth: bw, borderColor: "#000" },
+                  ]}
+                >
                   <Text>{p + 1}</Text>
                 </View>
                 {Array.from({ length: daysPerWeek }, (_, d) => {
@@ -61,16 +89,23 @@ export function RoomScheduleReport({ data, settings }: Props) {
                   return (
                     <View
                       key={d}
-                      style={[pdfStyles.tableCell, { borderRightWidth: bw, borderColor: "#000" }]}
+                      style={[
+                        pdfStyles.tableCell,
+                        { borderRightWidth: bw, borderColor: "#000" },
+                      ]}
                     >
-                      <Text>{subject ? (subject.shortName || subject.name) : ""}</Text>
+                      <Text>
+                        {subject ? subject.shortName || subject.name : ""}
+                      </Text>
                     </View>
                   )
                 })}
               </View>
             ))}
           </View>
-          {settings.footer && <Text style={pdfStyles.footer}>{settings.footer}</Text>}
+          {settings.footer && (
+            <Text style={pdfStyles.footer}>{settings.footer}</Text>
+          )}
         </Page>
       ))}
     </Document>

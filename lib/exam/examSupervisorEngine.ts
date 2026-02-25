@@ -1,12 +1,7 @@
+import type { ClassInfo, Koma, Subject, Teacher } from "@/types/common.types"
 import type {
-  Teacher,
-  Koma,
-  Subject,
-  ClassInfo,
-} from "@/types/common.types"
-import type {
-  ExamSchedule,
   ExamAssignment,
+  ExamSchedule,
   SupervisorCandidate,
 } from "@/types/exam.types"
 
@@ -17,24 +12,6 @@ interface ExamAssignInput {
   subjects: Subject[]
   classes: ClassInfo[]
   existingAssignments: ExamAssignment[]
-}
-
-/**
- * Parse a "YYYY-MM-DD" string into a Date.
- */
-function parseDate(dateStr: string): Date {
-  const [y, m, d] = dateStr.split("-").map(Number)
-  return new Date(y, m - 1, d)
-}
-
-/**
- * Format a Date as "YYYY-MM-DD".
- */
-function formatDate(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
 }
 
 /**
@@ -192,7 +169,7 @@ export function autoAssignSupervisors(
     examSchedule,
     teachers,
     komas,
-    subjects,
+    subjects: _subjects,
     classes,
     existingAssignments,
   } = input

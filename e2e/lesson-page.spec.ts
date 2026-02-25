@@ -4,8 +4,8 @@
  * /data/koma ページ表示確認
  * 学年タブ切替・駒追加ボタン
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -15,10 +15,10 @@ import {
   TEST_BASE_URL,
 } from "./helpers/fixtures"
 import {
+  createTestKomas,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestKomas,
   type SchoolIds,
 } from "./helpers/school-builder"
 
@@ -50,11 +50,41 @@ test.describe.serial("駒設定ページ UI", () => {
     await createTestKomas(
       page,
       [
-        { subjectName: "国語", gradeNum: 1, classIndices: [0], teacherIndices: [0], count: 4 },
-        { subjectName: "国語", gradeNum: 1, classIndices: [1], teacherIndices: [0], count: 4 },
-        { subjectName: "数学", gradeNum: 1, classIndices: [0], teacherIndices: [1], count: 4 },
-        { subjectName: "数学", gradeNum: 1, classIndices: [1], teacherIndices: [1], count: 4 },
-        { subjectName: "国語", gradeNum: 2, classIndices: [0], teacherIndices: [0], count: 4 },
+        {
+          subjectName: "国語",
+          gradeNum: 1,
+          classIndices: [0],
+          teacherIndices: [0],
+          count: 4,
+        },
+        {
+          subjectName: "国語",
+          gradeNum: 1,
+          classIndices: [1],
+          teacherIndices: [0],
+          count: 4,
+        },
+        {
+          subjectName: "数学",
+          gradeNum: 1,
+          classIndices: [0],
+          teacherIndices: [1],
+          count: 4,
+        },
+        {
+          subjectName: "数学",
+          gradeNum: 1,
+          classIndices: [1],
+          teacherIndices: [1],
+          count: 4,
+        },
+        {
+          subjectName: "国語",
+          gradeNum: 2,
+          classIndices: [0],
+          teacherIndices: [0],
+          count: 4,
+        },
       ],
       schoolIds,
       teacherIds,

@@ -1,7 +1,7 @@
 import type {
-  ElectiveStudent,
   ElectiveGroup,
   ElectiveResult,
+  ElectiveStudent,
 } from "@/types/exam.types"
 
 interface ElectiveInput {
@@ -28,10 +28,7 @@ export function optimizeElectives(input: ElectiveInput): ElectiveResult {
   const subjectPopularity = new Map<string, number>()
   for (const student of students) {
     for (const choice of student.choices) {
-      subjectPopularity.set(
-        choice,
-        (subjectPopularity.get(choice) ?? 0) + 1
-      )
+      subjectPopularity.set(choice, (subjectPopularity.get(choice) ?? 0) + 1)
     }
   }
 
@@ -121,9 +118,7 @@ export function optimizeElectives(input: ElectiveInput): ElectiveResult {
 
   // 5. Calculate score (percentage of students successfully assigned)
   const score =
-    totalChoices > 0
-      ? Math.round((totalAssigned / totalChoices) * 100)
-      : 100
+    totalChoices > 0 ? Math.round((totalAssigned / totalChoices) * 100) : 100
 
   return {
     groups: allGroups,

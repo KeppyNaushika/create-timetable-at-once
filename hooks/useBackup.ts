@@ -42,9 +42,7 @@ export function useBackup() {
       return result
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "バックアップの作成に失敗しました"
+        err instanceof Error ? err.message : "バックアップの作成に失敗しました"
       )
       throw err
     }
@@ -60,9 +58,7 @@ export function useBackup() {
       return result
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "バックアップの復元に失敗しました"
+        err instanceof Error ? err.message : "バックアップの復元に失敗しました"
       )
       throw err
     }

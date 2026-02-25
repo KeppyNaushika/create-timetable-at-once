@@ -8,7 +8,6 @@ import {
   CheckSquare,
   ClipboardCheck,
   Eye,
-  FileSpreadsheet,
   GitCompare,
   GraduationCap,
   LayoutGrid,
