@@ -1,9 +1,11 @@
-import React from "react"
 import { Document, Page, Text, View } from "@react-pdf/renderer"
-import { pdfStyles, lineStyleToBorderWidth } from "../styles"
-import { DAY_NAMES } from "@/lib/constants"
+import React from "react"
+
 import type { TimetableData } from "@/hooks/useTimetableData"
+import { DAY_NAMES } from "@/lib/constants"
 import type { PrintSettings } from "@/types/review.types"
+
+import { lineStyleToBorderWidth, pdfStyles } from "../styles"
 
 interface Props {
   data: TimetableData
@@ -22,16 +24,26 @@ export function ClassAllReport({ data, settings }: Props) {
     <Document>
       <Page size="B4" orientation="landscape" style={pdfStyles.page}>
         <Text style={pdfStyles.title}>クラス全体表</Text>
-        <View style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}>
+        <View
+          style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}
+        >
           <View style={pdfStyles.tableHeaderRow}>
-            <View style={[pdfStyles.headerCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+            <View
+              style={[
+                pdfStyles.headerCell,
+                { borderRightWidth: bw, borderColor: "#000" },
+              ]}
+            >
               <Text>クラス</Text>
             </View>
             {Array.from({ length: daysPerWeek }, (_, d) =>
               Array.from({ length: maxPeriods }, (_, p) => (
                 <View
                   key={`${d}-${p}`}
-                  style={[pdfStyles.tableCellHeader, { borderRightWidth: bw, borderColor: "#000" }]}
+                  style={[
+                    pdfStyles.tableCellHeader,
+                    { borderRightWidth: bw, borderColor: "#000" },
+                  ]}
                 >
                   <Text>{`${DAY_NAMES[d]}${p + 1}`}</Text>
                 </View>
@@ -39,8 +51,19 @@ export function ClassAllReport({ data, settings }: Props) {
             )}
           </View>
           {data.classes.map((cls) => (
-            <View key={cls.id} style={[pdfStyles.tableRow, { borderTopWidth: bw, borderColor: "#000" }]}>
-              <View style={[pdfStyles.labelCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+            <View
+              key={cls.id}
+              style={[
+                pdfStyles.tableRow,
+                { borderTopWidth: bw, borderColor: "#000" },
+              ]}
+            >
+              <View
+                style={[
+                  pdfStyles.labelCell,
+                  { borderRightWidth: bw, borderColor: "#000" },
+                ]}
+              >
                 <Text>{cls.name}</Text>
               </View>
               {Array.from({ length: daysPerWeek }, (_, d) =>
@@ -58,7 +81,10 @@ export function ClassAllReport({ data, settings }: Props) {
                   return (
                     <View
                       key={`${d}-${p}`}
-                      style={[pdfStyles.tableCell, { borderRightWidth: bw, borderColor: "#000" }]}
+                      style={[
+                        pdfStyles.tableCell,
+                        { borderRightWidth: bw, borderColor: "#000" },
+                      ]}
                     >
                       <Text>{subject?.shortName ?? ""}</Text>
                     </View>
@@ -68,7 +94,9 @@ export function ClassAllReport({ data, settings }: Props) {
             </View>
           ))}
         </View>
-        {settings.footer && <Text style={pdfStyles.footer}>{settings.footer}</Text>}
+        {settings.footer && (
+          <Text style={pdfStyles.footer}>{settings.footer}</Text>
+        )}
       </Page>
     </Document>
   )

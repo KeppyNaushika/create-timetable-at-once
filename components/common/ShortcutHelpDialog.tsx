@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
 import { Keyboard } from "lucide-react"
+import { useEffect, useMemo } from "react"
+
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -9,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 import {
   Table,
   TableBody,
@@ -17,9 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { SHORTCUT_DEFINITIONS } from "@/lib/shortcuts"
 
 interface ShortcutHelpDialogProps {
@@ -44,10 +45,7 @@ export function ShortcutHelpDialog({ open, onClose }: ShortcutHelpDialogProps) {
 
   // Group shortcuts by category
   const grouped = useMemo(() => {
-    const groups = new Map<
-      string,
-      { label: string; description: string }[]
-    >()
+    const groups = new Map<string, { label: string; description: string }[]>()
     for (const shortcut of SHORTCUT_DEFINITIONS) {
       const list = groups.get(shortcut.category) ?? []
       list.push({ label: shortcut.label, description: shortcut.description })
@@ -78,7 +76,7 @@ export function ShortcutHelpDialog({ open, onClose }: ShortcutHelpDialogProps) {
               return (
                 <div key={category}>
                   {idx > 0 && <Separator className="mb-4" />}
-                  <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+                  <h3 className="text-muted-foreground mb-2 text-sm font-semibold">
                     {category}
                   </h3>
                   <Table>
@@ -92,7 +90,10 @@ export function ShortcutHelpDialog({ open, onClose }: ShortcutHelpDialogProps) {
                       {shortcuts.map((shortcut) => (
                         <TableRow key={shortcut.label}>
                           <TableCell>
-                            <Badge variant="outline" className="font-mono text-xs">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-xs"
+                            >
                               {shortcut.label}
                             </Badge>
                           </TableCell>

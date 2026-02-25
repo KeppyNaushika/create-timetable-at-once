@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
-import { Upload, FileText, Import } from "lucide-react"
+import { FileText, Import, Upload } from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -112,8 +113,10 @@ export function ElectiveCsvImport({ onImport }: ElectiveCsvImportProps) {
           <Label htmlFor="csv-text">CSVデータ</Label>
           <textarea
             id="csv-text"
-            className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[120px] w-full rounded-md border bg-transparent px-3 py-2 text-sm font-mono shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder={"ID,氏名,選択1,選択2,選択3\n001,山田太郎,音楽,美術,書道"}
+            className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[120px] w-full rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder={
+              "ID,氏名,選択1,選択2,選択3\n001,山田太郎,音楽,美術,書道"
+            }
             value={csvText}
             onChange={(e) => handleTextChange(e.target.value)}
           />
@@ -145,9 +148,7 @@ export function ElectiveCsvImport({ onImport }: ElectiveCsvImportProps) {
           </Button>
         </div>
 
-        {parseError && (
-          <p className="text-sm text-destructive">{parseError}</p>
-        )}
+        {parseError && <p className="text-destructive text-sm">{parseError}</p>}
 
         {preview.length > 0 && (
           <div className="space-y-2">
@@ -167,7 +168,7 @@ export function ElectiveCsvImport({ onImport }: ElectiveCsvImportProps) {
                       {student.id}
                     </TableCell>
                     <TableCell>{student.name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-sm">
                       {student.choices.join(", ")}
                     </TableCell>
                   </TableRow>
@@ -175,7 +176,7 @@ export function ElectiveCsvImport({ onImport }: ElectiveCsvImportProps) {
               </TableBody>
             </Table>
             {preview.length > 10 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 ...他 {preview.length - 10} 件
               </p>
             )}

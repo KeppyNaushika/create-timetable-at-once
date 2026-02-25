@@ -1,10 +1,10 @@
 import type {
-  Teacher,
-  Koma,
-  TimetableSlot,
-  TeacherAvailability,
   Duty,
+  Koma,
+  Teacher,
+  TeacherAvailability,
   TeacherDutyInfo,
+  TimetableSlot,
 } from "@/types/common.types"
 import type { DailySchedule, RescheduleProposal } from "@/types/daily.types"
 
@@ -77,8 +77,7 @@ function isSameWeek(a: Date, b: Date): boolean {
     )
   }
   return (
-    a.getFullYear() === b.getFullYear() &&
-    getWeekNumber(a) === getWeekNumber(b)
+    a.getFullYear() === b.getFullYear() && getWeekNumber(a) === getWeekNumber(b)
   )
 }
 
@@ -118,9 +117,7 @@ export function findRescheduleProposals(
   const komaTeacherIds = (originalKoma.komaTeachers ?? []).map(
     (kt) => kt.teacherId
   )
-  const komaClassIds = (originalKoma.komaClasses ?? []).map(
-    (kc) => kc.classId
-  )
+  const komaClassIds = (originalKoma.komaClasses ?? []).map((kc) => kc.classId)
 
   const originalDateObj = parseDate(originalDate)
   const startDate = parseDate(targetDateRange.start)
@@ -182,9 +179,7 @@ export function findRescheduleProposals(
         )
         if (unavail) {
           const teacher = teachers.find((t) => t.id === teacherId)
-          conflicts.push(
-            `${teacher?.name ?? teacherId}はこの時間帯に出勤不可`
-          )
+          conflicts.push(`${teacher?.name ?? teacherId}はこの時間帯に出勤不可`)
           hasConflict = true
         }
 

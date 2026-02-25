@@ -1,11 +1,12 @@
 "use client"
 
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import type { CategoryDiagnosis } from "@/types/review.types"
-import { ChevronDown, ChevronUp } from "lucide-react"
 
 interface DiagnosisScoreCardProps {
   diagnosis: CategoryDiagnosis
@@ -70,9 +71,9 @@ export function DiagnosisScoreCard({ diagnosis }: DiagnosisScoreCardProps) {
         {expanded && (
           <div className="space-y-2 pt-1">
             {diagnosis.details.length > 0 && (
-              <ul className="space-y-1 text-sm text-muted-foreground">
+              <ul className="text-muted-foreground space-y-1 text-sm">
                 {diagnosis.details.map((d, i) => (
-                  <li key={i} className="pl-2 border-l-2 border-muted">
+                  <li key={i} className="border-muted border-l-2 pl-2">
                     {d}
                   </li>
                 ))}
@@ -81,13 +82,13 @@ export function DiagnosisScoreCard({ diagnosis }: DiagnosisScoreCardProps) {
 
             {diagnosis.suggestions.length > 0 && (
               <div className="mt-2 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-muted-foreground text-xs font-medium">
                   改善提案:
                 </p>
                 {diagnosis.suggestions.map((s, i) => (
                   <p
                     key={i}
-                    className="text-sm text-primary pl-2 border-l-2 border-primary/30"
+                    className="text-primary border-primary/30 border-l-2 pl-2 text-sm"
                   >
                     {s}
                   </p>

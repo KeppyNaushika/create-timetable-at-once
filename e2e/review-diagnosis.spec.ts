@@ -1,5 +1,5 @@
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -36,7 +36,5 @@ test("品質診断ページが表示される", async () => {
 })
 
 test("品質診断ページにナビゲーションからアクセスできる", async () => {
-  await expect(
-    page.getByRole("link", { name: "品質診断" })
-  ).toBeVisible()
+  await expect(page.getByRole("link", { name: "品質診断" })).toBeVisible()
 })

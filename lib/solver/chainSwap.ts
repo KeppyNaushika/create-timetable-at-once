@@ -1,6 +1,6 @@
 import type { ConstraintContext } from "./constraints"
-import { isPlacementValid, calculateScore, checkPlacement } from "./constraints"
-import type { Assignment, KomaLookup, SlotPosition } from "./types"
+import { calculateScore, checkPlacement, isPlacementValid } from "./constraints"
+import type { Assignment, SlotPosition } from "./types"
 
 export interface SwapStep {
   komaId: string
@@ -20,7 +20,7 @@ export function findSwapChains(
   targetKomaId: string,
   targetPos: SlotPosition,
   assignments: Assignment[],
-  maxDepth: number = 5,
+  _maxDepth: number = 5,
   maxCandidates: number = 20
 ): SwapProposal[] {
   const proposals: SwapProposal[] = []

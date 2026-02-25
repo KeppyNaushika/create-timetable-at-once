@@ -1,8 +1,8 @@
 "use client"
 
 import { DAY_NAMES } from "@/lib/constants"
-import type { Koma, TimetableSlot } from "@/types/common.types"
 import { cn } from "@/lib/utils"
+import type { Koma, TimetableSlot } from "@/types/common.types"
 
 interface PatternComparisonGridProps {
   patternSlots: { patternId: string; slots: TimetableSlot[] }[]

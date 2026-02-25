@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useCallback } from "react"
 import { CalendarDays, Save, X } from "lucide-react"
+import { useCallback, useState } from "react"
+
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Card,
   CardContent,
@@ -13,8 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { ExamSchedule } from "@/types/exam.types"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import type { Subject } from "@/types/common.types"
+import type { ExamSchedule } from "@/types/exam.types"
 
 interface ExamScheduleFormProps {
   schedule?: ExamSchedule | null
@@ -126,7 +127,7 @@ export function ExamScheduleForm({
               </div>
             ))}
             {subjects.length === 0 && (
-              <p className="col-span-full text-sm text-muted-foreground">
+              <p className="text-muted-foreground col-span-full text-sm">
                 科目が登録されていません
               </p>
             )}

@@ -8,9 +8,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
-import type { Violation } from "@/lib/solver/types"
 import { DAY_NAMES } from "@/lib/constants"
+import type { Violation } from "@/lib/solver/types"
+import { cn } from "@/lib/utils"
 
 interface ViolationsPaneProps {
   violations: Violation[]

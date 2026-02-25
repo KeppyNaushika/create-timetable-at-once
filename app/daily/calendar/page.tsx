@@ -1,22 +1,17 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
 import {
+  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
   Loader2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDailySchedule } from "@/hooks/useDailySchedule"
 import { useSchoolEvents } from "@/hooks/useSchoolEvents"
 import type { DailySchedule } from "@/types/daily.types"
@@ -34,8 +29,10 @@ const SCHEDULE_TYPE_LABELS: Record<string, string> = {
 }
 
 const SCHEDULE_TYPE_COLORS: Record<string, string> = {
-  normal: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  shortened: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+  normal:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  shortened:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   exam: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   event: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   holiday: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
@@ -135,7 +132,7 @@ export default function CalendarPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">日課カレンダー</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           日付をクリックして日課を編集します
         </p>
       </div>
@@ -158,10 +155,10 @@ export default function CalendarPage() {
         <CardContent>
           {loading ? (
             <div className="flex h-64 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <div className="grid grid-cols-7 gap-px rounded-lg border bg-muted">
+            <div className="bg-muted grid grid-cols-7 gap-px rounded-lg border">
               {/* Day headers */}
               {DAY_NAMES.map((name, idx) => (
                 <div
@@ -183,7 +180,7 @@ export default function CalendarPage() {
                   return (
                     <div
                       key={`empty-${idx}`}
-                      className="min-h-[80px] bg-muted/30"
+                      className="bg-muted/30 min-h-[80px]"
                     />
                   )
                 }
@@ -197,7 +194,7 @@ export default function CalendarPage() {
                   <button
                     key={day}
                     type="button"
-                    className="min-h-[80px] bg-background p-1.5 text-left transition-colors hover:bg-muted/50"
+                    className="bg-background hover:bg-muted/50 min-h-[80px] p-1.5 text-left transition-colors"
                     onClick={() => handleDateClick(day)}
                   >
                     <span
@@ -214,7 +211,7 @@ export default function CalendarPage() {
                     <div className="mt-1 space-y-0.5">
                       {schedule && (
                         <Badge
-                          className={`block truncate text-[10px] px-1 py-0 leading-4 ${
+                          className={`block truncate px-1 py-0 text-[10px] leading-4 ${
                             SCHEDULE_TYPE_COLORS[schedule.scheduleType] ?? ""
                           }`}
                         >
@@ -225,7 +222,7 @@ export default function CalendarPage() {
                       {dateEvents.map((ev) => (
                         <div
                           key={ev.id}
-                          className="truncate text-[10px] text-muted-foreground"
+                          className="text-muted-foreground truncate text-[10px]"
                           title={ev.name}
                         >
                           {ev.name}

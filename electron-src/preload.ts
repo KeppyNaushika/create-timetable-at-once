@@ -260,7 +260,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   examAssignmentBatchUpsert: (
     scheduleId: string,
     assignments: Record<string, unknown>[]
-  ) => ipcRenderer.invoke("examAssignment:batchUpsert", scheduleId, assignments),
+  ) =>
+    ipcRenderer.invoke("examAssignment:batchUpsert", scheduleId, assignments),
   examAssignmentDelete: (id: string) =>
     ipcRenderer.invoke("examAssignment:delete", id),
   examAssignmentClear: (scheduleId: string) =>

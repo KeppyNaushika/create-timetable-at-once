@@ -17,15 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { buildSubjectRows } from "@/lib/lessonGrid"
-import type { CellData } from "@/lib/lessonGrid"
 import type {
   ClassInfo,
   Koma,
@@ -69,15 +61,15 @@ export function LessonTable({
   batchCreateKomas,
 }: LessonTableProps) {
   // ダイアログ状態
-  const [teacherDialogKomaId, setTeacherDialogKomaId] = useState<
-    string | null
-  >(null)
+  const [teacherDialogKomaId, setTeacherDialogKomaId] = useState<string | null>(
+    null
+  )
   const [detailDialogKomaId, setDetailDialogKomaId] = useState<string | null>(
     null
   )
-  const [combineDialogKomaId, setCombineDialogKomaId] = useState<
-    string | null
-  >(null)
+  const [combineDialogKomaId, setCombineDialogKomaId] = useState<string | null>(
+    null
+  )
   const [addSubjectDialogOpen, setAddSubjectDialogOpen] = useState(false)
 
   // グリッドモデル計算
@@ -328,14 +320,18 @@ export function LessonTable({
                   colSpan={gradeClasses.length + 3}
                   className="text-muted-foreground border py-8 text-center"
                 >
-                  授業がありません。「+ 教科を追加」またはプリセットから生成してください。
+                  授業がありません。「+
+                  教科を追加」またはプリセットから生成してください。
                 </td>
               </tr>
             )}
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={gradeClasses.length + 3} className="border px-3 py-1">
+              <td
+                colSpan={gradeClasses.length + 3}
+                className="border px-3 py-1"
+              >
                 {unusedSubjects.length > 0 ? (
                   <Button
                     variant="ghost"
@@ -394,7 +390,10 @@ export function LessonTable({
       />
 
       {/* 教科追加ダイアログ */}
-      <Dialog open={addSubjectDialogOpen} onOpenChange={setAddSubjectDialogOpen}>
+      <Dialog
+        open={addSubjectDialogOpen}
+        onOpenChange={setAddSubjectDialogOpen}
+      >
         <DialogContent className="max-w-xs">
           <DialogHeader>
             <DialogTitle>教科を追加</DialogTitle>
@@ -553,20 +552,17 @@ function CombineDialog({
     (c) => !currentClassIds.includes(c.id)
   )
 
-  const handleToggle = useCallback(
-    (classId: string, checked: boolean) => {
-      setSelectedClassIds((prev) => {
-        const next = new Set(prev)
-        if (checked) {
-          next.add(classId)
-        } else {
-          next.delete(classId)
-        }
-        return next
-      })
-    },
-    []
-  )
+  const handleToggle = useCallback((classId: string, checked: boolean) => {
+    setSelectedClassIds((prev) => {
+      const next = new Set(prev)
+      if (checked) {
+        next.add(classId)
+      } else {
+        next.delete(classId)
+      }
+      return next
+    })
+  }, [])
 
   const handleSave = useCallback(async () => {
     if (!komaId || selectedClassIds.size === 0) return

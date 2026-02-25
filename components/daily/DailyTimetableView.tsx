@@ -1,15 +1,14 @@
 "use client"
 
 import { useMemo } from "react"
-import { Badge } from "@/components/ui/badge"
-import { CHANGE_TYPES } from "@/lib/constants"
-import type { DailyChange } from "@/types/daily.types"
+
 import type {
   ClassInfo,
-  Teacher,
   Koma,
+  Teacher,
   TimetableSlot,
 } from "@/types/common.types"
+import type { DailyChange } from "@/types/daily.types"
 
 interface DailyTimetableViewProps {
   date: string
@@ -81,11 +80,14 @@ export function DailyTimetableView({
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
-              <th className="border bg-muted px-3 py-2 text-center w-16">
+              <th className="bg-muted w-16 border px-3 py-2 text-center">
                 時限
               </th>
               {classes.map((cls) => (
-                <th key={cls.id} className="border bg-muted px-3 py-2 text-center">
+                <th
+                  key={cls.id}
+                  className="bg-muted border px-3 py-2 text-center"
+                >
                   {cls.name}
                 </th>
               ))}
@@ -94,7 +96,7 @@ export function DailyTimetableView({
           <tbody>
             {periods.map((period) => (
               <tr key={period}>
-                <td className="border bg-muted/50 px-3 py-2 text-center font-medium">
+                <td className="bg-muted/50 border px-3 py-2 text-center font-medium">
                   {period}
                 </td>
                 {classes.map((cls) => {
@@ -105,10 +107,9 @@ export function DailyTimetableView({
                   const changeStyle = change
                     ? CHANGE_STYLES[change.changeType]
                     : null
-                  const substituteTeacher =
-                    change?.substituteTeacherId
-                      ? teacherMap.get(change.substituteTeacherId)
-                      : null
+                  const substituteTeacher = change?.substituteTeacherId
+                    ? teacherMap.get(change.substituteTeacherId)
+                    : null
 
                   return (
                     <td
@@ -158,25 +159,25 @@ export function DailyTimetableView({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-red-50 border border-red-200" />
+          <div className="h-3 w-3 rounded-sm border border-red-200 bg-red-50" />
           <span>休講</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-yellow-50 border border-yellow-200" />
+          <div className="h-3 w-3 rounded-sm border border-yellow-200 bg-yellow-50" />
           <span>代替</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-blue-50 border border-blue-200" />
+          <div className="h-3 w-3 rounded-sm border border-blue-200 bg-blue-50" />
           <span>交換</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-gray-100 border border-gray-300" />
+          <div className="h-3 w-3 rounded-sm border border-gray-300 bg-gray-100" />
           <span>自習</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-purple-50 border border-purple-200" />
+          <div className="h-3 w-3 rounded-sm border border-purple-200 bg-purple-50" />
           <span>特別授業</span>
         </div>
       </div>

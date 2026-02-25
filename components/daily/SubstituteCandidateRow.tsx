@@ -1,9 +1,10 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { UserCheck } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import type { SubstituteCandidate } from "@/types/daily.types"
 
 interface SubstituteCandidateRowProps {
@@ -16,24 +17,24 @@ export function SubstituteCandidateRow({
   onSelect,
 }: SubstituteCandidateRowProps) {
   return (
-    <div className="flex items-center gap-3 rounded-md border p-3 transition-colors hover:bg-accent/30">
+    <div className="hover:bg-accent/30 flex items-center gap-3 rounded-md border p-3 transition-colors">
       <div className="flex-1 space-y-1.5">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{candidate.teacherName}</span>
+          <span className="text-sm font-medium">{candidate.teacherName}</span>
           {candidate.isSameSubject && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
               同教科
             </Badge>
           )}
           {!candidate.isAvailable && (
-            <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+            <Badge variant="destructive" className="px-1.5 py-0 text-[10px]">
               要確認
             </Badge>
           )}
         </div>
         <div className="flex items-center gap-2">
           <Progress value={candidate.score} className="h-2 flex-1" />
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-muted-foreground text-xs whitespace-nowrap">
             {candidate.score}点
           </span>
         </div>
@@ -42,7 +43,7 @@ export function SubstituteCandidateRow({
             <Badge
               key={i}
               variant="outline"
-              className="text-[10px] px-1.5 py-0"
+              className="px-1.5 py-0 text-[10px]"
             >
               {reason}
             </Badge>

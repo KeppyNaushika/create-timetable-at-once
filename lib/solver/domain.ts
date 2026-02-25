@@ -22,7 +22,7 @@ export function computeInitialDomains(
 export function ac3(
   domain: Domain,
   komaLookup: KomaLookup,
-  ctx: ConstraintContext
+  _ctx: ConstraintContext
 ): { consistent: boolean; domain: Domain } {
   const result = deepCopyDomain(domain)
   const queue: [string, string][] = [] // [komaId1, komaId2]

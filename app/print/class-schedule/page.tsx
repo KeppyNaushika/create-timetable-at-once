@@ -1,7 +1,7 @@
 "use client"
 
-import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 import { PrintableGrid } from "@/components/print/PrintableGrid"
+import { PrintPageLayout } from "@/components/print/PrintPageLayout"
 
 export default function ClassSchedulePrintPage() {
   return (

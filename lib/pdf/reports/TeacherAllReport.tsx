@@ -1,9 +1,11 @@
-import React from "react"
 import { Document, Page, Text, View } from "@react-pdf/renderer"
-import { pdfStyles } from "../styles"
-import { DAY_NAMES } from "@/lib/constants"
+import React from "react"
+
 import type { TimetableData } from "@/hooks/useTimetableData"
+import { DAY_NAMES } from "@/lib/constants"
 import type { PrintSettings } from "@/types/review.types"
+
+import { pdfStyles } from "../styles"
 import { lineStyleToBorderWidth } from "../styles"
 
 interface Props {
@@ -23,9 +25,16 @@ export function TeacherAllReport({ data, settings }: Props) {
     <Document>
       <Page size="B4" orientation="landscape" style={pdfStyles.page}>
         <Text style={pdfStyles.title}>先生全体表</Text>
-        <View style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}>
+        <View
+          style={[pdfStyles.table, { borderWidth: obw, borderColor: "#000" }]}
+        >
           <View style={pdfStyles.tableHeaderRow}>
-            <View style={[pdfStyles.headerCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+            <View
+              style={[
+                pdfStyles.headerCell,
+                { borderRightWidth: bw, borderColor: "#000" },
+              ]}
+            >
               <Text>先生</Text>
             </View>
             {Array.from({ length: daysPerWeek }, (_, d) =>
@@ -43,22 +52,31 @@ export function TeacherAllReport({ data, settings }: Props) {
             )}
           </View>
           {data.teachers.map((teacher) => (
-            <View key={teacher.id} style={[pdfStyles.tableRow, { borderTopWidth: bw, borderColor: "#000" }]}>
-              <View style={[pdfStyles.labelCell, { borderRightWidth: bw, borderColor: "#000" }]}>
+            <View
+              key={teacher.id}
+              style={[
+                pdfStyles.tableRow,
+                { borderTopWidth: bw, borderColor: "#000" },
+              ]}
+            >
+              <View
+                style={[
+                  pdfStyles.labelCell,
+                  { borderRightWidth: bw, borderColor: "#000" },
+                ]}
+              >
                 <Text>{teacher.name}</Text>
               </View>
               {Array.from({ length: daysPerWeek }, (_, d) =>
                 Array.from({ length: maxPeriods }, (_, p) => {
-                  const slot = data.slots.find(
-                    (s) => {
-                      const k = komaMap.get(s.komaId)
-                      return (
-                        s.dayOfWeek === d &&
-                        s.period === p + 1 &&
-                        k?.komaTeachers?.some((kt) => kt.teacherId === teacher.id)
-                      )
-                    }
-                  )
+                  const slot = data.slots.find((s) => {
+                    const k = komaMap.get(s.komaId)
+                    return (
+                      s.dayOfWeek === d &&
+                      s.period === p + 1 &&
+                      k?.komaTeachers?.some((kt) => kt.teacherId === teacher.id)
+                    )
+                  })
                   const koma = slot ? komaMap.get(slot.komaId) : null
                   const subject = koma ? subjectMap.get(koma.subjectId) : null
 
@@ -78,7 +96,9 @@ export function TeacherAllReport({ data, settings }: Props) {
             </View>
           ))}
         </View>
-        {settings.footer && <Text style={pdfStyles.footer}>{settings.footer}</Text>}
+        {settings.footer && (
+          <Text style={pdfStyles.footer}>{settings.footer}</Text>
+        )}
       </Page>
     </Document>
   )

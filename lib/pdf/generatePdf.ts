@@ -1,16 +1,18 @@
-import React from "react"
 import { pdf } from "@react-pdf/renderer"
+import React from "react"
+
 import type { TimetableData } from "@/hooks/useTimetableData"
-import type { ReportType, PrintSettings } from "@/types/review.types"
-import { TeacherAllReport } from "./reports/TeacherAllReport"
+import type { PrintSettings, ReportType } from "@/types/review.types"
+
 import { ClassAllReport } from "./reports/ClassAllReport"
-import { TeacherScheduleReport } from "./reports/TeacherScheduleReport"
 import { ClassScheduleReport } from "./reports/ClassScheduleReport"
-import { RoomScheduleReport } from "./reports/RoomScheduleReport"
 import { DutyListReport } from "./reports/DutyListReport"
-import { TeacherListReport } from "./reports/TeacherListReport"
 import { KomaListReport } from "./reports/KomaListReport"
 import { RemainingKomaReport } from "./reports/RemainingKomaReport"
+import { RoomScheduleReport } from "./reports/RoomScheduleReport"
+import { TeacherAllReport } from "./reports/TeacherAllReport"
+import { TeacherListReport } from "./reports/TeacherListReport"
+import { TeacherScheduleReport } from "./reports/TeacherScheduleReport"
 
 const reportComponents: Record<
   ReportType,

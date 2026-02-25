@@ -1,14 +1,14 @@
 "use client"
 
 import {
+  Building2,
   Eraser,
+  GraduationCap,
   LayoutGrid,
   Redo2,
   Save,
   Undo2,
   User,
-  Building2,
-  GraduationCap,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"

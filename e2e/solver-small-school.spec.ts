@@ -4,26 +4,25 @@
  * 構成: 1学年×2クラス、5教員、14駒(40スロット)
  * 教科: 国語(4h), 数学(4h), 英語(4h), 理科(3h), 社会(3h), 道徳(1h), 学活(1h) = 20h/class
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
   closeApp,
   expect,
   launchApp,
-  TEST_BASE_URL,
 } from "./helpers/fixtures"
 import {
+  createTestCondition,
+  createTestKomas,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestKomas,
-  createTestCondition,
   runSolverViaUI,
-  validateNoTeacherConflicts,
-  validateNoClassConflicts,
   type SchoolIds,
+  validateNoClassConflicts,
+  validateNoTeacherConflicts,
 } from "./helpers/school-builder"
 
 test.describe.serial("小規模校ソルバーテスト", () => {
@@ -77,26 +76,110 @@ test.describe.serial("小規模校ソルバーテスト", () => {
     // T4: 社会 → 両クラス(6h) + 道徳2組(1h) + 学活両クラス(2h) = 9h
     const komaDefs = [
       // 国語 T0
-      { subjectName: "国語", gradeNum: 1, classIndices: [0], teacherIndices: [0], count: 4 },
-      { subjectName: "国語", gradeNum: 1, classIndices: [1], teacherIndices: [0], count: 4 },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [0],
+        count: 4,
+      },
+      {
+        subjectName: "国語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [0],
+        count: 4,
+      },
       // 数学 T1
-      { subjectName: "数学", gradeNum: 1, classIndices: [0], teacherIndices: [1], count: 4 },
-      { subjectName: "数学", gradeNum: 1, classIndices: [1], teacherIndices: [1], count: 4 },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [1],
+        count: 4,
+      },
+      {
+        subjectName: "数学",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [1],
+        count: 4,
+      },
       // 英語 T2
-      { subjectName: "英語", gradeNum: 1, classIndices: [0], teacherIndices: [2], count: 4 },
-      { subjectName: "英語", gradeNum: 1, classIndices: [1], teacherIndices: [2], count: 4 },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [2],
+        count: 4,
+      },
+      {
+        subjectName: "英語",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [2],
+        count: 4,
+      },
       // 理科 T3
-      { subjectName: "理科", gradeNum: 1, classIndices: [0], teacherIndices: [3], count: 3 },
-      { subjectName: "理科", gradeNum: 1, classIndices: [1], teacherIndices: [3], count: 3 },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [3],
+        count: 3,
+      },
+      {
+        subjectName: "理科",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [3],
+        count: 3,
+      },
       // 社会 T4
-      { subjectName: "社会", gradeNum: 1, classIndices: [0], teacherIndices: [4], count: 3 },
-      { subjectName: "社会", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 3 },
+      {
+        subjectName: "社会",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [4],
+        count: 3,
+      },
+      {
+        subjectName: "社会",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 3,
+      },
       // 道徳 T3→1組, T4→2組
-      { subjectName: "道徳", gradeNum: 1, classIndices: [0], teacherIndices: [3], count: 1 },
-      { subjectName: "道徳", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 1 },
+      {
+        subjectName: "道徳",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [3],
+        count: 1,
+      },
+      {
+        subjectName: "道徳",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 1,
+      },
       // 学活 T4→両クラス
-      { subjectName: "学活", gradeNum: 1, classIndices: [0], teacherIndices: [4], count: 1 },
-      { subjectName: "学活", gradeNum: 1, classIndices: [1], teacherIndices: [4], count: 1 },
+      {
+        subjectName: "学活",
+        gradeNum: 1,
+        classIndices: [0],
+        teacherIndices: [4],
+        count: 1,
+      },
+      {
+        subjectName: "学活",
+        gradeNum: 1,
+        classIndices: [1],
+        teacherIndices: [4],
+        count: 1,
+      },
     ]
 
     const komaIds = await createTestKomas(

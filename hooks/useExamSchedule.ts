@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-import type { ExamSchedule, ExamAssignment } from "@/types/exam.types"
+import type { ExamSchedule } from "@/types/exam.types"
 
 export function useExamSchedule() {
   const [schedules, setSchedules] = useState<ExamSchedule[]>([])
@@ -134,9 +134,7 @@ export function useExamSchedule() {
       await window.electronAPI.examAssignmentClear(scheduleId)
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "試験割当のクリアに失敗しました"
+        err instanceof Error ? err.message : "試験割当のクリアに失敗しました"
       )
       throw err
     }

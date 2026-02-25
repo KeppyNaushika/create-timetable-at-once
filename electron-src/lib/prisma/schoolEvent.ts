@@ -11,7 +11,10 @@ export async function getSchoolEvents() {
   }
 }
 
-export async function getSchoolEventsByDateRange(startDate: string, endDate: string) {
+export async function getSchoolEventsByDateRange(
+  startDate: string,
+  endDate: string
+) {
   const prisma = getPrismaClient()
   try {
     return await prisma.schoolEvent.findMany({
@@ -72,7 +75,9 @@ export async function deleteSchoolEvent(id: string) {
   }
 }
 
-export async function importHolidays(holidays: { date: string; name: string }[]) {
+export async function importHolidays(
+  holidays: { date: string; name: string }[]
+) {
   const prisma = getPrismaClient()
   try {
     // Get existing dates to skip duplicates

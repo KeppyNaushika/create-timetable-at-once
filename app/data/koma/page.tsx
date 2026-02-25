@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { PageHeader } from "@/components/layout/PageHeader"
 import { LessonTable } from "@/components/lesson/LessonTable"
 import { PresetDialog } from "@/components/lesson/PresetDialog"
-import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { useClasses } from "@/hooks/useClasses"
 import { useKomas } from "@/hooks/useKomas"
@@ -93,7 +93,9 @@ export default function LessonPage() {
         }
       }
 
-      toast.success(`${items.length}教科 × ${targetClasses.length}クラスの駒を生成しました`)
+      toast.success(
+        `${items.length}教科 × ${targetClasses.length}クラスの駒を生成しました`
+      )
     },
     [classes, batchCreateKomas, setKomaClasses]
   )

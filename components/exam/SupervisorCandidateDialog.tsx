@@ -1,6 +1,8 @@
 "use client"
 
 import { UserCheck } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -8,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { SupervisorCandidate } from "@/types/exam.types"
@@ -50,7 +51,7 @@ export function SupervisorCandidateDialog({
         <ScrollArea className="max-h-[400px]">
           <div className="space-y-2 pr-4">
             {candidates.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">
+              <p className="text-muted-foreground py-8 text-center text-sm">
                 候補者が見つかりません
               </p>
             )}
@@ -58,7 +59,7 @@ export function SupervisorCandidateDialog({
               <button
                 key={candidate.teacherId}
                 type="button"
-                className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
+                className="hover:bg-muted/50 flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors"
                 onClick={() => {
                   onSelect(candidate.teacherId)
                   onClose()
@@ -66,10 +67,8 @@ export function SupervisorCandidateDialog({
               >
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {candidate.teacherName}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="font-medium">{candidate.teacherName}</span>
+                    <span className="text-muted-foreground text-sm">
                       {candidate.score}点
                     </span>
                   </div>
@@ -98,17 +97,13 @@ export function SupervisorCandidateDialog({
                       </Badge>
                     )}
                     {candidate.reasons.map((reason, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="text-xs"
-                      >
+                      <Badge key={idx} variant="outline" className="text-xs">
                         {reason}
                       </Badge>
                     ))}
                   </div>
 
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     現在の割当数: {candidate.currentAssignmentCount}回
                   </p>
                 </div>

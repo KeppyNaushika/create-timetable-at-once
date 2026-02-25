@@ -1,6 +1,10 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import { useState } from "react"
+
+import { OverviewMatrix } from "@/components/review/OverviewMatrix"
+import { SubjectHighlightPicker } from "@/components/review/SubjectHighlightPicker"
 import {
   Card,
   CardContent,
@@ -9,11 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { OverviewMatrix } from "@/components/review/OverviewMatrix"
-import { SubjectHighlightPicker } from "@/components/review/SubjectHighlightPicker"
 import { useTimetableData } from "@/hooks/useTimetableData"
 import type { SubjectHighlight } from "@/types/review.types"
-import { Loader2 } from "lucide-react"
 
 export default function OverviewPage() {
   const { data, loading, error } = useTimetableData()
@@ -23,22 +24,18 @@ export default function OverviewPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-destructive">
-        エラー: {error}
-      </div>
-    )
+    return <div className="text-destructive p-4">エラー: {error}</div>
   }
 
   if (!data.adoptedPattern) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
+      <div className="text-muted-foreground p-8 text-center">
         採用済みの時間割パターンがありません。
         <br />
         先に時間割を作成し、パターンを採用してください。
@@ -53,7 +50,7 @@ export default function OverviewPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">全体表</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           先生別・クラス別の時間割を一覧表示します
         </p>
       </div>
@@ -65,13 +62,11 @@ export default function OverviewPage() {
           onChange={setHighlights}
         />
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">フィルタ:</span>
+          <span className="text-muted-foreground text-sm">フィルタ:</span>
           <select
-            className="h-8 rounded border border-input bg-background px-2 text-sm"
+            className="border-input bg-background h-8 rounded border px-2 text-sm"
             value={filterSubjectId ?? ""}
-            onChange={(e) =>
-              setFilterSubjectId(e.target.value || null)
-            }
+            onChange={(e) => setFilterSubjectId(e.target.value || null)}
           >
             <option value="">すべて表示</option>
             {data.subjects.map((s) => (

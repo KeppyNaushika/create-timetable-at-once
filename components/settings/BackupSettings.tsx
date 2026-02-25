@@ -1,13 +1,8 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import {
-  Download,
-  RotateCcw,
-  Trash2,
-  HardDrive,
-  Loader2,
-} from "lucide-react"
+import { Download, HardDrive, Loader2, RotateCcw, Trash2 } from "lucide-react"
+import { useCallback, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,14 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -32,6 +19,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface BackupSettingsProps {
   backups: { name: string; path: string; size: number; date: string }[]
@@ -92,7 +87,7 @@ export function BackupSettings({
         </CardHeader>
         <CardContent>
           {backups.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground py-8 text-center text-sm">
               バックアップがありません
             </p>
           ) : (
@@ -108,9 +103,7 @@ export function BackupSettings({
               <TableBody>
                 {backups.map((backup) => (
                   <TableRow key={backup.path}>
-                    <TableCell className="font-medium">
-                      {backup.name}
-                    </TableCell>
+                    <TableCell className="font-medium">{backup.name}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatFileSize(backup.size)}
                     </TableCell>
@@ -177,10 +170,7 @@ export function BackupSettings({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmAction(null)}
-            >
+            <Button variant="outline" onClick={() => setConfirmAction(null)}>
               キャンセル
             </Button>
             <Button

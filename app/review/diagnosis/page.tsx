@@ -1,6 +1,11 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { Loader2, RefreshCw } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+
+import { DiagnosisScoreCard } from "@/components/review/DiagnosisScoreCard"
+import { OverallGradeBadge } from "@/components/review/OverallGradeBadge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -8,14 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { DiagnosisScoreCard } from "@/components/review/DiagnosisScoreCard"
-import { OverallGradeBadge } from "@/components/review/OverallGradeBadge"
 import { useTimetableData } from "@/hooks/useTimetableData"
 import { runDiagnosis } from "@/lib/diagnosis"
-import type { DiagnosisResult } from "@/types/review.types"
 import type { ScheduleCondition } from "@/types/common.types"
-import { Loader2, RefreshCw } from "lucide-react"
+import type { DiagnosisResult } from "@/types/review.types"
 
 export default function DiagnosisPage() {
   const { data, loading, error } = useTimetableData()
@@ -64,22 +65,18 @@ export default function DiagnosisPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     )
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-destructive">
-        エラー: {error}
-      </div>
-    )
+    return <div className="text-destructive p-4">エラー: {error}</div>
   }
 
   if (!data.adoptedPattern) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
+      <div className="text-muted-foreground p-8 text-center">
         採用済みの時間割パターンがありません。
         <br />
         先に時間割を作成し、パターンを採用してください。
@@ -92,14 +89,11 @@ export default function DiagnosisPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">品質診断</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             採用パターンの品質を5カテゴリで診断します
           </p>
         </div>
-        <Button
-          onClick={handleDiagnose}
-          disabled={diagnosing || !condition}
-        >
+        <Button onClick={handleDiagnose} disabled={diagnosing || !condition}>
           {diagnosing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -115,8 +109,9 @@ export default function DiagnosisPage() {
             <p className="text-muted-foreground">
               「診断実行」ボタンを押して品質診断を開始してください
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              パターン: {data.adoptedPattern.name} / スロット数: {data.slots.length}
+            <p className="text-muted-foreground mt-2 text-sm">
+              パターン: {data.adoptedPattern.name} / スロット数:{" "}
+              {data.slots.length}
             </p>
           </CardContent>
         </Card>

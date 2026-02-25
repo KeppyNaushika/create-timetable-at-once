@@ -41,9 +41,9 @@ export function IndividualTimetableCard({
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="border bg-muted px-3 py-2 text-sm w-16">時限</th>
+              <th className="bg-muted w-16 border px-3 py-2 text-sm">時限</th>
               {days.map((d) => (
-                <th key={d} className="border bg-muted px-3 py-2 text-sm">
+                <th key={d} className="bg-muted border px-3 py-2 text-sm">
                   {DAY_NAMES[d]}
                 </th>
               ))}
@@ -52,15 +52,13 @@ export function IndividualTimetableCard({
           <tbody>
             {periods.map((p) => (
               <tr key={p}>
-                <td className="border bg-muted/50 px-3 py-2 text-center text-sm font-medium">
+                <td className="bg-muted/50 border px-3 py-2 text-center text-sm font-medium">
                   {p}
                 </td>
                 {days.map((d) => {
                   const slot = slotMap.get(`${d}-${p}`)
                   const koma = slot ? komaMap.get(slot.komaId) : null
-                  const subject = koma
-                    ? subjectMap.get(koma.subjectId)
-                    : null
+                  const subject = koma ? subjectMap.get(koma.subjectId) : null
 
                   return (
                     <td
@@ -78,7 +76,7 @@ export function IndividualTimetableCard({
                             {subject.shortName || subject.name}
                           </div>
                           {koma?.label && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-muted-foreground text-[10px]">
                               {koma.label}
                             </div>
                           )}

@@ -5,8 +5,8 @@
  * komaUpdate, komaDuplicate, komaDelete, komaBatchCreate
  * komaGetByGradeId, komaGetByTeacherId
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -15,10 +15,10 @@ import {
   launchApp,
 } from "./helpers/fixtures"
 import {
+  createTestRooms,
   createTestSchool,
   createTestSubjects,
   createTestTeachers,
-  createTestRooms,
   type SchoolIds,
 } from "./helpers/school-builder"
 
@@ -51,9 +51,7 @@ test.describe.serial("駒 CRUD + 紐付け", () => {
       schoolIds.subjectMap
     )
 
-    roomIds = await createTestRooms(page, [
-      { name: "理科室", shortName: "理" },
-    ])
+    roomIds = await createTestRooms(page, [{ name: "理科室", shortName: "理" }])
   })
 
   test.afterAll(async () => {
@@ -141,10 +139,7 @@ test.describe.serial("駒 CRUD + 紐付け", () => {
     expect(dup.count).toBe(3) // 複製元と同じ
 
     // 複製分を削除してクリーン
-    await page.evaluate(
-      async (id) => window.electronAPI.komaDelete(id),
-      dup.id
-    )
+    await page.evaluate(async (id) => window.electronAPI.komaDelete(id), dup.id)
   })
 
   test("komaBatchCreate で一括作成できる", async () => {
@@ -197,10 +192,7 @@ test.describe.serial("駒 CRUD + 紐付け", () => {
     const before = await page.evaluate(() => window.electronAPI.komaGetAll())
     const countBefore = before.length
 
-    await page.evaluate(
-      async (id) => window.electronAPI.komaDelete(id),
-      komaId
-    )
+    await page.evaluate(async (id) => window.electronAPI.komaDelete(id), komaId)
 
     const after = await page.evaluate(() => window.electronAPI.komaGetAll())
     expect(after.length).toBe(countBefore - 1)

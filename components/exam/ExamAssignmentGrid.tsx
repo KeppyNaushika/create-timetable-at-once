@@ -1,8 +1,11 @@
 "use client"
 
+import { Trash2, Wand2 } from "lucide-react"
 import { useMemo } from "react"
-import { Wand2, Trash2 } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
   Table,
   TableBody,
@@ -11,10 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import type { ExamSchedule, ExamAssignment } from "@/types/exam.types"
-import type { ClassInfo, Teacher, Subject } from "@/types/common.types"
+import type { ClassInfo, Subject, Teacher } from "@/types/common.types"
+import type { ExamAssignment, ExamSchedule } from "@/types/exam.types"
 
 interface ExamAssignmentGridProps {
   schedule: ExamSchedule
@@ -84,7 +85,9 @@ export function ExamAssignmentGrid({
       const dateStr = current.toISOString().slice(0, 10)
       // Assume up to 4 periods per exam day
       const periodsPerDay = Math.min(
-        Math.ceil(examSubjectIds.length / Math.max(1, daysBetween(start, end) + 1)),
+        Math.ceil(
+          examSubjectIds.length / Math.max(1, daysBetween(start, end) + 1)
+        ),
         4
       )
       const actualPeriods = Math.max(1, periodsPerDay)
@@ -115,13 +118,13 @@ export function ExamAssignmentGrid({
           <Trash2 className="mr-2 h-4 w-4" />
           クリア
         </Button>
-        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground ml-auto flex items-center gap-2 text-sm">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded bg-blue-100 border border-blue-300" />
+            <span className="inline-block h-3 w-3 rounded border border-blue-300 bg-blue-100" />
             自動
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded bg-green-100 border border-green-300" />
+            <span className="inline-block h-3 w-3 rounded border border-green-300 bg-green-100" />
             手動
           </span>
         </div>
@@ -131,7 +134,7 @@ export function ExamAssignmentGrid({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 bg-background z-10 min-w-[100px]">
+              <TableHead className="bg-background sticky left-0 z-10 min-w-[100px]">
                 日時
               </TableHead>
               <TableHead className="min-w-[80px]">科目</TableHead>
@@ -147,10 +150,10 @@ export function ExamAssignmentGrid({
               const subject = subjectMap.get(row.subjectId)
               return (
                 <TableRow key={`${row.date}__${row.period}`}>
-                  <TableCell className="sticky left-0 bg-background z-10 font-medium whitespace-nowrap">
+                  <TableCell className="bg-background sticky left-0 z-10 font-medium whitespace-nowrap">
                     {row.date}
                     <br />
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {row.period}限
                     </span>
                   </TableCell>
@@ -170,7 +173,7 @@ export function ExamAssignmentGrid({
                     return (
                       <TableCell
                         key={cls.id}
-                        className={`cursor-pointer text-center transition-colors hover:bg-muted/50 ${
+                        className={`hover:bg-muted/50 cursor-pointer text-center transition-colors ${
                           assignment
                             ? isAuto
                               ? "bg-blue-50 dark:bg-blue-950/30"
@@ -186,7 +189,7 @@ export function ExamAssignmentGrid({
                             {teacher.name}
                           </span>
                         ) : (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             --
                           </span>
                         )}
@@ -200,7 +203,7 @@ export function ExamAssignmentGrid({
               <TableRow>
                 <TableCell
                   colSpan={classes.length + 2}
-                  className="h-24 text-center text-muted-foreground"
+                  className="text-muted-foreground h-24 text-center"
                 >
                   考査科目が設定されていません
                 </TableCell>

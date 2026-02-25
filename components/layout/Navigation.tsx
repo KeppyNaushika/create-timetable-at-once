@@ -251,7 +251,7 @@ export function Navigation() {
   }
 
   return (
-    <div className="bg-card flex h-full w-56 flex-col border-r no-print">
+    <div className="bg-card no-print flex h-full w-56 flex-col border-r">
       <div className="flex h-14 items-center gap-2 border-b px-4">
         <Settings className="text-primary h-5 w-5" />
         <span className="text-sm font-bold">一括時間割作成</span>

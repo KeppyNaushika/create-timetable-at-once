@@ -38,7 +38,7 @@ export function HourCountSummary({
 
   if (usedSubjects.length === 0) {
     return (
-      <div className="py-4 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground py-4 text-center text-sm">
         配置データがありません
       </div>
     )
@@ -48,13 +48,13 @@ export function HourCountSummary({
     <table className="w-full border-collapse text-sm">
       <thead>
         <tr>
-          <th className="border bg-muted px-2 py-1 text-left">教科</th>
+          <th className="bg-muted border px-2 py-1 text-left">教科</th>
           {days.map((d) => (
-            <th key={d} className="border bg-muted px-2 py-1 text-center">
+            <th key={d} className="bg-muted border px-2 py-1 text-center">
               {DAY_NAMES[d]}
             </th>
           ))}
-          <th className="border bg-muted px-2 py-1 text-center font-bold">
+          <th className="bg-muted border px-2 py-1 text-center font-bold">
             合計
           </th>
         </tr>
@@ -83,16 +83,16 @@ export function HourCountSummary({
           )
         })}
         <tr className="font-bold">
-          <td className="border bg-muted/50 px-2 py-1">合計</td>
+          <td className="bg-muted/50 border px-2 py-1">合計</td>
           {days.map((d) => {
             const dayTotal = slots.filter((s) => s.dayOfWeek === d).length
             return (
-              <td key={d} className="border bg-muted/50 px-2 py-1 text-center">
+              <td key={d} className="bg-muted/50 border px-2 py-1 text-center">
                 {dayTotal || ""}
               </td>
             )
           })}
-          <td className="border bg-muted/50 px-2 py-1 text-center">
+          <td className="bg-muted/50 border px-2 py-1 text-center">
             {slots.length}
           </td>
         </tr>

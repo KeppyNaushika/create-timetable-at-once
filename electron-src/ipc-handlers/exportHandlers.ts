@@ -1,13 +1,22 @@
 import { dialog, ipcMain } from "electron"
 import * as fs from "fs"
+
 import { generateExcel } from "../lib/excel/generateExcel"
 
 export function registerExportHandlers() {
   ipcMain.handle(
     "export:excel",
-    async (_event, reportType: string, data: unknown, defaultFileName: string) => {
+    async (
+      _event,
+      reportType: string,
+      data: unknown,
+      defaultFileName: string
+    ) => {
       try {
-        const buffer = await generateExcel(reportType, data as Parameters<typeof generateExcel>[1])
+        const buffer = await generateExcel(
+          reportType,
+          data as Parameters<typeof generateExcel>[1]
+        )
 
         const result = await dialog.showSaveDialog({
           title: "Excelファイルを保存",
@@ -25,7 +34,8 @@ export function registerExportHandlers() {
         console.error("Excel生成エラー:", error)
         return {
           success: false,
-          error: error instanceof Error ? error.message : "Excel生成に失敗しました",
+          error:
+            error instanceof Error ? error.message : "Excel生成に失敗しました",
         }
       }
     }
@@ -52,7 +62,8 @@ export function registerExportHandlers() {
         console.error("PDF保存エラー:", error)
         return {
           success: false,
-          error: error instanceof Error ? error.message : "PDF保存に失敗しました",
+          error:
+            error instanceof Error ? error.message : "PDF保存に失敗しました",
         }
       }
     }

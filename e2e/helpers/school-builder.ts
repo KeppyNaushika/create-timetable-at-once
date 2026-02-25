@@ -216,9 +216,7 @@ export async function createTestSubjects(
   await page.evaluate(async () => {
     await window.electronAPI.subjectSeedDefaults()
   })
-  const subjects = await page.evaluate(() =>
-    window.electronAPI.subjectGetAll()
-  )
+  const subjects = await page.evaluate(() => window.electronAPI.subjectGetAll())
   const subjectMap: Record<string, string> = {}
   for (const s of subjects) {
     subjectMap[s.name] = s.id
@@ -265,8 +263,7 @@ export async function setTeacherAvailabilities(
     status: a.status,
   }))
   await page.evaluate(
-    async (data) =>
-      window.electronAPI.teacherAvailabilityBatchUpsert(data),
+    async (data) => window.electronAPI.teacherAvailabilityBatchUpsert(data),
     items
   )
 }
@@ -304,8 +301,7 @@ export async function setRoomAvailabilities(
     status: a.status,
   }))
   await page.evaluate(
-    async (data) =>
-      window.electronAPI.roomAvailabilityBatchUpsert(data),
+    async (data) => window.electronAPI.roomAvailabilityBatchUpsert(data),
     items
   )
 }
@@ -427,8 +423,7 @@ export async function createPerSubjectConditions(
     const subjectId = subjectMap[c.subjectName]
     if (!subjectId) continue
     await page.evaluate(
-      async (args) =>
-        window.electronAPI.conditionUpsertPerSubject(args),
+      async (args) => window.electronAPI.conditionUpsertPerSubject(args),
       {
         conditionId,
         subjectId,
@@ -469,9 +464,7 @@ export async function runSolverViaUI(
   await page.waitForTimeout(3000)
 
   // パターン取得
-  const patterns = await page.evaluate(() =>
-    window.electronAPI.patternGetAll()
-  )
+  const patterns = await page.evaluate(() => window.electronAPI.patternGetAll())
   const patternId = patterns[patterns.length - 1].id
 
   const patternWithSlots = await page.evaluate(

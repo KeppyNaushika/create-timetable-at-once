@@ -3,8 +3,8 @@
  *
  * dutyCreate, dutySetTeachers, dutyUpdate, dutyDelete
  */
-import { test } from "@playwright/test"
 import type { Page } from "@playwright/test"
+import { test } from "@playwright/test"
 
 import {
   type AppContext,
@@ -33,7 +33,14 @@ test.describe.serial("校務管理 + 担当割当", () => {
         maxPeriodsPerDay: 6,
         hasZeroPeriod: false,
         namingConvention: "number",
-        periodNamesJson: JSON.stringify(["1限", "2限", "3限", "4限", "5限", "6限"]),
+        periodNamesJson: JSON.stringify([
+          "1限",
+          "2限",
+          "3限",
+          "4限",
+          "5限",
+          "6限",
+        ]),
         periodLengthsJson: JSON.stringify([50, 50, 50, 50, 50, 50]),
         lunchAfterPeriod: 4,
         classCountsJson: JSON.stringify({ "1": 2 }),
@@ -42,9 +49,30 @@ test.describe.serial("校務管理 + 担当割当", () => {
     const subjectMap = await createTestSubjects(page)
 
     const data = [
-      { name: "教員A", nameKana: "", mainSubjectId: subjectMap["国語"], maxPeriodsPerWeek: 25, maxPerDay: 6, maxConsecutive: 4 },
-      { name: "教員B", nameKana: "", mainSubjectId: subjectMap["数学"], maxPeriodsPerWeek: 25, maxPerDay: 6, maxConsecutive: 4 },
-      { name: "教員C", nameKana: "", mainSubjectId: subjectMap["英語"], maxPeriodsPerWeek: 25, maxPerDay: 6, maxConsecutive: 4 },
+      {
+        name: "教員A",
+        nameKana: "",
+        mainSubjectId: subjectMap["国語"],
+        maxPeriodsPerWeek: 25,
+        maxPerDay: 6,
+        maxConsecutive: 4,
+      },
+      {
+        name: "教員B",
+        nameKana: "",
+        mainSubjectId: subjectMap["数学"],
+        maxPeriodsPerWeek: 25,
+        maxPerDay: 6,
+        maxConsecutive: 4,
+      },
+      {
+        name: "教員C",
+        nameKana: "",
+        mainSubjectId: subjectMap["英語"],
+        maxPeriodsPerWeek: 25,
+        maxPerDay: 6,
+        maxConsecutive: 4,
+      },
     ]
     const teachers = await page.evaluate(
       async (d) => window.electronAPI.teacherBatchImport(d),

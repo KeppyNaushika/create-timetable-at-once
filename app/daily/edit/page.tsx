@@ -1,15 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
-  Calendar,
-  RefreshCw,
-  UserCheck,
-} from "lucide-react"
+import { ArrowLeft, Calendar, Loader2, Save } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,9 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -29,10 +23,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useDailySchedule } from "@/hooks/useDailySchedule"
 import { useDailyChanges } from "@/hooks/useDailyChanges"
+import { useDailySchedule } from "@/hooks/useDailySchedule"
 import { useTimetableData } from "@/hooks/useTimetableData"
-import type { DailyChange } from "@/types/daily.types"
 
 const SCHEDULE_TYPES = [
   { value: "normal", label: "通常" },
@@ -56,10 +49,19 @@ function DailyEditContent() {
   const router = useRouter()
   const date = searchParams.get("date") ?? ""
 
-  const { currentSchedule, loading: scheduleLoading, fetchByDate, upsertSchedule } =
-    useDailySchedule()
-  const { changes, loading: changesLoading, fetchChanges, createChange, deleteChange } =
-    useDailyChanges()
+  const {
+    currentSchedule,
+    loading: scheduleLoading,
+    fetchByDate,
+    upsertSchedule,
+  } = useDailySchedule()
+  const {
+    changes,
+    loading: changesLoading,
+    fetchChanges,
+    createChange,
+    deleteChange,
+  } = useDailyChanges()
   const { data: timetableData, loading: timetableLoading } = useTimetableData()
 
   const [scheduleType, setScheduleType] = useState("normal")
@@ -163,7 +165,7 @@ function DailyEditContent() {
 
   if (!date) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
+      <div className="text-muted-foreground p-8 text-center">
         日付が指定されていません
       </div>
     )
@@ -184,7 +186,7 @@ function DailyEditContent() {
             <Calendar className="mr-2 inline h-5 w-5" />
             {date} の日課
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             日課種別の設定と変更の管理
           </p>
         </div>
@@ -192,7 +194,7 @@ function DailyEditContent() {
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -206,7 +208,8 @@ function DailyEditContent() {
               <div className="space-y-2">
                 <Label>日課種別</Label>
                 <select
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  aria-label="日課種別"
+                  className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                   value={scheduleType}
                   onChange={(e) => setScheduleType(e.target.value)}
                 >
@@ -249,9 +252,10 @@ function DailyEditContent() {
                 <Label htmlFor="daily-notes">備考</Label>
                 <textarea
                   id="daily-notes"
-                  className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none"
+                  className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-15 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  placeholder="備考を入力"
                 />
               </div>
 
@@ -271,13 +275,13 @@ function DailyEditContent() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">この日の時間割</CardTitle>
               <CardDescription>
-                採用パターンの{DAY_OF_WEEK_LABELS[dayOfWeek] ?? ""}の配置
-                ({dailySlots.length}コマ)
+                採用パターンの{DAY_OF_WEEK_LABELS[dayOfWeek] ?? ""}の配置 (
+                {dailySlots.length}コマ)
               </CardDescription>
             </CardHeader>
             <CardContent>
               {dailySlots.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground py-4 text-center text-sm">
                   この日の配置データがありません
                 </p>
               ) : (
@@ -321,7 +325,9 @@ function DailyEditContent() {
                                   {subject.shortName || subject.name}
                                 </Badge>
                               ) : (
-                                <span className="text-muted-foreground">--</span>
+                                <span className="text-muted-foreground">
+                                  --
+                                </span>
                               )}
                             </TableCell>
                           </TableRow>
@@ -353,7 +359,8 @@ function DailyEditContent() {
                   <div className="space-y-1">
                     <Label className="text-xs">クラス</Label>
                     <select
-                      className="h-9 w-[120px] rounded-md border border-input bg-background px-2 text-sm"
+                      aria-label="クラス"
+                      className="border-input bg-background h-9 w-30 rounded-md border px-2 text-sm"
                       value={newChangeClassId}
                       onChange={(e) => setNewChangeClassId(e.target.value)}
                     >
@@ -371,7 +378,7 @@ function DailyEditContent() {
                       type="number"
                       min={1}
                       max={10}
-                      className="w-[70px]"
+                      className="w-17.5"
                       value={newChangePeriod}
                       onChange={(e) =>
                         setNewChangePeriod(Number(e.target.value))
@@ -381,7 +388,8 @@ function DailyEditContent() {
                   <div className="space-y-1">
                     <Label className="text-xs">種別</Label>
                     <select
-                      className="h-9 w-[100px] rounded-md border border-input bg-background px-2 text-sm"
+                      aria-label="変更種別"
+                      className="border-input bg-background h-9 w-25 rounded-md border px-2 text-sm"
                       value={newChangeType}
                       onChange={(e) => setNewChangeType(e.target.value)}
                     >
@@ -395,11 +403,10 @@ function DailyEditContent() {
                   <div className="space-y-1">
                     <Label className="text-xs">補欠教員</Label>
                     <select
-                      className="h-9 w-[140px] rounded-md border border-input bg-background px-2 text-sm"
+                      aria-label="補欠教員"
+                      className="border-input bg-background h-9 w-35 rounded-md border px-2 text-sm"
                       value={newChangeSubTeacherId}
-                      onChange={(e) =>
-                        setNewChangeSubTeacherId(e.target.value)
-                      }
+                      onChange={(e) => setNewChangeSubTeacherId(e.target.value)}
                     >
                       <option value="">なし</option>
                       {timetableData.teachers.map((t) => (
@@ -422,10 +429,10 @@ function DailyEditContent() {
               {/* Changes list */}
               {changesLoading ? (
                 <div className="flex h-16 items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
                 </div>
               ) : changes.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground py-4 text-center text-sm">
                   変更はありません
                 </p>
               ) : (
@@ -455,8 +462,8 @@ function DailyEditContent() {
                         </TableCell>
                         <TableCell>
                           {change.substituteTeacherId
-                            ? teacherMap.get(change.substituteTeacherId) ??
-                              change.substituteTeacherId
+                            ? (teacherMap.get(change.substituteTeacherId) ??
+                              change.substituteTeacherId)
                             : "--"}
                         </TableCell>
                         <TableCell className="text-right">
@@ -496,7 +503,7 @@ export default function DailyEditPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       }
     >

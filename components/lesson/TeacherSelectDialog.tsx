@@ -21,9 +21,7 @@ interface TeacherSelectDialogProps {
   teachers: Teacher[]
   currentMainId: string | null
   currentSubIds: string[]
-  onSave: (
-    teachers: { teacherId: string; role: string }[]
-  ) => Promise<void>
+  onSave: (teachers: { teacherId: string; role: string }[]) => Promise<void>
 }
 
 export function TeacherSelectDialog({
@@ -52,8 +50,7 @@ export function TeacherSelectDialog({
     const q = search.trim().toLowerCase()
     return teachers.filter(
       (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.nameKana.toLowerCase().includes(q)
+        t.name.toLowerCase().includes(q) || t.nameKana.toLowerCase().includes(q)
     )
   }, [teachers, search])
 
@@ -93,7 +90,7 @@ export function TeacherSelectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm max-h-[80vh] overflow-auto">
+      <DialogContent className="max-h-[80vh] max-w-sm overflow-auto">
         <DialogHeader>
           <DialogTitle>担当先生の設定</DialogTitle>
         </DialogHeader>

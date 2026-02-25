@@ -32,10 +32,7 @@ export function buildSubjectRows(
   gradeClasses: ClassInfo[]
 ): SubjectRow[] {
   // 教科別にグループ化
-  const groups = new Map<
-    string,
-    { subject: Subject; komas: Koma[] }
-  >()
+  const groups = new Map<string, { subject: Subject; komas: Koma[] }>()
 
   for (const koma of komas) {
     const existing = groups.get(koma.subjectId)
@@ -61,16 +58,14 @@ export function buildSubjectRows(
   const rows: SubjectRow[] = []
 
   for (const [subjectId, group] of groups) {
-    const hours =
-      group.komas.length > 0 ? group.komas[0].count : 0
+    const hours = group.komas.length > 0 ? group.komas[0].count : 0
 
     // クラスインデックス → CellData のマッピングを構築
     // 1つの駒が複数クラスを持つ場合（合同授業）、最も左のクラスインデックスに配置
     const classIndexToKoma = new Map<number, Koma>()
 
     for (const koma of group.komas) {
-      const assignedClassIds =
-        koma.komaClasses?.map((kc) => kc.classId) ?? []
+      const assignedClassIds = koma.komaClasses?.map((kc) => kc.classId) ?? []
 
       if (assignedClassIds.length === 0) {
         // クラス未割当の駒 → 空きスロットに配置
@@ -117,8 +112,7 @@ export function buildSubjectRows(
 
       seenKomaIds.add(koma.id)
 
-      const assignedClassIds =
-        koma.komaClasses?.map((kc) => kc.classId) ?? []
+      const assignedClassIds = koma.komaClasses?.map((kc) => kc.classId) ?? []
       const indices = assignedClassIds
         .map((cid) => gradeClasses.findIndex((c) => c.id === cid))
         .filter((idx) => idx >= 0)
@@ -143,7 +137,9 @@ export function buildSubjectRows(
           name: kt.teacher?.name ?? "不明",
           role: kt.role as "main" | "sub",
         }))
-        .sort((a, b) => (a.role === "main" ? -1 : 1) - (b.role === "main" ? -1 : 1))
+        .sort(
+          (a, b) => (a.role === "main" ? -1 : 1) - (b.role === "main" ? -1 : 1)
+        )
 
       cells.push({
         komaId: koma.id,

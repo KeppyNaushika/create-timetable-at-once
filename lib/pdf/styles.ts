@@ -1,4 +1,5 @@
-import { StyleSheet, Font } from "@react-pdf/renderer"
+import { Font, StyleSheet } from "@react-pdf/renderer"
+
 import type { LineStyle } from "@/types/review.types"
 
 // Noto Sans JP フォント登録
@@ -8,15 +9,12 @@ try {
     family: "NotoSansJP",
     fonts: [
       {
-        src: typeof window !== "undefined"
-          ? "/fonts/NotoSansJP-Regular.ttf"
-          : "",
+        src:
+          typeof window !== "undefined" ? "/fonts/NotoSansJP-Regular.ttf" : "",
         fontWeight: "normal",
       },
       {
-        src: typeof window !== "undefined"
-          ? "/fonts/NotoSansJP-Bold.ttf"
-          : "",
+        src: typeof window !== "undefined" ? "/fonts/NotoSansJP-Bold.ttf" : "",
         fontWeight: "bold",
       },
     ],

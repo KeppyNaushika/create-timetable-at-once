@@ -45,7 +45,10 @@ export function greedyConstruct(
   // 必要数をコマIDごとに集計
   const requiredCount: Record<string, number> = {}
   for (const t of targets) {
-    requiredCount[t.komaId] = Math.max(requiredCount[t.komaId] ?? 0, t.index + 1)
+    requiredCount[t.komaId] = Math.max(
+      requiredCount[t.komaId] ?? 0,
+      t.index + 1
+    )
   }
 
   // 未配置ターゲットを構築

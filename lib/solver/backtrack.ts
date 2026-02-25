@@ -1,7 +1,7 @@
 import type { ConstraintContext } from "./constraints"
 import { isPlacementValid } from "./constraints"
 import { deepCopyDomain } from "./domain"
-import { selectVariableMRVDegree, orderValuesLCV } from "./heuristics"
+import { orderValuesLCV, selectVariableMRVDegree } from "./heuristics"
 import type {
   Assignment,
   Domain,
@@ -26,7 +26,7 @@ export function backtrack(
   onProgress?: (progress: Partial<SolverProgress>) => void
 ): BacktrackResult {
   const assignments = [...initialAssignments]
-  const assignedSet = new Set(
+  const _assignedSet = new Set(
     assignments.map((a) => `${a.komaId}:${a.dayOfWeek}:${a.period}`)
   )
 
@@ -46,8 +46,7 @@ export function backtrack(
   const unassignedList: string[] = []
   const remainingCountPerKoma: Record<string, number> = {}
   for (const t of remaining) {
-    remainingCountPerKoma[t.komaId] =
-      (remainingCountPerKoma[t.komaId] ?? 0) + 1
+    remainingCountPerKoma[t.komaId] = (remainingCountPerKoma[t.komaId] ?? 0) + 1
   }
   for (const [komaId, count] of Object.entries(remainingCountPerKoma)) {
     for (let i = 0; i < count; i++) {

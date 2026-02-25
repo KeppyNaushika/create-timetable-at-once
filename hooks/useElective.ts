@@ -3,9 +3,9 @@
 import { useCallback, useState } from "react"
 
 import type {
-  ElectiveStudent,
-  ElectiveResult,
   ElectiveGroup,
+  ElectiveResult,
+  ElectiveStudent,
 } from "@/types/exam.types"
 
 export function useElective() {
@@ -41,9 +41,7 @@ export function useElective() {
       setResult(null)
       return parsed
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "CSVの解析に失敗しました"
-      )
+      setError(err instanceof Error ? err.message : "CSVの解析に失敗しました")
       throw err
     }
   }, [])

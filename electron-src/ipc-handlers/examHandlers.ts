@@ -1,7 +1,7 @@
 import { ipcMain } from "electron"
 
-import * as examScheduleDAL from "../lib/prisma/examSchedule"
 import * as examAssignmentDAL from "../lib/prisma/examAssignment"
+import * as examScheduleDAL from "../lib/prisma/examSchedule"
 
 export function registerExamHandlers() {
   // ExamSchedule handlers
@@ -58,10 +58,7 @@ export function registerExamHandlers() {
     return await examAssignmentDAL.deleteExamAssignment(id)
   })
 
-  ipcMain.handle(
-    "examAssignment:clear",
-    async (_event, scheduleId: string) => {
-      return await examAssignmentDAL.clearExamAssignments(scheduleId)
-    }
-  )
+  ipcMain.handle("examAssignment:clear", async (_event, scheduleId: string) => {
+    return await examAssignmentDAL.clearExamAssignments(scheduleId)
+  })
 }

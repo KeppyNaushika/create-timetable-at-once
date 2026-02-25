@@ -2,7 +2,6 @@
 
 import { useCallback } from "react"
 
-import { Slider } from "@/components/ui/slider"
 import {
   Select,
   SelectContent,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
 import {
   Table,
   TableBody,
@@ -18,11 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  CONSTRAINT_FIELDS,
-  CONSTRAINT_LEVELS,
-  type ConstraintLevel,
-} from "@/lib/constants"
+import { CONSTRAINT_FIELDS, CONSTRAINT_LEVELS } from "@/lib/constants"
 import type { ScheduleCondition } from "@/types/common.types"
 
 interface ConditionTableProps {
